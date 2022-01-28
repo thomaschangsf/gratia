@@ -1,0 +1,1620 @@
+------------------------
+Python notebooks
+------------------------
+- Tensorflow 
+	cookbooks
+		http://localhost:8888/tree/udacity/machine-learning/personalGitHub/MachineLearning/labs/tensorflow_cookbook
+	My own notes:
+		http://localhost:8888/notebooks/udacity/machine-learning/personalGitHub/MachineLearning/mlUnsupervised/capstone_embeddings/Capstone-QueryEmbeddings-Tensorflow.ipynb
+	Capstone: word2vec embeddings
+		http://localhost:8888/edit/udacity/machine-learning/personalGitHub/MachineLearning/mlUnsupervised/capstone_embeddings/train.py
+
+- SciKit/Panda common library
+	http://localhost:8888/tree/udacity/machine-learning/personalGitHub/MachineLearning/common
+
+- Udacity work
+	General
+		http://localhost:8888/tree/udacity/machine-learning/personalGitHub/MachineLearning
+	Capstone
+		http://localhost:8888/tree/udacity/machine-learning/personalGitHub/MachineLearning/mlUnsupervised/capstone_embeddings
+		
+
+------------------------
+Extra-curricular
+------------------------
+EMR
+	- pick up ML on the fly
+	- 
+
+Pick a team in data field to make decision. Some company are better are data centric, ie Pinterest.
+
+Work as software, and pick up as the job.
+
+Transition to ML engineer?
+	work experience
+
+People building pipeline : becoming democratized.
+
+ML engineer:  
+	Feature engineering
+	Cloud engineer who use the services.
+
+	What kind of data you collect, how one collect it, --> what features to collect.
+	
+	How do you see the problem
+
+	What kind of model you train to collect
+
+	How to collect label? A service that detects a music, adn tell what song.  Usage pattern --> maybe it..
+
+	Senior level: best to interview ...
+
+
+Data scientist:
+	Works with data, analyze, and present it as visualization.  Don't necessarily need a model.  Data analysts ...
+
+- Skillset 
+	ML framework: R, [-->TensorFlow<--],  
+	data pipeline: [-->Scala<--] [-->Spark<--], Hadoop, 
+	
+	Python, Cloud technologies
+
+	Tensorflow jupyter ...
+		Collab
+		https://colab.research.google.com/
+
+- Good source of interview questions
+	best: what have you done. Know your things well that you have used.
+		compare a couple of models. Naives Bayes vs Tree. Training speed, accuracy model, distribution of data.  What kind of thigs you have to train.  Decision tree.  Types of data. Time series.  95% one category, class imbalance.  See Eric's A/B evaluation framework.  
+
+		some deep learning
+		
+		how do you apply to your problem
+
+		how one thinks
+
+		shazam question: given a database a song, how do you design a pipeline to improve the experience.  How do you know if the prediction is wrong..
+
+		more exposed to different problems, 
+
+		go to tech talks, share 
+	
+	medium blogs on ml 
+
+
+- VP of career service (Kathleen)
+
+
+
+- How would you frame my resume?
+	My strength and weakness?
+
+- Entry level data scientist vs principal data scientist?
+	* What are some of the qualities a senior level data scienties from a entry level data scientist?
+
+- Good source of ml interview questions?
+	depending what type of ml job?	
+
+
+
+
+
+------------------------
+3-18: 
+------------------------
+Set up project
+	github: https://github.com/udacity/dog-project
+	jects/machine-learning/projects/dog-project
+	Download data set
+	conda env create -f requirements/dog-mac.yml
+
+Start project:
+	cd /Users/thchang/Documents/dev/personal/ml/connect/git/pro
+	source activate dog-project
+		When done: source deactivate (in the terminal with (dog-project))
+
+
+
+------------------------
+3-7: Convolutional Neural Network (CNN)
+------------------------
+	- Build upon DL, but optimize for optimum learning by:
+		(1) reducing input vector size. Example: 1000x 1000 image ==> 1000 x 1000 x 3(for R,G,B) = 3B
+			* parameter sharing across windwos
+			* space/orieination
+
+	- Convolution
+		Use a filter to reduce the initial image size
+			input x filter_edge_detector = image_new
+		Move window 1 pixel to the right
+		See slide ...
+			6x6_image convolve 3x3_filter = 4x4 new_image
+
+		In practice, the neural network can learn the filters. In the 3x3_filter, we just need to 9 weights
+
+		PADDING:
+			What if we want 6x6_image to be the same size as the new_image. This is because we want to do DL. If so, the new_image has to be same size.
+
+			new_image will be now 6x6
+
+			Another benefit: good for detecting edges and give it more weight
+
+			types of padding
+				valid: no padding
+				same: if the input an out are the same, then p=(f-1)/2. Best for filter size to be odd.
+
+			Example
+									image 			filter   	output
+				w/o PADDING			nxn				fxf			(n-f+1)(n-f+1)
+				w PADDING			(n+2p)(n+2p)	fxf			(n+2p-f+1) (n+2p-f+1)	
+				w PADDING+STRIDE 	(n+2p)(n+2p)	fxf			floor[(n+2p-f)/s+1] floor[(n+2p-f)/s+1]
+
+		STRIDE: 
+			how many pixels we move to the right after each window * filter
+			impacts how fast we train
+			??? If the picture is "sparse", ie very much similar pixel by pixel, we can increase the stride
+
+	- Convolution over volume
+		Apply multiple filters in parallel
+
+		Number of parameters:
+			f x f x (number of channel in image, ie, rgb) x n_filters
+			[Filter has to be same size of the input channle, rgb]
+
+		Example: See slide
+			output : 
+				s=stride, p=padding
+
+				39x39x3 --> f=3,s=1,p=0,10filters
+					Apply 1 filter ==> 37x37 (using the equation above)
+					Since we have 10 filters ==> new output= 37x37x10
+
+			ConvLayer1 --> ConvLayer2 --> Hidden layer[s] --> softmax --> mutli-classes
+
+			Back propagation goes back all the way to ConvLayer1
+
+	- Pooling layers:
+		reduce network size, speed up size, more robust
+			Robust:	This is for generalization to reduce overfitting
+
+		max pooling and average pooling: 
+			input: image
+			max pool: max pool is ~ 2x2 filter wil stride of 2
+			NO learning involved!!!
+
+		Flow
+			conv layer --> pool layer --> conv layer --> pool layer
+
+			conv layer = input x filter with stride and padding
+				padding: slows down the image too fast ...
+
+			Now, we don't need to design the filter.  The backward propagation dictates what we are learning...
+
+	  ************************************
+	- PUTTING IT ALL TOGETHER [IMPORTANT]
+	  ************************************
+		ConvLayer1 --> pooling layer --> ConvLayer2 -->  pooling layer  --> Hidden layer[s] --> softmax --> mutli-classes
+
+
+		See notebook (written)
+		See slide for size
+			number of parameters: 59,000 parameters!!!  most of it in the hidden fully connected layer
+
+		Advantange of CNN
+			parameter sharing: when we learn the weights of filter_1, ie edge detector, we get to apply it to all other pictures. Significantly reduce the number of parameters to learn.
+
+			sparsity of connection: each layer is smaller number than the previous layer, makes it less susceptible to over-fitting and faster training.
+			In each layer, each output value depends only on a smaller number of inputs, which leads to smaller neural network and makes the neural network less prone to overfitting
+
+
+	- What does the 1 pixel in the output layer mean?
+			It's kind of like PCA. When you do transform, the new axis is not really understandable. But with the stride, we have parameter sharing which enables relative "consistency", maybe we get something 
+
+			Even with ADC, analog digital converters, what does 1 bit mean?
+
+
+	- Quiz:
+		(1) W/0 CN,
+			Give: input = n=300, no convolution, hidden=100
+			Question: What's th eoutput volume?
+			300x300x(100+1) * 3 = 900,000 * 100 *3 + 100
+
+		(2) How many parameters does hiden layer have?
+		input = n=300, convolution(f=5,p=0,s=1), hidden=100
+			1 filter = floor[(n+2p-f)/s+1] floor[(n+2p-f)/s+1]
+					= [(300-5)/1 +1]
+					= 5x5x3 = 75
+			input vector = (75+1) * (n_filter=100) = 7600
+
+		(3) input=63x63x16, n_filter=32, f=7, s=2, p=0
+			What's the output volume?
+			1 filter 	= floor[(n+2p-f)/s+1] floor[(n+2p-f)/s+1]
+						= floor[(63+0-7)/2 +1] * floor[(63+0-7)/2 +1]
+						= 29* 29
+			Number of filter =32
+			Output = 29x29x32
+
+		(4) input=15x15x8, a=1
+			What is dimension after padding: Does not change the 3rd dimension
+			(15+2*2)*(15+2*2)x8
+
+		(5) input=63x63x16, n_filter=32, f=7, s=1
+			If we want input and output to be of same size, what is the padding?
+				p=(f-1)/2
+				derived by: n = (n+2p-f)/s+1
+
+		(6) input volume=32x32x16, max pooling= s=2, f=2. What's the oputput volume.
+			(n+2p-f)/s+1
+			(32+0-2)/2 +1 = 16
+			answer = 16x16x8
+
+------------------------
+3-4: Deep Neural Networking
+------------------------
+	- Review
+		* Naives Bayes
+			P(spam | Features) = [ P(Features | spam)  P(spam) ] / P(Features)
+			P(Features) = P(f1) * P(f2) * P(f3) ..
+				It may be "NAIVE" to think these features are INDEPENDENT ...
+		* How to see which feature can be ignored?
+			This is one of the lab.  If one of the feature is highly correlated to one another, we can remove that feature
+	
+	- DL References
+		https://www.deeplearningbook.org/
+		https://www.youtube.com/channel/UCWN3xxRkmTPmbKwht9FuE5A/playlists
+		Andrew Ng has a Deep Learning Specialization on Coursera (5 courses)
+
+	- DL can be both supervised and unsupervised
+
+	- Class will not cover RNN
+
+	- How does one control the bias / variance of DL?
+		Dropout: At training time, drop a few of the connections.  But at testing and final practivation, put back the connection.
+
+	- The intuition behind NN
+		Why activation layer needs a relu | sigmoid?
+			Without non-linear activation, all the linear weights across the layers will appear to be a single layer.  N layers will still give you a linear combination, as it is is one layer.  The non-linear activation function give a non-linear system equation.  The sigmoid | relu is non-linear.
+
+		Each layer is transforming the features, and consruct a new set of features.  Each feature in the hidden layer is a combination of the original feature. The weights (equation) is a by-product of the back-propagation.  
+			This is like PCA, but we are setting the number of nodes in the hidden layer.
+
+		Domain --> Influence architecture
+			RNN for NLU
+			CNN for Vision
+
+	- Activation function
+		Sigmoid :
+			f(x) = 1 / ( 1 + e^x))
+			output: [0, 1]
+		Tanh :
+			f(x) = [2 / (1 + e^(-2x)) ] -1
+			output: [-1, 1]
+		Relu
+			Solves the Gradient vanishing problem: for sigmoied and tanh, for extreme input values, the gradient is very small.
+
+			Backprogation : uses the slope of the activation fucntion to calculate how much to adjust.
+
+			f(x): {
+				0 for x < 0
+				x for x>= 0
+			}
+
+			Trains much faster
+
+	- Cost function: How much is our predicted different from the label?
+		Cross-entropy: used for the final output laywer
+			Binary Classification
+			Multi-class			
+
+			delta_weight = Cost function(y_predicted, y_label)
+			next_weight = original_wight - (learning_rate) * delta_weight
+
+		Other types:
+
+	- Loss Function vs Cost Function vs Objective Function
+		A loss function is a PART of cost function, which is a TYPE of objective function
+
+		https://stats.stackexchange.com/questions/179026/objective-function-cost-function-loss-function-are-they-the-same-thing
+
+		Loss function: difference between model prediction and label on "ONE DATAPOINT"
+			Types: http://ml-cheatsheet.readthedocs.io/en/latest/loss_functions.html
+				cross-entropy
+				hinge
+				L1
+				L2
+				Maximum liklihood
+				Mean square error
+
+		Cost function: different between model prediction and label across "TRAINING SET"
+
+		Objective Function: general term for any function that one wants to maximize.  Cost function is one type. Another one is maximum liklihood used in word vec.  One example is noise-constrastive estimation(NCE) loss.
+
+		Maximum liklihood is the optimal value for mean for a distribution of observed measurements.  FOr mean liklihood, this is the location of the center of distribution where most of the obersvation point will be congregated around. 
+
+	- We run an optimizer on the cost | objective function.
+		optimizer: Gradient descent
+
+	- Example of loss|cost|objective with optimization in TF
+		(1) Digit recognition
+			* loss function: tf.nn.softmax_cross_entropy_with_logits
+			* cost function: tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_)
+			* optimization: tf.train.GradientDescentOptimizer(learning_rate=0.5)
+			* training:
+				train_step = tf.train.GradientDescentOptimizer(learning_rate=0.5).minimize(cross_entropy)
+	
+				for each batch iteration:
+					train_step.run(feed_dict={x: batch[0], y_: batch[1]})
+
+		(2) WordVec simple
+			loss function: tf.nn.nce_loss
+
+			cost function: tf.nn.nce_loss(weights=nce_weights, biases=nce_biases, labels=train_labels,inputs=embed, num_sampled=num_sampled,num_classes=vocabulary_size)
+
+			optimizer = tf.train.GradientDescentOptimizer(1.0).minimize(loss)
+
+			training:
+				session.run( [optimizer, merged, loss], feed_dict=feed_dict, run_metadata=run_metadata)
+
+	- Gradient Descent Types
+		Given 100 training data points
+
+		Batch Gradient: Calculate error for EVERY data point
+			Calculate error for 100 data points, and update weights once
+			VERY SLOW
+
+		Min-Batch Gardient: Split the data to small batch 
+			Split the data into B batch. If size per batch is 20, ypdate weights ONCE per for every 20 data points. TF program has a batch api which probably uses this.
+
+		Stocahstic
+			Take one data point, and update the weight once
+			Can be NOISE
+
+
+	- Regularization
+		Complese NN can over-fit
+		One solution: regularization.  
+
+		Types:
+			L1/L2: add a penalty term to cost function which penalizes large coefficients (aka weights)
+
+			Drop out:
+				keep only a fraction of nodes at TRAINING time. Smaller network.   Model will keep only 80% of connection, 
+
+			Early Stopping: 
+				Epoch: one training iteration
+				When the validation and training error diverges, we can terminate the iteration.
+
+	- Summary: See slide
+		Levers:
+			Architecture: 
+				Data collection & preparation
+				number of hidden layers
+				number of nodes in each hidden layer
+				Regurlation: Drop out, L1/L2, early stop
+				What to feed in: wordvec, Convolutional
+
+			Initialization of weights
+
+			
+
+------------------------
+2-25: Reinforcement Learning
+------------------------
+- Types of RL
+	- Policy based
+	- Model based : (more complicatd)
+	- Value function based : our project
+		Learn action value pairs
+		Q learning:
+			find optimal selection policy given finite MDP
+			Assume: iniyislly is greedy algorithm
+- Example of room : Q Learning
+	- Insight: Reward is edge propagation
+	- Learn Q Matrix: Brain of the agent
+		rows = state of agents
+		cols = possible action to go to the next state
+		number at each cell is value that helps agent choose action ..
+		See slide for algorithm ..
+			There are 2 matrix
+				R: state & action: we need to define the constraint of the system , ie each (state,action) has a reward: [-1,0,100]
+					R is the system constraint and does not change
+				Q: what we learn
+
+				Q(4,1) = R(4,1) + gamma * (max (Q(1, [possible states, ie  non-negative state]))  )
+
+				At each time, we are exploring. At some point, the Q matrix does not change ..
+
+
+		Project: what if I have apply this to personal shopping with Q learning
+			The R matrix is built from personalized data PER shopping meta:
+
+			Learn the Q matrix per meta category ..
+
+			
+
+
+
+------------------------
+2-11: Reinforcment learning
+------------------------
+Feature selection [Continue]
+	- lab: http://localhost:8888/notebooks/Udacity_connect/wk8/FeatureSelection%20-%20solution.ipynb
+
+	- Goal: Is CATEGORICAL featureA and label dependent? 
+	    We want to reduce the number of features due to the curse of dimensinality; data sparsity 
+	    If numerical, we can use pearson correlation score
+	- Dependent variables have high chi2 score.
+	- Keep the top K features with the highest chi2 score
+	- Theory:
+	    Assume the null hypothesis is true, ie featureA and label are interdependent(?)
+	    If chi2 score is small, the null hypothesis is INCORRECT. Therefore, we cannot discard featureA becuase lable is dependent on featureA.
+	- based on chi2
+	- uni-variate selection
+	- recursive selection
+
+	- Another way to reduce dimenstions:
+		PCA, but remember the new coordinate system is not unreadable. Will need to convert back to the original coordinate.
+
+		PCA is based on variance reduction, pick the axis that spreads out the data the most (variance); Chi2 sampling is based on selecting features with the "GREATEST" predictive power.
+
+
+
+Inferential score
+	p score and c score
+
+
+Talk
+	NLU: U=Understanding
+		Word2Vec, Doc2Vec
+		Parts of speech
+		entity resolution
+		sentiment analysis
+		categorization
+	NLG: G=Geneartion
+		Content determination
+		Document structuring
+		Lexical: determine right concepts
+		Relization: Correct syntax and morpology
+
+		Application
+			chatbot
+			financial report
+			car reviews
+				Given a labeled respose for carA, update the response for carB
+			Limitation
+				sometimes the sequence is not in the right sequence
+				quality of training data: ie noise
+				Correct syntax, morphology ...
+
+				Product idea: MadLib?
+				Because of these limitations, Alex's response is in one sentence
+
+		Example:
+			Retrieval based model (easier)
+				Use a repository of pre-defined responses and some kind of heursitcs to pic appropriate reponse
+				Heurestics can be as simple as rule based expression
+				Can be 90% accuracy model. 
+
+			Generative model (harder)
+				Don't rely on pre-defined responses.
+				May be based on neural nework, but may have wrong syntax, at best 70% accuracy.
+				Example: adding a caption to a picture ..
+
+		How to measure the NLG score?
+			Compare to the training data?  Is the real world performance as good as the training performance?
+			
+			https://ehudreiter.com/2017/05/03/metrics-nlg-evaluation/
+				Use this to judge the health of a chatbot ..
+
+
+Types of learning
+	Supervised
+		hase label
+			output = categoregical ==> classification
+			output = numerical ==> regression
+	Unsupervised
+		learn the structure. Ex: clustering and CA
+			idea: use clustring to become labels and convert it to supervised
+	Reinforcment learning
+		Has an agent
+		Characteristics
+			No supervisor, only a reward signal
+			feedback is delayed, not instanteous.
+				Get reward after trying ALL the experiment. 
+			Current state is a factor of previous state
+			The data one collect is dependent on the action one take
+		Examples
+			GO
+			Balance the pole example
+	
+	Markov Decision Process (MDP)
+		Mathematical framwork
+			- Current state captures all the history of the previous states. IE no memory
+		Markov Chain
+			- Probabilitb from state is fixe and is not dependent on past states.  (functional programming ?)
+			- Give a state S_0, there is a probability from one state to another 
+		Markove Decision Process: Now we have a reward
+			- (S, A, R, P, discount factor)
+			- S = set of possible states
+			- A : set of possile actions
+			- R : Reward
+				Agent uses reward to guide its action
+				How does agent balance transition probability vs action ..
+
+		Terminology
+			Return: the random sequence's total reward. 
+				Gamma: used to discount future steps
+			Policy: 
+				Policy is a function that given a state, maps an action to a score.
+				Policy is a table of S and A with a score.
+
+		Exploration vs Exploitation
+			Exploration: ~ learning phase, fill out the policy table
+			Exploitation: exploit the information to maximize reward
+
+
+------------------------
+2-4
+------------------------
+Customer Segment
+	Learning:
+		Feature clearning
+			Feature normalize (via log normalizer)
+			Remove outliers
+			Reduce dimension via PCA
+				Since PCA is based on maximizing variance, it is IMPERATIVE to remove the outlier data
+
+
+Principal Component Analysis (PCA)
+	Feature engineering technique uses to reduce the dimensions of the features
+
+	Why reduce dimensionality?
+		ML is statical by nature. As dimensions grows, there are fewer observations per region. Data becmoes sparse. Model will not be able to predict, ie test and trainng data gap.
+			Consequence: less relaiable data, and requires more data
+
+		Simple Solution: Projection
+			Ex: Project 3D --> 2D
+			Limitation: swiss data set --> 2 D is not useful
+		Simple solution: Manifold learning
+			Approach to non-linear dimensional reduction, but requires labels ..
+
+	PCA:
+		Most pouluar dimensional reduction ..
+		Useful for visualization, noise filtering, feature extration & engineering
+		Idea: "Zero out one or more prinicapl" components, resulting in a lower dimestional projetion of data the "preserves the maximal data varaince"
+			Variance is the information we want to capture by chossing the right hyperplane
+
+		When to apply PCA?
+			Desire: if we plot numSamples Vs numFeatures, we want to have a "tall" box.  If we have a square, ie numSamples ~= numFeatures, we may want to investigate PCA.
+
+		Once we find the principal component, we can then have otehr princapl cooponents. The later components captuers the most variance of the data set in the new axis systems.
+
+		Singular Value Decomposition (SVD): Matrix foctorization to decompose the training set matrics
+
+		Even with the pricipal component which cpatures the max variance, we will still lose some information .. We will have to have add other components (up to the original dimension)
+			Slide: Choosing the numer of components: Cumulative Explained Variance vs #component.  
+				Cumulative explained by variance: add up
+
+		Insight: 
+			When PCA does the job well, it spreads out the data the "evenly" by captures the variance ..
+				But just because the data is spread out, you might lose the information/strucutre. Ex: swiss roll.
+				One of the reason may be because PCA captures linear combinations of the of original features.  However, the perfect model is composed of non-linear combinations of the original features ...
+
+				NN: while PCA maximize the variance, NN does a better job learning the weights of the ..
+
+			PCA also makes the new features orthogonal, ie low correlation ..
+
+
+		Randomized PCA: Stachastics alogirthm
+			Previously, we need to find ALL the principal compeonts.
+			Here: we just find the top D principal components ..
+
+		In Practice, data pipeline
+			input data --> [Feature transformation/ clearning] --> PCA[true/false] --> model
+			Here, the grid search of the entire knobs ..
+
+		Con:
+			With the new grid system, it is harder to explain the intuition behind
+
+
+	LDA vs ICA vs Factor Analysis
+		LDA: Linear discriminant analysis:
+			Also for feature dimensional reduction ...
+			For SUPERVISED ONLY. PCA can apply to both SUPERVISED and UNSUPERVISED
+			Maxismize the components axes for class-separation
+	
+		Vs Kernal FN in SVM:
+			Kernal SVM: increase dimension with the objective of ..
+
+		ICA: Independent component analysis
+			Decompose a multi-variate singal into independent non-Gausian singals
+			MIMO antenna: person1: hello ; person2: ni hao
+			Objective: Find directions of maximum independence
+
+		Factor Analysis
+			 Reduce the dimensions into a few interpretable underlying factors
+
+			 describe variablibg among observed, correalted varaibles in terms of a probability of lower number of features.  Factor causes the variables
+
+			statistics used to determine a cause
+
+			https://www.theanalysisfactor.com/factor-analysis-1-introduction/
+
+		Kernel PCA
+			Other PCA captures linear relationship in the original features ..
+
+			Kernel PCA: apply kernal trick to raise all the features to a higher dimension, and then collapse into smaller dimension. Captures non-linear feature (f1 + f2^2 + ..) relationship
+
+			Max comment: "use kernel PCA when I have sparse data."
+				Makes sense since the spreading out of data pts via variance maximation can pull the data apart from each other ...
+
+Re-inforcement Learning
+	
+
+Markov Decision Process
+	Assumptions:
+		Next state depends ONLY on the current state and action.  Previous states are captured in the current state.
+		The model T(s, a, s') = P(s' | s, a) does not change
+
+------------------------
+1-28: Unsupervised Algorithms 
+-----------------------
+Unsupervised:
+	unlabled data. Only get features..
+	Most commonly used to find the hidden structure
+	Used in: clustering, visualization, anamoly detection
+
+Applications
+	search: nearest objects are similar, ie fastext embedding ...
+
+Measure the clustering quality:
+	Silhouette index: 
+		Cluster similar things together; items in the same cluster should have a small distance.
+		(distance_noncluster-to-pt - distance_cluster_main-to-pt) /  max( the two terms above)
+
+	Clustering methods architecture
+		Partitioning
+		Hierarchial
+
+	K-Means
+		Need to specify k, where k is how many groups/cluster I want
+		Centroid based clustering ..
+			Initialization: randomly pick the centroid for each classes RANDOMLY based on the distance. Assumes points near this centroidA is part of class A.
+
+		Finding the number of K: very important
+			Plot: Avg within cluster distance to centroid VS number of clusters ..
+
+		Pre-processing
+			Feature normalization is VERY important becaues this algorithm is distance based ..
+
+		Pros
+			Scalable and efficient: O(# objects * k cluster)
+			simple and robust if data form compact clouds
+		Cons
+			Need to select k
+			Sensitive to data
+
+		Hard clustering: does not give a probablistic classification
+		Variations of K-mean: For different data structures/meta data, we might want to choose different variations.
+			Soft clustering: give a probabilitic interpetation; assume each point can belong to multiple cluster with a gausian distribution.
+				For each cluster, calculate the mean and sigma of all the datapoints in this particular cluster to get the gaussian distribution.
+				Has a bayesian component to this algorithm ...
+
+				Kmeans will try to find cluster of the same size; Soft cluster: the radius of each cluster can be different. Example: Mickey mouse
+
+			Density based clustering:
+				Good for clustering data based on the density.  See slide.  Use points density to determine if we include it in our training set.
+				Can handle different type
+
+				Scikit- dbscan
+
+			Hierchial clustering
+				2 Types:
+					Agglomerative clustering: Start each point as its own cluster; and combine different clusters
+						Single linkage clustering:
+							Start as each point in its own cluster
+							combine 2 pts that closest to each other, and combine them into one cluster
+							Keep going until all datapoints to the cluster.
+							Con: 
+								localized
+								expensive
+							Pro:
+								Does not require prior knowledge about number of clusters
+								
+					Divisive clustering: Start all data point as ONE cluster; and then divide them ..
+
+				Each data is a vector; Data that are close to each other are represented as an embedding; data close to each other will be put close to each other ..
+
+
+
+------------------------
+1-21:  
+-----------------------
+Problem Definition:
+	What are you trying to predict? 
+		Categorical, Numerical? --> regression/classification
+
+	How will you solution be used?
+		Be used in another ML model?
+
+Define Performance Metics:
+	Ideally single numeric metric: ie fbeta which cmobines recall and precision ...
+		More than 1 metics: optizimzing vs satisifying (ie within window)
+			systems: training time, prediction time, resource used ..
+			optiimzing metrics: what our model 
+	Specific type to each machine learning matrics
+	What is the min performance to reach business objective?
+	Is performance aligned with objective?
+	What is human level performance? ie Bayes optimal can be threshold
+
+Getting the data:
+	List the data you need and how much you need
+	Find the data and document the soure
+	Check the size and type of data
+	Convert the data format that can be easily manipulated.
+	Data-sources: uci machine learning repo, AWS public datasets, data.gov, reddit, kaggle, imageNet, twitter, quandl, The world bank, google big query public datasets, twitter for text data
+
+Explore and prepare data:
+	Study each features and its characteristics: 
+		Name, type, % missing values, noise and type of noise, type of distribution (skewed or normal), summary statistics
+			USE PANDA!!
+		Identify the target variable
+		Visualize the data: 
+			Histogram, line chard, scatter, whiseter
+		Study the correlation between features
+			Use seborn pair plots
+			Pearson correlation cofficient: a measure of "LINEAR" correlation between 2 variables
+				[-1, 1]
+				1: perfect linear relation btween 2 variables
+				ONLY captures linear correlation; good for Bayes. DOES NOT CAPUTRE NON-LINEAR realtionas
+
+	Prepare the data
+		data cleaning: 
+			outliers:
+				what's the range for outlier?  
+				Remove points outsidfe of outlier
+			missing values -> imputation 
+				by group or by value
+				or just drop ..
+		feature selection:
+			drop irrelevant features
+			what's the important features:
+				Tree based: choose the feature for you.  Idea: use tree based and see the top features; look at teh Finding donor 
+
+		feature engineering:
+			transform features( log, square, polynomical, aggregate features, one-hot encoding)
+				Aggregate features: PCA: use some and combine/decompose features
+
+			decompose features
+
+			Feature scaling: 
+				standardize or normalize features
+					standardize: based on the standard deviation, x' = (x - x_avg) / 1 sigma
+					normalize: max min based, every value is between 0 and 1, x' = (x - min(x)) / (max(x) - min(x))
+				Distance based algorithms, ie SVM classifier or Nearest neighbors,  is very sensitive to features
+
+
+		Train-test split: 
+			Pay attention to the order; some data sets are ordered via some feature; make sure you shuffle the data
+
+	Document your findings; 
+
+
+Train and Test Model:
+	Select models from different categories (logistics, naive bayes, SVM, tree based, etc)
+
+	make some quick and dirty training/validation using default hypter parameter to trim down you model candidate
+
+	Perhaps reduce dataset for faster training
+
+	Shortlist 3-5 models candidates
+
+Iterate & Diagnose:
+	High training error --> model has high bias error.  
+		solution: 
+			more complicated model
+			feature engineering
+	Low training error, but high validation --> model has high variance error; ie overfitting
+		solutions:
+			simpler data
+			more data
+			add regulrations penalty terms: lasso, elaticnet
+	From Evernote: Nuts and Bolts 
+		- Big Bias?
+		    - Bigger model
+		        - With neural network, it’s adding more layers…
+		            - NN decouples bias and variance, giving us a level that is not a zero sum game (see highlighted notes below)
+		        - With logistic regression, can come up with more features ..  This is harder to do.
+		        - Bigger data puts more stress on system requirements: resources + latency .
+		    - Train longer
+		    - New model architecture
+		- High variance?
+		    - More data (powerful)
+		        - Automatic data synthesis:
+		            - People used to “craft” input features
+		            - Now people are now beginning to create new data.
+		    - Regularization (L1, L2)
+		    - New model architecture
+		- Note: Bigger model and more data is able to solve a lot of problem...
+
+Deploy:
+	Be careful of model's slow degradatoin as data evolves or updates, ie a new product 
+	Monitor the input quality (malfunction of sensors), easier than using output as the threshold ..
+	Regulary re-train the model on fresh data
+
+
+Tuning the systems (hyper-parameters)
+	Orthogonalizaton: Changing one does not cause the other to get worse
+		Each step has a set of tools to achieve good performance and these tools should be orthogonal to each other
+		ie: speedcontrol orthogonal to steering angle
+
+	Chain of assumptoins
+		Good training set performance
+		Good validation set performce
+		Good test set performance
+		Good real world performance
+
+	Use the grid search or random search
+
+	Try ensemble method: combine betwt models result in better performance than individuals
+
+
+Bayes Theorem: http://localhost:8888/notebooks/Udacity_connect/wk5/BayesNLP_Miniproject-solution.ipynb
+	Lecture notes: ‎⁨/Users/thchang/Documents/dev/personal/ml/connect/notes/Lecture/wk4_classification_algorithms.pdf
+
+	p(h|D) = P(D|h) * P(h) / P (D):
+		Ex: Probability of patient having cancer GIVEN our model predicts +/-
+
+	p(h) : aka priority probability, before we collect any data
+		Ex: probability of a patient has cancer
+
+	p(h | D): posterior probaility, after we collect the data
+		Ex: probability a patient has cancer GIVEN our model predicts/diagnosed + or -
+
+	p(D | h): 
+		Probability a patient is diagnosed positive GIVEN patient has cancher
+
+	p(D): 
+		probability of a diagnosis
+		Use probability tree to get all the positive | negative predictions.
+
+	What goes first, h or D?
+		One trick: what comes after pipe is what one knows.
+		p(h | D+): 
+			Given I KNOW the p(+ diagnosis) 
+		p(D | h)
+			Given I know the p(h), ie probability of cancer
+
+	Ways to view probability: Bayesian vs Frequentist
+		Bayesion: uses a prior probability
+		Frequentist: every time you sample, you start with a clean state ..
+		https://www.quora.com/What-is-the-difference-between-Bayesian-and-frequentist-statisticians
+
+
+	Example: The probability of having a specific type of cancer (C) in the population is 0.01. There is a screening test for this type of cancer. If a person has cancer (AKA GIVEN), there is 10% chance that the test will come back negative. The test also has 5% chance of giving positive result for healthy people. 
+		h = patient has cancer
+		p(h) = 0.01
+		P(D=- | h) = 0.1
+			--> P(D=+, h) = 1 - 0.1 = 0.9 
+		P(-h |  D=+) = 0.05
+
+		Question1: What is the probability of both having a positive test and having the cancer? ie p(h, D=+) = p(h) * p(h | D=+)
+			= [p(h) = 0.01] * [p(h | D=+) = 1 - p(h, D=-) = 1 - 0.1 = 0.9]
+			= 0.01 * 0.9 = 0.009
+
+		Question2: If a patient gets a positive result from the test, what is the probability that s/he actually has the cancer? p(h | D=+)
+			
+			p(D+): use probility hiearcy
+				a) p(h) * p(D+) = 0.01 * 0.9 = 0.009
+				b) p(~h) * p(D+) = 0.99 * 0.05 = 0.99 * 0.05
+				= a + b = 
+
+			p(h|D+) = p(D+|h) * p(h) / p(D+)
+					= 0.9 * 0.01 / (0.9⋅0.01+0.05⋅0.99)
+					= 0.154 
+
+Naives Bayes Theorem: Assuming features are inter-dependent
+	Simplify bayes theorem, so P(D) = 1
+		p(D, h) = p(h, D) * p(h) / p(D)
+		Here, h = features I am using
+		h is a vector of features
+		p(D) = the class i am predictive 
+
+	P(D| features) = P(f1|D) * P(f2|D) * P(f3|D) * P(D)
+		D = class prediction
+		f are features
+
+	Example: classify a banana given features length, color, etc..
+		W4_classification_algorithms.pdf
+
+		P(D| features) = P(f1|D) * P(f2|D) * P(f3|D) * P(D)
+		P(banana | features) = P(color=yellow | banana) * P(sweet=1 | banana) * P(banana)
+
+
+	P(word|surroundingwords)=P(surroundingwords|word)⋅P(word) / P(surroundingwords)
+	
+
+Coding practices
+	hackerrank
+	codewars.com
+	CodeFights
+
+
+Quiz:
+	(1) B
+	(2) B
+	(3)a
+	4 d
+	5 a
+	6 a
+	7 ?
+	8 d
+	9 C/#
+	10 accuracy = 150/161	
+		FPR = FP / FP + ()
+		TPR = TP / (TP + FP)  (aka precions) = 50 / (50 + 5) = 50 /55
+
+
+
+------------------------
+1-7: Classification 
+------------------------
+Linear regression recap
+	Types
+		Parametric: y = fnc( x_feature)
+			Linear regression: ADC/DAC fitting; learning the parameters
+			Polynomical regression
+			Regularized
+		Non-parametric instance based: KNN. Trainng phase just store it.
+		Descision tree: 
+			In training, a model is generated. However, you don't CONTROL how many input features parameters.  Tree automatically finds the split threshold of the parameters.
+
+		Side: a model can be viewed as a mapping function; instance-based output 
+
+Classification:
+	Types:
+		Binary
+		Multiclass
+
+	Logistic Regression: can we leverage  linear regression for bineary classification?
+		Answer: yes; see slide..  We are still calculate the parameter b0 b1, just like in linear regression. We then use the sigmored convert that linear line to a probabilistc line, which is required since the output is either probabilistic.
+
+		Cannot use linear line to classify 2 classes.  Can use a sigmoid function, which transalte any value between 0 and 1.
+
+		Summary: you are still traing a model; a lineary regression line.  In the application, you still take in a feature paratmer, get a output from the value; then apply sigmod to get a probabilistic output. A probabilitic output is required for a classification problem.
+			Ex: y = b0 + b1_x1 + b2_x2^2.  x1 can be number of rooms; x2 can be school rating..
+
+		Pro
+
+		Cons:
+			Provide a linear decision boundary; can lead to high bias error.
+
+
+	SVM: A type of logistic regression
+		Goal: find linear decision boundary (aka hypter plane) that maximize the margin of the 2 clases of training data.  In other words, find the line that createst the most "DISTANCE" between the 2 classes.
+
+		Since SVM tries to "MAXIMIZE" the margin/distance between the 2 classes, the algorithm tend to generalize well. 
+
+		In reality, outlier dataset can wreak havoc on the SVM. Solution: Soft margin allows some data points (that violates our model) to be discarded .
+
+		SVM can actually do non-linear classification; 
+			Use kernel trick
+
+			Kernel is a function that maps the input data that to a different dimmension that separates the the non-linear dataset to become a linear dataset. The different dimension has increased thed number of dimensions.  Higher dimension is like adding new features.
+
+			Different kernsl in SVM: polynomical, gausian RBF, linear.  The kernel function can be another hyper-parameter one can tune.  More complex kernel ==> more complex model, which can lead to high variance problem..
+
+		Pro
+			can handle non-linear
+			similar to logicisc regression
+
+		Con: 
+			Can be suscipetible to overfitting
+			Does not provide probabilstic output; it is important for systems to know when NOT to apply the model and ask for help.
+			Slow with large training instances
+
+	Bayes Theorem
+		P(A) : Probability of event A occurs
+		
+		When event event A and B are independent: P(A & B) = P(A) * P(B)
+
+		When event A and B and dependent: P(A & B) = P(A | B) * P(B)
+
+		See slide (TOD)
+			Bayes does NOT assume independent input features
+				P(A | B) = P(B | A) * P(A) / P(B)
+
+			Naive- Bayes is based on the Bayes theorem, and assume indpendent variables.
+				c == class; x = features
+				P(c|x) = P(x|c) * P(c) / P(x)
+
+				P(c) : class prior probability
+				P(x) Predictor prior probability
+
+			Step 1: Create a count table.
+
+			Since we are assuming interdependnt variables, use pd.corr to see the correlation between the data.
+
+
+		Pro:
+			Easy to build and useful for large dataset
+		Cons:
+			Assume feature are inter-dependent..
+
+	Ensemble Learning: (Wisdom of crowd)
+		Bagging: aka Bootstrap Aggregating
+			Reduce varaince of predictio nby commbining multiple classlifers (See slide)
+
+			Bagging is an alternative to boosting. 
+				https://stats.stackexchange.com/questions/18891/bagging-boosting-and-stacking-in-machine-learning
+				Bagging improves model's variance behavior
+				Boosting improves model's bias
+
+			Step 1: Bootstrap
+				Given a dataset of size D
+				Given C classifiers
+
+				For each classifer, feed it a dataset of size D. This is accomplished by randomly sampling the D_original, 
+
+			Step2: Build a simple decision tree
+
+			Step3: Combine by majority
+		
+		Random Forest
+			Take the average of each tree's ranking/selection of the importance of a feature 
+
+		Boost
+			Give higher sampling weight to the dataset that did not do well.
+			Uses multiple classifications models
+
+			Pro
+				Can handle large data set with high dimension
+				power prodiction
+
+			Con:
+				Less interpretable
+				Diffult to tune huperparameters
+				More prone to overfit than classifiying
+
+		Bagging vs Boost
+			Bagging:
+				- parallel ensemble: each model is built independently
+				- aim to decrease variance, not bias
+				- suitable for high variance low bias models (complex models)
+				- an example of a tree based method is random forest, which develop fully grown trees (note that RF modifies the grown procedure to reduce the correlation between trees)
+
+			Boosting:
+				- sequential ensemble: try to add new models that do well where previous models lack
+				- aim to decrease bias, not variance
+				- suitable for low variance high bias models
+				- an example of a tree based method is gradient boosting
+				
+		Stacking:
+			Unlike previously, we can use other classifiers.			
+
+			Very popular in Kaggle competition
+
+
+	Neural network
+		Activation function:
+			relu vs sigmoid vs tanh: https://stats.stackexchange.com/questions/126238/what-are-the-advantages-of-relu-over-sigmoid-function-in-deep-neural-networks
+
+			Sigmoid: activation function does not blow up
+			Relu: activation function has no vanishing gradient
+
+			Vanishing gradient: derivative of sigmoid is at most 0.25. In deep learning, where there are MANY layers, each in series of the other, the gradient can get to 0 very very fast. In contrast, with relu, you can multiply multiple gradient across the layers.
+
+		Is this a knapsack problem?  Give me all the items at McDonald if I have $5
+			Perhaps.  Perceptron + backward propagation.
+
+
+	Interview
+		3 parts: 
+			coding
+			ML algorithms: 
+				bais vs varaince; which algorithm and why?
+			business quiestion
+
+------------------------
+12-17
+------------------------
+Data / Performance measures
+	Common across all algoirthms
+	Performance measures may be aglorith dependent (ie regression classification)
+
+Learning algorithms FOR LINEAR OUTPUTs
+	Regression algorithms
+		Input features --> model --> CONTINUOUS value
+		Vs classification:
+			look at label: Both has label.  But Regression label will be continous price (ie house price). Classfication label is categorical (ie Titantic: survived | non-survived)
+
+		Regression uses gradent descent
+
+		Gradient descent: See slide
+			Pick a random paratmer starting point.
+			Plot root mean square mean (ie cost function, y-axis) vs one our parameter (x-axis)
+				sum [( model_predict(x) - label(x))^2]/numPoint
+			Choose the paraemter that has th highest slope
+			Stop when we reach a min (ie slope = 0)
+			Tuning parameter: step size between each iteration
+
+			CONS:
+				Assumes that is a LINEAR relationship between independent and dependent variablces.  
+					But if we take enough small step, things will be linear
+				Very sensitive to outlier problem, since we are squaring the errors. Each that datapoint has not much other points near it
+
+				Multi-collinearity problem: in problems with multi parameters, one of the parameter is a linear relationship of other parameters.
+					In multi-variate, update one paramter and freeze the other paramters
+
+		Regularization: 
+			Reduces overfitting by adding a complexity function in the cost function
+				cost_regularized = cost + complexity penalty (aka regularization)
+
+			L1: complexity penalty= sum of absolute coefficient --> shinnk number of input features
+				Can be used for feature selection...  MAGIC !!!
+			L2: complexity penality = sum of squared coefficients --> Leads to smaller weights
+				More conservative than L1
+
+			Types of regularizations
+				Ridge: uses L2 regularization
+				Lasso: uses L1 reguralization, which can be used to select input features ...
+				ElasticNet: uses L1 and L2
+
+	K Nearest Neighbors
+		Instance based, based on the similarity (ie distance) between the other points
+			Can I use this for KG?
+		Use local averages to make predictions. NO model is created !!! Ie, instance based.
+
+		Tuning parameter: K
+			K=1 ==> look at only 1 neighbor
+
+		Pro:
+			Simple to implement with different choice
+			No training involved?  But what if there are 1million datapoints
+		Con:
+			Large search problem to find the nearest problem
+			Noisy dataset
+			Assumes all attributes are equally impt
+
+	Decision tree
+		How does one calculate the decision threshold? To minimize the error.
+			In compare to classification decision tree, we use the ginni index which measures how our data fits our prediction.  This gives us a purity index, called the Ginni index. Another measure is entropy.  The decision tree uses this to derive the threshold for the split.
+
+		Tuning parametesr
+			max_depth:
+			min_sample_leaf: how many data point has to fit into the prediction before we take the avarage. Reduces overfitting.
+
+		Pro:
+			highl interpretable
+			Automically select discribminar featre
+			require little data preparation
+		Cons:
+			Prone to overfitting
+			Sensitive to small variation in data set
+			Exponentical calculation growth as problem gets bigger
+Select right algorithm
+	Data exploration (histogram)
+		Outliers?
+		Does featureA depend on featureB?  Collinearity problem
+		Plot feature vs label data?  
+		Look at featureA
+
+	Cross validation with performance metric (eg mean sequred error) to evaluate multiple models
+	Kbow your objective: sometimes a less powerfule model is easy to implement
+	Regularization moeth do works well in case of high dimensionality and multi-collinearity in dataset
+
+
+Feature Engineering
+	Axises: 
+		[WHEN] Time: short term, medium term, long term, holidays
+		[WHO] user personalization
+		[WHERE] location
+		[WHAT?] product attributes
+		Desired action/result
+	Constraints:
+		What i can collect, accurately ..
+
+
+Notes for M
+	Feature engineeing: 
+		how do you find relationships & correlation of different features?
+			KDE?  pairplot? histogram?
+
+		Clean data
+			If look at a feature, do we normalize it to be gausian?
+
+		What if more than 100 features?
+
+
+12-10
+	Review Discussion:
+		Supervised vs unsupervised
+			The training data
+				does it have label on the input 
+		
+		Reinforcement
+			Agent [a] takes a series of Actions [a] to maximize an objective [O] in the environment [E]
+			Has an objective one try to maximize
+			Given a set of rules (ie parallel parking)
+	
+	data acquisition and data cleaning thakes up to 80% of the time..
+
+	Model and evaluation for SUPERVISED learning:
+		Challenges:
+			Bad data
+				Not enough data (variance problem)
+					Go buy some data
+				non-represetnign training data (sampling bias)
+					Using general data for ecommerce data
+				Data quality: (outliers, errors, noises)
+
+			Bad algorithm (alogirthm complexity)
+				Irrelevant features
+					Can generate noises
+					Solution: use domain knowledge & some algo does automatic feature generations
+				Overfitting
+
+	How to evaluate one's model?
+		Method 1: Train - dev - test (Hold out method)
+			Training and test:
+				make sure to shuffle and randomize ..
+				what if one class has alot more than the others (minority class)
+					- Give more weight to the minority class
+					- Synthesise new data points
+			Traing, dev(aka validation), and test
+				dev (aka validation) is for hyper-parameters so we don't 
+
+		Method 2: Goal: how good is our model generalize to future data. Which model should we use? to remove bias & variance..
+			Once we are done, we go back to splitting the original traiing data into traing | dev | test
+
+			Use K fold validation
+			
+			Split the traiing data into K parts
+			For a given iteration, 
+				derive new weights, and make a prediction m_k
+			average of the m_k
+
+			Get much more reliable performance since the address potential data distribution 
+
+			Small K --> bad because the training set may be smaller
+			Large K --> tol long contribution
+			Usual = 5 <-> 10
+
+	Performance measures
+		Classification
+			Accuracy: (TP + TN) / Total size
+				Bad for class in balance
+
+			Confusion matrix
+				TP, TN, FP, FN = func( what model predicted vs label data)
+				
+				1st letter denotes wheter our model was correct(T) or incorrect(F)
+				2nd letter is what model predicts
+
+				TP: Result is correct: model predict positive, label is positive
+				TN: Result is correct: model predicted negative, label is negative 
+				FP: Result is incorrect, model predicted positive, label is negative
+				FN: Result is incorrect, model predicted negative, label is positive
+
+			Precision: TP / (TP + FP)
+				Classification exactness
+				Measures Everything you PREDICTED as positive is actually positive
+				Musen: Does not include True negative ..
+
+			Recall: How many relevant items are select
+				See slide
+				TP / (TP + FN)
+
+			F1 score: combines recall and precision ..
+			F1 beta score: enable giving more weight to precision or recall..
+
+			VS ROC: en.wikipedia.org/wiki/Sensivity_and_specifity
+				ROC: y-axis=TPR 	x-axis=FNR
+				
+				TPR (aka sensitivity) = true positive rate = true positive / false negatiges
+
+				FPR (aka spcificity) = false negative rate = true negatives / false positives
+
+				
+
+
+		Regression
+			Mean absolute error
+			Mean square error = [sum(prediction - actual)^2] /n
+				Penalize larger error
+				If take mean, thake the same unit ..
+
+			R2
+				Coefficient of determination; 
+				100 %: good ...
+				
+				From http://localhost:8888/notebooks/projects/machine-learning/projects/boston_housing/boston_housing-Solution-Tom.ipynb notebook:
+					Hint: The R2 score is the proportion of the variance in the dependent variable that is predictable from the independent variable. In other words:
+
+					R2 score of 0 means that the dependent variable cannot be predicted from the independent variable.
+					R2 score of 1 means the dependent variable can be predicted from the independent variable.
+					R2 score between 0 and 1 indicates the extent to which the dependent variable is predictable. An
+					R2 score of 0.40 means that 40 percent of the variance in Y is predictable from X.
+
+
+	Bias vs Variance
+		Bias: 
+			high bias --> underfitting
+		Variance
+			error from sensitivity to small fluctuations in the training set ..
+			High varaince --> overfitting
+		Error vs compliexity
+			As model get more complex, low bias
+			Simple model can get high bias.
+
+		Most ML Bias variance is a zero-sum game. Optimize one over the other. One exception: DL.
+
+
+
+	Learning curves
+		Error as a function of test size ..
+
+		Can tell you if your model has high bias and high variance by looking at the error between validation and traing set error .. 
+		This is a way to visualize Andrew Ng's work flow ..
+
+		High bias --> better model
+		High variance --> more data might help ..
+
+		Is x-axis always traing set size ???
+
+
+	[[Putting it all together]] 
+		Clean the data
+			nulls --> fill in (like titanic)
+			class minority --> create new data?  Give more weight to minority class? 
+			categorical var --> numberical variables
+
+
+		Splitting the data
+			Hold out: 
+				Training | Dev | Test
+
+			KFold cross validation
+				Split the data into training and test
+
+				Kfold divides the trainig and use 1/K part fo validation, from which one can use the hyperparameter tuning ... Each hyper-paramter tuning iteration, makes K predictions and average them. This gives us a more robust measurement.
+
+				Can also use Kfold is this for model selection.
+
+		Model training
+			Hold out: use dev to tune parameter
+			KFold: for each iteration of tuning parameters, we calculate K prediction, and use the average to get a better more consistent 
+
+
+
+	Homework:
+		Look over bayesian notebook: https://classroom.udacity.com/nanodegrees/nd009-connect/parts/2f7e2bff-ade2-4aee-ab00-0d09b6b1cce6/modules/576a9541-522f-4f9d-89c0-4bbfcfa503d4/lessons/05d3f00e-4f55-44e0-a059-6a56f3109b89/concepts/a7a081bb-0df1-4cde-be87-ca32d605b6d3
+
+		Start looking at Boston house project
+			http://localhost:8888/tree/Udacity_connect/wk3
+
+		Videos
+
+
+12-3 Monday
+	- Need to put in 10-15 hours outside of class
+	- This is a long process, how are you going to stick to your plans?
+		Goal settings:
+			Specific
+			Measureable
+			Attainable
+			Relevant
+			Timely
+	- Machine Learning is a subset of datamining
+		data mining can use db technology, visualization; machine learning is just one toolset.
+
+	- Types of learning
+		Supervised
+		Unsupervised
+		Reinforcement
+
+		Deep neural can be both supervised and unsupervised
+
+	- There are some algorithms that can determine the features ...
+	- Selecting a feature set is bounded by
+		what you are trying to predict
+		what data you have
+
+	- Interesting ideas: 
+		use unsupervised to create labels
+		Use supervised to 
+
+	- Machine learning: 
+		Clean up the data
+		What question you ask is the basis of many tasks
+
+	- Types of ML
+		- Supervised
+		- Unsupervised
+		- Reinforcment learning
+			Given no input features, but you have a reward function, and let the computer learn via actions...
+				In contrast to supervised, 
+		- Deep learning
+			Can be used for supervised and unsupervised
+			Has NOT features engineering !!!  The CNN extracts the features !!!
+
+			In pictures training: each pixel goes to one neuron
+		
+	- Goals
+		Learn by doing
+		Intermediate: develop deeper understsanding of algorithms, problems, and tools
+			If you run random forest, why did you do this?  You need to know the model
+		Advanced: develop extension to fields
+
+		Bools:
+			Book: Introduction to Statistcal learning (actually v)
+				Stanford has an open course on this book: Statistical learning from stanford (http://online.stanford.edu/course/statistical-learning-self-paced)
+
+				Google: Tom Mitchell machine learning (http://www.cs.ubbcluj.ro/~gabis/ml/ml-books/McGrawHill%20-%20Machine%20Learning%20-Tom%20Mitchell.pdf)
+
+			Andrew Ng: a new course on Deep learning
+			Kaggle: 
+			UCI machine learning repository
+
+
+--------------------
+Setup
+--------------------
+cdu
+cd git
+jupyter notebook
+
+
+
+--------------------
+Algorithm Comparisons
+--------------------
+Neural Network
+	Pro
+		- Widely adopted; 
+			* source code and libraries
+			* proven in may fields
+		- Deep learning: most algorithms performance improvment saturates with training data.  Deep neural network keeps improving, so it is a more controllable way to improve model performance; keep collectiing data
+		- Decouples bias and variance tradeoff.
+		- Linear neural network: share parameters among features and classes; which help classes(ie labels) that have fewer training data.
+
+	Con
+		- Too much of a blackbox; don't know what is being learned. Could your accuracy be correlated and not CAUSED by the feature you thing it should be focued on. Example: 
+
+		- Deep neural network training can be slow.
+
+		- Neural network are not probabilistic, ie statistical or bayesian. Therefore, we do not know how confident the classifier is. This has implication on system.  (IS THIS TRUE?)
+			https://www.microsoft.com/en-us/research/publication/confidence-measures-for-neural-network-classifiers/
+
+	Insights
+		- Algorithm requires less understanding of the structure of the problem.
+
+
+Regularlized regression
+	Add on to avoid overfitting by adding pnality to the loss function. Penalty penalizes features that are very loud ...
+	When to use:
+		When too many features; multi-collinearity exist between features
+		feature selection
+			After running the model, we can see the coefficients for each feature; This will tell us how dominant the feature is...
+	Type:
+		Ridge: shrink parameters to really small value (l2 space)
+		Lasso: Features selection (?) (l1 space)
+			In comparison, lasso will reduce the parametsr to 0.
+			Even if you could try to use this for feature selection
+		Elastic Net: comination of ridge and lasso
+
+
+	Assumes the problem is a linear assumption
+
+
+Naives Bayes Classifier
+	Supervised algorithm
+	C1 --> (f1, f2, f3)
+	C2 --> (fa, fb, fc)
+
+	For each class, calculate the probability of each feature in each class to get the prior probability
+
+	P(C1 | ) = 
+
+SVM
+	https://github.com/aberenyi73/Udacity_connect/blob/master/wk5/SVM%20Presentation.ipynb
+
+	The classifier is the hydraplane H, with 2 other hyperplanes H1 and H2, aka support vectors. H =  (w•x+b), and has the maximum distance between H1 and H2.
+		- Model:
+			class(x) ==> class A if w*x + b > 1; class ~A if w*x +b <1
+
+	To classify a pt to the  class, there's 2 components to determine the hyper plane.	
+		- Distance based : we want to learn the support vectors that maximizes the distance between H and (H1,H2)
+		- For data points on the wrong side of the plane, ie mis-prediction, we have a hinge loss function.
+		To conclude:
+			Loss function = func_A(Distance between H and (H1,H2)) + func_B( pts on wrong side will have high loss value)
+			We want to maximize func_A and minimize func_B
+	
+	Gotchas
+		Watch out for feature scaling with this algorithm
+		Missing data has to be imputed
+			sklearn.pre-proecessing
+
+	Can be used for multi-class 
+		One vs all
+			Output a probability for each class in case on data point falls in multiple clients
+
+		Onve vs all
+
+	Linear SVM vs Nonlinear classifciation
+		Someimes one cannot split the data in a straight line. In this kage, take a kernel function to separate the data set.
+
+	Pros
+		SVM is very versatile and powerful
+		Convex optimization guaratees optimality. The solution is guaranteed to be a global minimum and not a local minimum.
+		Suitable for both linearly and non-liearly separable data.
+		You only need to train C parameter and provide a kernel.  (Less tuning parameters)
+		Works well on small as well as large dimensional data sets. The complexity of the training data is characterized by the support vector, not the entire data set.
+		It can work well with small training data set.
+	Cons
+		Not suitable for larger data sets becuase the training time can be high. O(n$^3$)
+			How to measure noise daata: How many data is outside 2 standard deviation..
+		Less effective on noisier data sets and overlapping data points.
+
+
+Nearest Neighbors
+	Instance based learning algorithm
+	Can be used for both regression and classifier ..
+		Regression: take the mean of
+	Advantage:
+
+	Disadvantage:
+		It's a lazy learner; stores all the data
+			Test data has to compared with all the training data, leading to long prediction time
+
+Logistic Regression
+	Supervised model for classification
+
+	Terminology:
+		independent variables = features
+		dependent variables = label/classes
+
+	Output probabilities, output is between 0 and 1
+
+	Assumptions:
+		http://www.statisticssolutions.com/assumptions-of-linear-regression/
+
+
+
+
+--------------------
+Project
+--------------------
+Idea 1: DL in NLU
+	TensorFlow to do some question and answer 
+		* query --> segement --> wordvec --> LSTM --> TF neural  --> classification
+		
+		* Show in a graph
+
+	Implementation
+		TF:
+			http://campuspress.yale.edu/yw355/deep_learning/
+			https://github.com/georgeiswang/Query_Classfication_LSTM
+		Visualization: 
+			https://github.com/YaleDHLab/pix-plot
+
+
+Idea 2: Similar items via visual
+	http://douglasduhaime.com/posts/identifying-similar-images-with-tensorflow.html
+
+	Spotify: recommendation based on vector. Each user is converted into a vector via ALS, and fed into a distance based clustering alogorithm
+	https://github.com/spotify/annoy
+
+	scala version for annoy: https://github.com/mskimm/ann4s
+
+Idea 3: Bot feeder:
+	Given a context, generate a response.  Each bot has a personality.
+	? Where to get the data ?
+		Ebay NPD?
+		Stack overflow:
+			https://cloud.google.com/bigquery/public-data/stackoverflow
+		Twitter
+			https://www.quora.com/How-can-I-download-Twitter-data
+
+
+	Implementation can be tied to idea 1?

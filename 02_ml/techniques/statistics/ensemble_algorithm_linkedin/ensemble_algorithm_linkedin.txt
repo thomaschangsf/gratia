@@ -1,0 +1,223 @@
+// ---------------------------------------
+// Overview
+// ---------------------------------------
+- Course link 
+	https://www.linkedin.com/learning/advanced-predictive-modeling-mastering-ensembles-and-metamodeling/adaboost-xgboost-light-gbm-catboost?u=2101921	
+
+- Notes 
+	/Users/chang/Documents/dev/git/ml-tools/ml/general/ensemble_algorithm_linkedin
+
+- Lab excercises code @ /Users/chang/Documents/dev/git/ml/pyspark_linkedin
+	/Users/chang/Documents/dev/git/ml/ensemble_algorithm_linkedin
+
+
+
+
+
+
+// ---------------------------------------
+// 1 Key Modeling Concepts
+// ---------------------------------------
+<-- What is an Ensemble
+	Ex: Predict mpg for cars
+		model1: linear regression (weight) --> mpg
+		model2: NN (hp, weights, origin, cylinder) --> mpg
+		model3: regression tree (aka CART, decision tree) --> mpg
+			CART is also known as a decistion tree
+
+		final prediction = avg( pred_model1, pred_model2, pred_model3)
+			sometimes you may not want to average, if one of the model performs better
+
+	** KEY POINT** : 
+		For ensemble, we want models to have error in different areas. In a majority voter wins, the other 2 model will override the wrong model.  All the modeling algorithm will try to shuffle the model around so the modelA's error is over-ruled by the two other models.
+
+
+<-- Types of models and modeling algorithms
+	--> Supervised vs Unsupervised
+		* Supervised
+			value estimate : predict a numerical value, ie MPG
+			classification: predict wihch class 
+
+	Ensemble are usually associated with supervised learning
+
+	Ensemble can solve either supervised classification or value estimation problems. For unsupervised, look to clustering.
+
+
+
+<-- Types of ensembles  
+	(1) Heteregnous Ensembles
+		Different component models
+
+	(2) Homogensous  ensembles
+		- slight variant of the same algorithm 
+		- Ex: RandomForests, AdaBoost, XGBoost, 
+
+	(3) Meta modeling
+		models working together, in sequence (?). Moddel sends information from another model.
+
+
+
+// ---------------------------------------
+// 2 Understanding Model Error
+ // ---------------------------------------
+<-- Measuring model accuracy: Value estimation
+	Mean Absolute Error
+	ABS( actual - predict )
+
+<-- Understanding model error: Classification
+
+
+
+
+
+// ---------------------------------------
+// 3 Simple Heterogenous Ensembles
+// ---------------------------------------
+<-- Stacking
+	Works well for kaggle.com
+
+	Given 3 model, we learn a 4th model on how to combine the predictions
+
+	pred1
+	pred2 ---> MODEL_4 --> final_prediction
+	pred3
+
+
+
+<--  Voting for classification
+	If a model outputs (pred, confidence) 
+
+	we could either pick the 
+		highest confidence 
+		weight 
+		Simple vote
+
+
+
+// ---------------------------------------
+// 4 Bias Variance Tradeoff
+// ---------------------------------------
+<-- Error decomposition
+	Model Error = variance + bias + noise
+
+	Different ensemble technique can either target bias, variance, or maybe both
+
+
+<-- Visualizing bias and variance
+
+
+<-- Curse of dimensionality
+	More data give model more power to capture nuances, like noise, which can lead to overfitting, where performance in training is significantly better than the hodlout data.
+
+	!!! As we add more variables, we may improve bias but make variance much larger.  Is this what we have in search?
+
+
+<-- Is Occam's Razor always true?
+	Occam's Razor: simpler is better
+ 
+	Favor simpler model over more complex model. Then what about ensemble?
+		Given 2 models with same generalization error, we should prefer simplicity. Simple models are more transaprent. For complex models, we need more visibility/checks into the input to make sure they are right.
+
+		However, it is not true simpler model has less generalization error.  More complex, does NOT always mean higher variance, such as [bagging]
+
+
+
+// ---------------------------------------
+// 5 Ensemble Algorithms Fundamental
+// ---------------------------------------
+<-- What is Bootsrap aggregating (aka bagging)
+	  bootstrap sampling: take random samples without replacement; the same dataset can replicated.
+
+	  Intuition: train 100 trees; each tree gets a random sample set. the hope is that the general pattern is picked up by most of the trees. The tree that picked up on the outlier data will be outvoted by the majority.  100 trees more robust.
+
+	  Grow a more complex tree can help with accuracy, but hurt variance
+
+	  Benefit: 
+	  	can reduce variance in high variance low bias datasets
+	  	many weak learner can outperform a single model
+	  	can be trained in parallel
+	  	
+  	  Con:
+  	  	Hard to interpret
+  	  	if data has high bias, aggregate also has high bias
+
+
+<-- What is Boosting and how does it work
+	Increase the weight of data the previous tree mis-predicted
+
+	Adaboost: has some complex weight to the ROWS/records we mispredicted
+
+<-- Gradient Boosting demo
+	https://towardsdatascience.com/machine-learning-part-18-boosting-algorithms-gradient-boosting-in-python-ef5ae6965be4
+
+	residual = predict - actual
+
+	Each tree predicts the residual (diff(pred, vs actual)) . The residual is the leaf node of the tree.
+		Tree1  
+			--> CART, divide by variable
+			--> (leaf_node = residual1) 
+			--> prediction_1 = avg(label) + learning_rate * (residual1)
+			--> residual_2 = actual - prediction_1
+
+		Tree2
+			...
+
+		Ideally, the residual of all the leaf node will make our prediction_final === actual
+
+
+
+	Tree2:
+
+
+
+
+// ---------------------------------------
+// 6 Important Ensemble Algorithms
+// ---------------------------------------
+<-- Random Forest ( )
+	We randomly select features.  Tree by its nature are greedy; it selects the best top K best feature. By randomly selecting features improves bias but also more robust when there a large number of inputs.
+
+	We want to the trees to grow and be flexible; grow your tree so you get more of a bush (wider and deeper) but you get more variance. Address variance by aggregating the the trees.
+
+	Unlike cart, we will prune the component trees.
+
+	Still pretty effective.
+
+
+<-- Model search by bumping
+	Related to bagging; but we just choost the bset tree.
+
+
+<-- AdaBoost, XGBoost, LightGBM, CatBoost [Boosting Algorithms Family]
+	- Adaptive Boosting (aka adaboost) : Find incorrect records, and give them extra wegiht
+
+	- XGBoost: Define a residual and the tree is tries to minimize this loss function. Dominant one
+		TanQi Chen (2016) 
+		xgboost.readthedocs.io
+
+
+	- LigtGBM: Make boosting more scalalable (for lasrge dataset)
+
+	- Catboost: address xgboost tendency to overfit
+
+
+<-- Super learner, Subsemble, StackNet
+
+
+
+
+
+
+
+// ---------------------------------------
+// 7 Ensemble and Meta-Modeling Case Studies
+// ---------------------------------------
+<-- Combining supervised and unsupervised
+
+
+
+
+<-- Routing cases to different models
+
+
+

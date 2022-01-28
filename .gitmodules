@@ -26,3 +26,11 @@
 	path = 02_ml/tools_code/gcloud_data_science/ml-design-patterns
 	url = git@github.com:thomaswchang/ml-design-patterns.git
 	branch = master
+[submodule "02_ml/tools_code/d2l-en"]
+	path = 02_ml/tools_code/d2l-en
+	url = git@github.com:thomaswchang/d2l-en.git
+	branch = master
+[submodule "02_ml/techniques/foundations/udacity/MachineLearning"]
+	path = 02_ml/techniques/foundations/udacity/MachineLearning
+	url = https://github.com/thomaswchang/MachineLearning
+	branch = master
