@@ -1,0 +1,1328 @@
+// -------------------------------
+// 0 Overview
+// -------------------------------- 
+- Type of Problems (See Chapter5 notes for detail)
+	* Link prediction, aka graph completion
+		Ex: recommend friend, find connection between cluster
+		Approach1: Use node2vec to create node embeddings for every node on graph. For all possible nodes, compute edge2vec 
+
+	* Detect cluster and community of graph. How to parition?
+
+	* Detect graph simlarities and graph matching
+
+	* Use learned representation to train supervised models
+		use shallow or GNN method to learn embeddings
+
+
+- Step1: Create nodes (from graph)
+	* Via TFIDF
+
+	* Via TextRank : text summarization based on pagerank
+
+	* NER
+		Via spacy
+
+	what about edges? how are they created
+
+- Step2: Create graph
+	networkx
+		creates a graph by taking in edge DF. 
+
+	define types of graph
+		digraph
+
+		bipartite
+			transfrom from 1 space to the other
+
+- Step3: Toolset
+	* Analyze graph
+		metrics: shortest_path, clustering_coefficient
+		KG: nearest neighbor, find most probable edge/nodes
+
+	* If bipartite
+			Bipartite are often used to represent binary relations between two types of objects. These relations (edges) can be represented as matrices. These relationship creates toplogical information GNN can learn from.
+
+			Applications: 
+				Document/Term Graphs: Here U are documents and V are terms or words, and there is an edge (u, v)
+				if the word v is in the document u. Graph is used to analyze text, for example to cluster the documents.
+
+				Movies preferences: (Netflix prize: predict how much someone would enjoy a movie based on their preferences. This can be viewed, and in the submissions often was, as a bipartite graph problem. The viewers are the vertices U and the movies the vertices V and there is an edge from u to v if u viewed v. In this case the edges are weighted by the rating the viewer gave. The winner was algorithm called “BellKor’s Pragmatic Chaos”. In the real problem they also had temporal information about when a person made a rating, and this turned out to help.
+
+		can transform from one nodte type to another
+
+	* partition graph
+		via lovain.community which strives to partition the graph to maximize connection densness of the nodes.
+
+	* Method1: Shallow learning methods
+		via matrix factorization:
+			Idea: Given 2 entities (user item) and a sparse rating, we learn 2 matrixes P and Q that minimizes the difference between the actual and predicted ratings.  P = user x k; Q = item x k where k is the latent feature
+
+		via node2vec: semi-supervised with random walks to create node and edge embeddings 
+			this uses the structure of the graph, node and its edges, BUT does not use node features. In comparison, GNN use node features. Inspired by skipgrams
+
+			use learned embeddings 
+				to train a classifier BUT this has cold-start problem (transductive approach)
+				
+				similarity (for a subpartition of graph): use some similarity measurement
+
+
+	* Method2: via Graph Nueral Network
+		via stellargraph, pytorch, and TF
+
+		The main goal of GCN is to distill graph and node ATTRIBUTES into the vector node representation aka embeddings. Use embeddings in training, like document classification
+
+		pytorch code
+			https://towardsdatascience.com/hands-on-graph-neural-networks-with-pytorch-pytorch-geometric-359487e221a8https://github.com/khuangaf/Pytorch-Geometric-YooChoose
+
+
+
+// -------------------------------
+// 0.5 Graph Neural Network: GNN
+// -------------------------------
+- Reference
+	https://towardsdatascience.com/a-gentle-introduction-to-graph-neural-network-basics-deepwalk-and-graphsage-db5d540d50b3
+	https://towardsdatascience.com/hands-on-graph-neural-networks-with-pytorch-pytorch-geometric-359487e221a8
+
+	overview paper of GNN: https://arxiv.org/pdf/1812.08434.pdf
+
+- When Applied to node classifcation
+	It can be used as label propagation
+	Essentially, every node in the graph is associated with a label, and we want to predict the label of the nodes without ground-truth
+
+	Given a PARTIALLY labeled graph, the goal is to leverage these labeled nodes to predict the labels of the unlabeled. 
+
+- Annotation
+	GNN learns a embedding representation h of for the node v based on the node and its neighborhood
+		h_v = f(x_v, c_co[v], h_ne[v], x_ne[v])
+			x_v 	: feature vector of node v
+			x_co[v]	: features of edges connecting node v
+			h_ne[v]	: embedding of neihboring nodes of v
+			x_ne[v]	: feature of neighboring nodes of v
+
+			f is a function that projects these intputs onto a d-dimensional space
+			h_v is the hidden vector embedding for node v
+
+			Message passing refers to the process by how a node's embedding is updated using the info described here.
+			x_i^(k) = fn_update( 
+				x_i^(k-1), 
+				fn_aggregate( 
+					for j in neighbor(i):
+						fn_message(
+							x_i^(k-1),	# current node i at prev time
+							x_j^(k-1),	# neighbor node j at prev time
+							edge_i,j
+						)
+				)  
+			)
+
+		output node v in network
+			o_v = g(h_v, x_v)
+			f and h are fead forward connected layer of NN
+
+		loss +=
+			for i in range(p): # p is number of nodes
+				sum( t_i - o_i)
+
+		use gradient descent to update 
+
+- Flow
+	https://arxiv.org/pdf/1812.08434.pdf
+
+	* What's the graph type and scale? These aspectes are not orthogonal
+		directed/undirected: 
+			edges in directed graph are 1 direction, from u to v.
+
+		homogenours/hetergenous: 
+			Nodes and edgs in homogenous graph are the same tpe
+
+		static/dynamic:
+			input features of a dynamic graph varies with time
+
+	* Types of Tasks
+		node level: focus on nodes, ie node classification and node clustering
+		edge level: edge classification and link prediction
+		graph level: graph classification and matching
+
+	* Design Loss function 
+
+	* Computation modules
+		propagaton module: propagae info beween nodes so aggregated information can capture feature and topologic information. 
+			Ex: conv and recurrent operator are used to aggregate info from neighbors
+
+			Ex: skip operator gather info from historical representationof nodes
+
+		sampling module: when graph is huge, we need to sample
+
+		pooling module: to represent high level subgraph or graphs, pooling extracts high level info
+
+
+- GNN: GraphSAGE
+	https://www-cs-faculty.stanford.edu/people/jure/pubs/graphsage-nips17.pdf
+
+	for a node v, combine the vector representation of its neighbors
+
+// -------------------------------
+// 1 Gettings Started
+// -------------------------------
+<-- Book code github
+	https://github.com/PacktPublishing/Graph-Machine-Learning
+
+<-- Via PIP
+	python3 -m venv .env
+
+	alias python3V=/Users/chang/Documents/dev/git/ml/Graph-Machine-Learning/.env/bin/python3
+
+	pip3 install numpy==1.21
+	pip3 install spacy
+
+	python3V -m spacy download en_core_web_sm
+
+	pip3 install -r requirements.txt
+
+	DO NOT install stellargraph + tensorflow!!!
+		tensorflow will downgrade numpy from 1.21, which is required for MAC M1
+		https://github.com/explosion/spaCy/issues/7962
+
+	Install torch via wheel
+
+	TORCH=1.9.0
+		python -c "import torch; print(torch.__version__)"
+
+	CUDA=none
+		python -c "import torch; print(torch.version.cuda)"
+
+	pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+	pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+	pip install torch-geometric
+
+	pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+	pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+
+	ipython kernel install --user --name=graph-ml
+			Creates /Users/chang/Library/Jupyter/kernels/graph-ml
+
+	vi /Users/chang/Library/Jupyter/kernels/graph_ml/kernel.json
+		change python3 to point to /Users/chang/Documents/dev/git/ml/Graph-Machine-Learning/.env/bin/python3
+
+
+<-- Setup envionrment via conda [DOES NOT WORK]
+	Why? Tensorflow does not work for mac m1 yet
+	
+	https://towardsdatascience.com/installing-tensorflow-on-the-m1-mac-410bb36b776
+
+	* install miniforge
+		Download Min*.sh
+		bash Miniforge3-MacOSX-arm64.sh
+		conda config --set auto_activate_base false
+
+	* restart terminal
+
+	* cd /Users/chang/Documents/dev/git/ml/Graph-Machine-Learning
+
+	* conda
+		conda 
+		conda env create --file=conda-env/environment.yml --name tf_m1
+		conda env create --file=~/miniforge3/envs/environment.yml --name ml_graph
+		
+
+		conda activate tf_m1
+			tf_m1 environment is stored in ~/miniforge3/envs/
+
+	* Install tensorflow
+		pip3 install --upgrade --force --no-dependencies install https://github.com/apple/tensorflow_macos/releases/download/v0.1alpha3/tensorflow_addons_macos-0.1a3-cp38-cp38-macosx_11_0_x86_64.whl
+
+		pip3 install --upgrade --force --no-dependencies install https://github.com/apple/tensorflow_macos/releases/download/v0.1alpha3/tensorflow_addons_macos-0.1a3-cp38-cp38-macosx_11_0_arm64.whl
+		
+		pip3 install --upgrade --force --no-dependencies install https://github.com/apple/tensorflow_macos/releases/download/v0.1alpha3/tensorflow_macos-0.1a3-cp38-cp38-macosx_11_0_arm64.whl
+		
+	* Test
+		/Users/chang/miniforge3/envs/tf_m1/bin/python3 -c "import tensorflow"
+
+		note: python3 is tied to pyenv.
+
+	* Install other libraries
+		conda install -c conda-forge matplotlib -y
+		conda install -c conda-forge scikit-learn -y
+		conda install -c conda-forge nltk -y
+		conda install ipykernel
+		conda install -c conda-forge  -y
+		
+		conda install --file /Users/chang/Documents/dev/git/ml/Graph-Machine-Learning/Chapter07/requirements.txt
+			NOT FOUND!!!
+			  - keras==2.0.2
+			  - fasttext==0.9.2
+			  - smart-open==3.0.0
+			  - communities==2.2.0
+			  - gensim==3.8.3
+			  - node2vec==0.3.3
+
+			  # Can use pip3 to insall into conda environment !! Cool
+			  pip3 install fasttext
+
+		conda install -c stellargraph stellargraph
+			STUCK!!
+
+
+	* Create jupyter environment
+		ipython kernel install --user --name=graph-kernel
+			Creates /Users/chang/Library/Jupyter/kernels/graph-kernel
+		vi /Users/chang/Library/Jupyter/kernels/graph-kernel/kernel.json
+			{
+			 "argv": [
+			  "/Users/chang/miniforge3/envs/tf_m1/bin/python3",
+			  "-m",
+			  "ipykernel_launcher",
+			  "-f",
+			  "{connection_file}"
+			 ],
+			 "display_name": "graph-kernel",
+			 "language": "python"
+			}
+
+		jupyter notebook
+<-- Code: /Users/chang/Documents/dev/git/ml/Graph-Machine-Learning
+	Reinstall python3.8.3
+		CFLAGS="-I$(brew --prefix openssl)/include -I$(brew --prefix bzip2)/include -I$(brew --prefix readline)/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L$(brew --prefix openssl)/lib -L$(brew --prefix readline)/lib -L$(brew --prefix zlib)/lib -L$(brew --prefix bzip2)/lib" pyenv install --patch 3.8.3 < <(curl -sSL https://github.com/python/cpython/commit/8ea6353.patch\?full_index\=1)
+
+	
+	cd /Users/chang/Documents/dev/git/ml/Graph-Machine-Learning
+
+	pyenv versions
+		make sure to use 3.8.3; pyenv local 3.8.3
+
+	/Users/chang/.pyenv/versions/3.8.3/bin/python3 -m venv .env
+
+	source .env/bin/activate
+
+	pip3V  install --upgrade pip
+
+	pip3V install stellargraph
+
+	python3 -c "import stellargraph"
+
+
+<-- Types of Graphs
+	Digraph: (uni-directional graphs)
+
+	Multigraph: multiple edges have same pair of start and end nodes
+
+	Weighted Graph: edges have weight
+
+	Bipartite graph: graphs whose vertices can be partitioned in 2,3, ..k set of nodes (multipartite graph)
+		Used in Chapter7 and 8 for Natural Language Processing
+
+<-- Graph Representations
+	Adjacency matrix: v x v matrix, where value of cell is equal to either weight or connection.
+
+	Edge list: a more compact way to represent graphs
+		A list of (v_source, v_target) representing edges. Can have weight associationed as well.
+
+<-- Plotting Graphs
+	networkx
+	Gephi
+
+<-- Graph Properites
+	--> Integration metrics
+		* Distance, path, and shortest distance: where distance is a function of the edge weights
+
+		* Characteristic path length: average of all the shortes path lenghts between all possible pair of nodes
+
+		* Global and local efficiency: measure how efficiently information is exchanged across a network
+
+	--> Segration metrics
+		* Clustering coefficient: measure how much nodes cluster together
+
+		* Transivity: 
+
+		* Modularity: quantiifes division of network, how much of a clique do we have
+
+	--> Centrality metrics
+
+
+	--> Resilience metrics
+
+
+
+	--> Segregation metrics
+
+	--> Centrality metrics
+
+	--> Resilience metrics
+
+<-- Benchmarks and Respository
+	--> Stanford Network Analysis Platform (SNAP)
+		handle hundreds of million of nodes and billion of edges.  Snap is order of magnitude faster than networkx.
+
+// -------------------------------
+// 2 Graph Machine Learning
+//	concepts and graph embedding techniques
+// -------------------------------
+<-- Technical Requirements
+
+<-- Understanding ML on graphs
+	--> Basic principle of ML
+
+	--> Benefit of ML on graphs
+
+<-- Generalized Graph Embedding Problem
+
+<-- Taxonomy of Graph Embedding Algorithms
+	--> Categorization of Embedding Algorithms
+
+
+
+
+// -------------------------------
+// 3 Unsupervised Graph Learning
+//	unsupervised graph embeddings 
+// -------------------------------
+<-- Technical Requirements
+
+<-- Unsupervised Graph Embedding Roadmap
+	
+	--> Shallow Embedding Methods
+	
+		* Matrix Factorization
+			Reference: https://towardsdatascience.com/recommendation-system-matrix-factorization-d61978660b4b
+
+			Idea: Given 2 entities (user item) and a sparse rating, we learn 2 matrixes P and Q that minimizes the difference between the actual and predicted ratings.  P = user x k; Q = item x k where k is the latent feature
+
+		* Skip gram
+			Idea: Generate a dataset given P(target | context) for a rolling window.  The model consist of 
+				- an integer representation of target word
+				- a hidden layer of d dimensions. The hidden layer creates a representation for a word.
+				- an output softmax layer which predicts the context. 
+
+			Graph analogy is to walk through the graph; each walk represent a text corpus in skipgram. Different walks emphasis particular local or global graph structure
+				- Deepwalk: generates a random walk which will be the input to the skipgram model. Hyper-parameter include: number of random walks for each node, the length of walk, and the window size of skipt gram model. Once trained, hidden layer of skip-gram is used to generate embedding for the nodes
+
+				- Node2Vec: identical to DeepWalk, but its random walk balances exploration of unseen nodes and getting back to previous visited node. In other words, node2Vec balances local structures and global community structures.
+
+				- Edge2Vec: Generates embeddings for edges by applying a operator on the edge's connected node's embeddings
+
+				- Graph2Vec: Generates embeddings for an entire graph, which uses the Doc2Vec algo. 
+
+
+	--> Autoencoders
+		* Overview of autoencoders
+			- Help deal with high-dimensional datasets; ie compact sparse representations. It is a NN where the input and output are the same; NN is trained to reconstruct its inputs using lower number of variables. It is better than PCA because it can learn non-linear transformations due to the non-linear activation fucntions. 
+
+
+
+		* TF and Keras (Side)
+			TF is a framework for symbolic computations and differential programming. A computational graph consisting of nodes (scalars, arrays, and tenors) and edges (operators). TF is static, unlike torch. TF allows differentiations required for optimization of generic loss functions.
+
+			Keras API is a simpler way to build TF models
+				Keras functional API provies from flexibility than Sequential API
+
+
+		* Our first auto-encoder
+			Book goes over some sample code
+
+		* Denoising autoencoders
+			input + noise(ie gaussian) --> target=input wihtout noise
+
+		* Graph autoencoders
+			- how to define reconstuction error for graphs?
+				In typical autoencoder, this is diff(input, and predicted output)
+				Intuitively, the loss function forces neighboring nodes to be close in embedding space.
+
+	--> Graph Neural Networks (GNN)
+		* Overview
+			- encoder takes input the graph structure and node features
+			- GNN relies on the each node can be described by its features and its neighborhoods.
+
+
+		* Variants of GNN
+			- For unsupervised representation learning, use encoder to embed the graph ; use the decoder to reconstructe dthe adjacnecy matrix.
+
+		* Spectral Graph Convolution
+			- has a strong mathmatical foundation and computational expensive.
+		
+		* Spatial Graph Convolution
+			- Aggregate information from spatially close neighbors; pro is weights can be shared across nodes, leading to generalization capability.
+
+			- Example: GraphSAGE
+				Neighborhood sampling: For each node, find its k-nearest neighbor
+
+				Aggregation: For each node, aggregate features describing neihborhood, using averaging, pooling, or even LSTM.
+
+				Prdiction: Each node is a simple NN which can predict using the aggregated features from neighbors. Will go over in detail in Supervied section
+
+		* Graph Convolution in Practice
+			- GNN has been implemented in TF, PyTorch and Keras.  Book uses SellarGraph, whihc is python library.
+
+
+
+
+
+// -------------------------------
+// 4 Supervised
+//	Supervised graph embedding methods
+// -------------------------------
+<-- Technical Requirements
+	networkx
+	tf
+	stellargraph
+	neural-structured-learning
+
+<-- Supervised Graph Embedding Roadmap
+	- Types (https://arxiv.org/abs/2005.03675),
+		feature based
+		
+		shallow embedding
+			label propagation
+			label spreading
+
+		regularization
+			manifold and semi-embedding
+			nerual graph learning
+
+		graph neural network: 
+			spectral: GCN
+			spatial: GraphSAGE
+
+
+<-- Feature based methods
+	- analogy: predict flower type based on petal width and sepal length. When applied to graphs, there are methods to select these features
+
+	- example: proten dataset: contains several graph, where each graph is a protein and has been labeled.
+		load protein dataset from stellar graph
+		convert stellargraph to netwrokx format
+		for each graph, extract features like
+			num_edges, average_clustering, efficiency
+		use scikit to split datasets
+		use a SVM model 
+
+
+<-- Shallow Embedding Methods
+	- Overview
+		Shallow embedding methods learns node, edge, or graph representation for a SUBSET of input data.
+
+	--> Label Propagation Algorithms
+		Given a graph with a set of labeled and unlabled nodes, the labeled nodes propage their label to their neighbors
+
+		This is a semi-supervised learning method
+
+		Skipped alot
+
+	--> Label Spreading Algorithms
+		Unlike the label propagation algo, the ORIGINAL labeled nodes can change its value.
+
+
+<-- Graph Regularization Methods
+	- Overview
+		We use network information to constrain models and enforce outputs to be smooth within neighboring nodes. Use network info to regularize the learning phase.
+
+	--> Manifold Regulraization and Semi-supervised Embeddings
+
+	--> Neural Graph Learning
+
+	--> Planetoid
+
+
+<-- Graph CNNs
+	--> Graph Classification Using GCN
+
+	--> Node classification using GraphSAGE
+
+
+
+// -------------------------------
+// 5 ML Problems Solvable with Graph
+//		Link Prediction
+//		Community detection (graph partition)
+//		Graph similarity
+// -------------------------------
+<-- Technical Requirements
+	stellargraph
+	communities
+	node2vec
+
+<-- Predicting missing links in a graph (aka graph completion) (p183)
+	--> References: 
+		https://arxiv.org/pdf/1901.03425.pdf
+
+	--> Examples;
+		recommendation, where link is current friendship.  We want to recommend friends.
+		
+		find hidden connections between criminal clusters
+
+		Can also to capture time information (temporal)
+
+
+	--> Approach: Similarity based methods
+		Idea: Estimate a similarity fuction between copy of nodes. If 2 nodes are similar, they have a high probability of being connected.
+			* (1) indexed based: calculate of an index based on neighbors given couple of nodes
+				Resource allocation index(u, v) = sum ( 1/ N(w) )
+				
+					N function computes the neighbors of v
+				
+					w is a node for both nodes and u
+				
+				Then compute the similarity between u and v using Jaccard similarity using the value for N
+
+			* (2) community based: index calculation uses info in the community for a node
+				community_common_neighbor(u, v): calucate the number of common neighbors of u and v in the community
+
+
+	--> Approach: Embedding based methods (More Advanced)
+			Model the link prediction as a supervised classification task
+
+			Given a graph
+				a node is represented by: (i) feature vector x  (ii) class label y
+
+				y = 1 if there is an edge between node u and v
+
+				Generate feature vector by using node2vec or edge2vec
+
+				Algo:
+					for each node in G, compute a node representation using node2vec
+
+					for all possible couple nodes in graph, compute embedding using edge2vec
+
+				Code:
+					https://linqs-data.soe.ucsc.edu/public/lbc/cora.tgz.
+					
+					# Step1: build a networkx graph
+					import networkx as nx 
+					import pandas as pd 
+					edgelist = pd.read_csv("cora.cites", sep='\t', header=None, names=["target", "source"]) G = nx.from_pandas_edgelist(edgelist)
+
+					# Step2: create training and test datasets. Traing and test sets should contain only a subset of real edges, but also couple of nodes that do not connected. (negative labels)
+					from stellargraph.data import EdgeSplitter 
+					edgeSplitter = EdgeSplitter(G) 
+						graph_test,		# subset of graph containg ALL NODES but SUBSET of EDGES 
+						samples_test, 	# vector, where each element contains a couple of nodes representing connected and unconned edges, ie POS and NEG samples
+						labels_test = 	# same len as sample_test, of values {0,1}
+							edgeSplitter.train_test_split(p=0.1, method="global")
+						}
+					
+					# Step3: Generate traiing dataset
+					edgeSplitter = EdgeSplitter(graph_test, G) # add graph_test so we don't replicate samples from test
+					graph_train, samples_train, labels_train = edgeSplitter.train_test_split(p=0.1, method="global")
+
+					# Step4: Generate feature vectors for node using node2vec
+					from node2vec import Node2Vec 
+					from node2vec.edges import HadamardEmbedder 
+					node2vec = Node2Vec(graph_train) 
+					model = node2vec.fit() 
+					edges_embs = HadamardEmbedder(keyed_vectors=model.wv) 
+					train_embeddings = [edges_embs[str(x[0]),str(x[1])] for x in samples_train]
+					edges_embs = HadamardEmbedder(keyed_vectors=model.wv) 
+					test_embeddings = [edges_embs[str(x[0]),str(x[1])] for x in samples_test]
+
+					# Step5: Use sklearn randomforest classifier
+					from sklearn.ensemble import RandomForestClassifier 
+					rf = RandomForestClassifier(n_estimators=1000) 
+					rf.fit(train_embeddings, labels_train);
+
+					# Step6: Infer
+					from sklearn import metrics
+					y_pred = rf.predict(test_embeddings)
+					print('Precision:', metrics.precision_score(labels_test, y_pred)) 
+					print('Recall:', metrics.recall_score(labels_test, y_pred)) 
+					print('F1-Score:', metrics.f1_score(labels_test, y_pred)) 
+					As a result, we get the following output: 
+						Precision: 0.8557114228456913 
+						Recall: 0.8102466793168881 
+						F1-Score: 0.8323586744639375
+
+					??? Why didn't we use edge2vec? BC the edge information is used as labels.
+
+
+<-- Detecting meaningul structure such as communities (p195)
+	--> Overview
+		How to identify clusters and communities in a graph.  How to partition a graph? These methodlogies can also applied to clustering and segmentation.
+
+		Two general stratagies of community detection
+			(i) Non-overlapping: each node has a 1-1 association with a community
+
+			(ii) Overlapping: node has 1-N association with a community. A person on FB can have multiple friend community
+
+	--> Via Embedding based community detection
+		Project nodes into a vector space 
+
+		Then we can apply clustering technicuqes like
+			k-means (distance based)
+			hierarchical (connectivity based)
+			Gaussian (distribution based)
+			Density based (DBSCAN: Density Based Spatial Clustering of App with Noise)
+
+		Code example of DBSCAN:
+			# Create barbell graph using networkx
+			import networkx as nx
+			G = nx.barbell_graph(m1=10, m2=4)
+
+			# Get node representations
+			from gem.embedding.hope import HOPE
+			gf = HOPE(d=4, beta=0.01)  
+			gf.learn_embedding(G)  
+			embeddings = gf.get_embedding()
+
+			# Plot clusters
+			colors = ["blue", "green", "red"] 
+			nx.draw_spring(G, node_color=[colors[label] for label in labels])
+
+
+	--> Via Spectral methods and matrix factorization
+		Spectral methods uses the connectivity property of the graph (via the adjacency matrix), and apply standard clustering algo on the eigenvector of the Laplacian matrix (WTF).  Spectral method can be viewed as a special case for the embedding methods. 
+
+		The adjency matrix can be further decomposed using matrix factorization
+
+	--> Via Probability models
+		Background
+			discriminative model: 	conditional probabiliy -> P(y|x)
+			generative model: 		joing probability -> P(y,x)
+
+		Create a generative model: (Chatbot)
+			* Represent the graph with 2 matrixes:
+				membership matrix M, of size NxK, where N=#nodes K=#communities
+				probability matrix B, of size K, representing edge probability between community i and j
+			* Fill the a_ij in adjaancy matrix 
+				a_ij is the probability of an edge
+
+						Bernouli( B(g_i, g_j))		if i<j
+				a_ij = 	0							if i=0
+						a_ji 						if i>j
+
+
+
+	--> Via Cost function minimization
+		Design a cost function that represent graph structure and penalie edges across communiites versus edges within communities. This is supervised(?)
+
+
+<-- Detecting graph similarities and graph matching (p202)
+	--> Graph embedding based methods
+		Obtain node or graph level representations via Node2Vec or DeepWalk
+		Perform some sort of similarity
+
+	--> Graph kernel based methods
+		Compute simlarty between 2 graphs based on the fucntion of their substructure.
+
+		Types of graph kernels: 
+			Keep Graph Kernels
+			Shortest path
+			Subgraphs
+
+		Then use NLP approach like CBOW and skipgrams to learn latent representations	
+
+	--> GNN based methods
+		GNN learns BOTH representation learning AND target learning JOINTLY. 
+	
+	--> Applications
+		Bioinformatics - find chemical compounds most similar to a query compound
+
+
+
+
+// -------------------------------
+// 6 Social Network Analysis
+// -------------------------------
+<-- Technical Requirements
+
+<-- Overview of the dataset
+	
+
+<-- Network Topology and community detection
+	--> Topology OVerview
+
+	--> Node Centrality
+
+	--> Community detection
+	
+<-- Embedding fo Supervised and Unsupervised 
+	--> Task preoparation
+
+	--> node2vec link prediction
+
+	--> GraphSAGE based link prediciton
+
+	--> Hand crafted features for link prediction 
+
+
+// -------------------------------
+// 7 Text Analytics And Natural Language Processing Using Graphs
+// -------------------------------
+<-- Technical Requirements
+	--> 
+
+	--> Dataset: 
+
+<-- Providing a quick overview of Dataset
+	Reuter: 
+		{ article : category }
+
+
+<-- Understanding main concepts and tools used in NLP
+	--> Language Detection
+		from langdetec import detect
+		import numpy as np
+		def get_language(text: str):
+			try:
+				return langdetec.detect(text)
+			except:
+				return np.nan
+
+		corpus['language'] = corpus['text'].apply(get_language)
+
+
+	--> Language segmentation and tokenization (using spacy or bert)
+		nlp = spacy.load('en_core_web_md')
+		parsed  = nlp(text) # parsed contains sgements and tokens
+
+		# each token is a spacy Span object that has attributes introduced by other models, like POS, dependency parser, etc..
+		for segment in parsed.sents:
+			for token in segment: 
+				print(token)
+
+	--> Part of Speech Tagger: 
+		Nouns, Verbs, ..
+		can access via the label__ attribue of the Span object
+
+	--> Named Entity Recognition (NER)
+		Location, Person, Address, Currenies
+
+		to see entitites of parsed object, use spacy's displacy method
+		displacy.render(parsed, stype='ent', jupyter=True)
+
+	--> Dependency parser:
+		relationship between the verb, subject noun, etc.. Can be useful to biuld KGs
+
+	--> Lemmatizer: reduce words to a common root.  Can be accessd via the span object lemma_
+
+	--> Stemmer: sometimes replace lemmatizer. Stemmers remove last part of words to deal with inflectional and derivational variance. Stemmer are usually based on rules and does not capture syntax and lexica info as much
+
+
+
+<-- Application 1: Creating Graphs from a copus of docuemnts
+	--> KG: (pg 237)
+		use semantic meanings of sentences to infer relationships between entities
+
+		Idea: Identify Subject Verb Object (SVO) triplet in setences.  This can be done via leveraging (i) spacy's dependency tree (ii) some rules
+		
+		from subject_object_extraction import findSVOs 
+				https://github.com/NSchrading/intro-spacy-nlp/blob/master/subject_object_extraction.py
+
+		corpus["triplets"] = corpus["parsed"].apply( lambda x: findSVOs(x, output="obj") ) edge_list = 
+
+		pd.DataFrame(
+			[ 
+				{ 
+					"id": _id, 
+					"source": source.lemma_.lower(), 
+					"target": target.lemma_.lower(), 
+					"edge": edge.lemma_.lower() 
+				} 
+				for _id, triplets in corpus["triplets"].iteritems() 
+					for (source, (edge, neg), target) in triplets 
+			]
+		)
+
+		# Create graph
+		G = nx.from_pandas_edgelist( 
+			edges, "source", 
+			"target", 
+			edge_attr=True, 
+			create_using=nx.MultiDiGraph() 
+		)
+
+		# See relationships for edge=verb="lend"
+		G=nx.from_pandas_edgelist( 
+			edges[edges["edge"]=="lend"], 
+			"source", 
+			"target", 
+			edge_attr=True, 
+			create_using=nx.MultiDiGraph() 
+		)
+
+
+
+
+	--> Bipartitie document/entity graphs (pg 240)
+		* Connect document to entities that appear in text. THIS IS WHAT I NEEDED in RIVER2
+
+		* KG are good to query against aggregated entities (ie noun, aspects, etc) But KG is not good for clustering documents semantically. KG is not good at finding indirect relationships, like similar products, that do not occur in the same setence (ie bad generalization)> To Overcome this, we will encode document in form of a bipartite graph.
+
+		* Bipartite graph in detail:
+			- For each document, extract entities. The document is represenent as a node; entities in the document are connection to thos document node. A document has 1:n relationhip to entity node. An entity can be refered by multiple document nodes.  2 Documents sharing similar entities are similar. This similarity can be used to project the bipartite graph to a particular set of nodes, ie document OR entity
+
+		* Step1: Extract relevant entity
+			Takes some thinking here; What are the most significant tokens?
+				Via TFIDF: 
+
+				Via TextRank - for text summarization: p241
+
+					Is a graph-based ranking model for text processing which can be used in order to find the most relevant sentences in text and also to find keywords.
+
+					Nodes are tokens in document; edges are creatd when 2 token occured within a window of each other
+
+					TextRank creates a network where the nodes are the single token and where the edges between them are created when tokens are within a certain window. After creating such a network, "PageRank" is used to compute the centrality for each token, which it does by providing a score that allows ranking within the document based on the centrality score. The most central nodes (up to a certain ratio, generally between 5% and 20% of the document size) are identified as candidate keywords.
+
+					from gensim.summarization import keywords
+					corpus['keywords'] = corpus['clean_text'].apply(lambda text:
+						keywords(text, words=10, split=True, scores=True, pos_filter=['NN', 'JJ'], lemmatize=True)
+					)
+
+
+				Via NER:
+					def extractEntities(ents, minValue=1, typeFilters=["GPE", "ORG", "PERSON"]): 
+						entities = pd.DataFrame(
+							[ 
+								{ 
+									"lemma": e.lemma_, 
+									"lower": e.lemma_.lower(), 
+									"type": e.label_ 
+								} for e in ents if hasattr(e, "label_") 
+							]
+						)
+						if len(entities)==0: 
+							return pd.DataFrame() 
+
+						g = entities.groupby(["type", "lower"]) 
+						summary = pd.concat(
+							{ 
+								"alias": g.apply(lambda x: x["lemma"].unique()), 
+								"count": g["lower"].count() 
+							}, 
+							axis=1
+						) 
+						return summary[summary["count"]>1].loc[pd.IndexSlice[typeFilters, :, :]] 
+
+					def getOrEmpty(parsed, _type): 
+						try:   
+							return list(
+								parsed
+								.loc[_type]["count"]
+								.sort_values(ascending=False)
+								.to_dict()
+								.items()
+							) 
+						except: 
+							return [] 
+
+					def toField(ents): 
+						typeFilters=["GPE", "ORG", "PERSON"] 
+						parsed = extractEntities(ents, 1, typeFilters) 
+						return pd.Series(
+							{_type: getOrEmpty(parsed, _type) for _type in typeFilters}
+						)
+
+					# Create entities
+					entities = corpus["parsed"].apply(lambda x: toField(x.ents))
+
+					# Add entities to corpus
+					merged = pd.concat([corpus, entities], axis=1)
+
+
+		* Step2: Create edges by looping over document-keyword(entity|keyword)
+			edges = pd.DataFrame(
+				[ 
+					{
+						"source": _id, 
+						"target": keyword, 
+						"weight": score, 
+						"type": _type
+					} 
+					for _id, row in merged.iterrows() 
+						for _type in ["keywords", "GPE", "ORG", "PERSON"] 
+							for (keyword, score) in row[_type] 
+				]
+			)
+
+		* Step3: Create bipartite graph
+			G = nx.Graph() 
+
+			G.add_nodes_from(edges["source"].unique(), bipartite=0) #document
+
+			G.add_nodes_from(edges["target"].unique(), bipartite=1) #entity/keyword
+
+			G.add_edges_from(
+				[ 
+					(row["source"], row["target"])
+					for _, row in edges.iterrows() 
+				]
+			)
+
+			G.info
+
+		* Step4a: Project bipartite graph to entity node:
+			networkx's default projected_graph have unweighted edges. To explore edges with weight, projection has a couple of methods based on Jaccard similarity based on common neighbors. Different strategies will deped on your task. We will use overlap_weighted_projected_graph
+
+			import networkx.algorithms.bipartite
+			imoirt networkx.algorithms.bipartite.projection
+
+			document_nodes = {n for n, d in G.nodes(data=True) if d["bipartite"] == 0} 
+
+			entity_nodes = {n for n, d in G.nodes(data=True) if d["bipartite"] == 1}
+
+			# exclude nodes with degree less then 5. Computation can be very expensive !!!
+			nodes_with_low_degree = {
+				n for n, d in nx.degree(G, nbunch=entity_nodes) if d<5
+			} 
+			subGraph = G.subgraph(set(G.nodes) - nodes_with_low_degree)
+
+			# Project to entity space
+			entityGraph = overlap_weighted_projected_graph( 
+				subGraph, 
+				{n for n in subGraph.nodes() if n in entity_nodes}
+			)
+			entityGraph.info 
+			# still too many nodes and edges. graph has too many degrees. graph degree = for all nodes sum( edges going into 1 node) Let's filter by edge weight
+
+			# we also want to control for meaningfulness of 2 nodes. Ex: Microsoft and US is related, but not very interesting. Therefore, we will set a edge weight threshold 
+			filteredEntityGraph = entityGraph.edge_subgraph( 
+				[ edge for edge in entityGraph.edges if entityGraph.edges[edge]["weight"]>0.05]
+			)
+
+
+		* Step4b: Analyze entity graph
+			- The largest components account for mos of the nodes
+				components = nx.connected_components(
+					filteredEntityGraph) 
+				pd.Series([len(c) for c in components])
+
+			- Global merics
+				comp = components[0] 
+				global_metrics = pd.Series(
+					{ 
+						"shortest_path": nx.average_shortest_path_length(comp), 
+						"clustering_coefficient": nx.average_clustering(comp), 
+						"global_efficiency": nx.global_efficiency(comp) 
+					}
+				)
+
+			- Try to partition the entity graph
+				Louvain algo partition the graph to maximize the denseness of a partition. https://neo4j.com/docs/graph-data-science/current/algorithms/louvain/#:~:text=It%20maximizes%20a%20modularity%20score,assignment%20of%20nodes%20to%20communities.&text=The%20Louvain%20algorithm%20is%20a,clustering%20on%20the%20condensed%20graphs.
+
+				import louvain.community 
+				communities = community.best_partition(filteredEntityGraph)
+
+			- Find similary entities nodes via node2vec
+				from node2vec import Node2Vec 
+				node2vec = Node2Vec(filteredEntityGraph, dimensions=5) 
+				model = node2vec.fit(window=10) 
+				embeddings = model.wv
+
+				# Cluster based on the node emebddings: kemans, gaussian, or DB-scan
+
+		* Step5a: Project to document space
+			documentGraph = overlap_weighted_projected_graph( G, document_nodes )
+
+			allEdgesWeights = pd.Series(
+				{ 
+					(d[0], d[1]): d[2]["weight"] for d in documentGraph.edges(data=True) 
+				}
+			)
+
+			filteredDocumentGraph = documentGraph.edge_subgraph( 
+				allEdgesWeights[(allEdgesWeights>0.6)].index.tolist() 
+			)
+
+		* Step5b: Analyze document graph
+			Degree distribution and edge weight distribution 
+			Unlike entity graph, document network is characer by a core network and several weekly connected satellites.
+
+			components = pd.Series({ ith: component for ith, component in enumerate( nx.connected_components(filteredDocumentGraph) ) })
+
+			coreDocumentGraph = nx.subgraph( filteredDocumentGraph, [node for nodes in components[components.apply(len)>8].values for node in nodes]
+
+			# Identify community
+			import community
+			communities = pd.Series(community.best_partition(filteredDocumentGraph) )
+
+			# Let's look at the entropy of the graph, what's the documen category
+			from collections import Counter 
+			def getTopicRatio(df): 
+				return Counter([label for labels in df["label"] for label in labels]) 
+			communityTopics = pd.DataFrame.from_dict(
+				{ 
+					cid: getTopicRatio(corpus.loc[comm.index]) for cid, comm in communities.groupby(communities) 
+				}, orient="index"
+			) 
+			normalizedCommunityTopics = ( communityTopics.T / communityTopics.sum(axis=1) ).T
+			# calculate entropy per cluster; each cluster has very low 
+			normalizedCommunityTopics.apply( lambda x: np.sum(-np.log(x)), axis=1)
+
+
+			# Find correlation between communities (ie document topic)
+			topicsCorrelation = normalizedCommunityTopics.corr().fillna(0)
+			topicsCorrelation[topicsCorrelation<0.8]=0 
+			topicsGraph = nx.from_pandas_adjacency(topicsCorrelation)
+
+
+
+
+<-- Application 2: Building a document topic classifiier 
+	--> Overview
+		We will know train multi-label classifiers to predict the document topic leveraging topolgoical information of the graph. 
+
+		#Let's limit our classifier to top 10 labels
+		from collections import Counter 
+		topics = Counter( 
+			[label for document_labels in corpus["label"] for label in document_labels] 
+		).most_common(10)
+		
+		#[('earn', 3964), ('acq', 2369), ('money-fx', 717), ..]
+		topicsList = [topic[0] for topic in topics] 
+		topicsSet = set(topicsList) 
+		dataset = corpus[corpus["label"].apply( lambda x: len(topicsSet.intersection(x))>0 )]
+
+
+	--> Method1: Shallow Learning Methods
+		Use embeddings extracted from the bi-partite network to train classifier, ie Random Forest classifier.
+
+		* 1 A graph where nodes that are not connected will not have useful topological information to represent. The bipartite graph created earlier address this.
+			from node2vec import Node2Vec 
+			node2vec = Node2Vec(G, dimensions=10)  	# G is bipartite graph
+			model = node2vec.fit(window=20) 		# window is used to generate walks
+			embeddings = model.wv
+
+		* 2 Save embeddings to disk.  This approach, shallow learning method, is transductive because it assumes we have all the embeddings needed we will see. In comparision, the GNN appraoch which does not make this assumption.
+			pd.DataFrame(embeddings.vectors, index=embeddings.index2word )
+				.to_pickle(f"graphEmbeddings_{dimension}_{window}.p"
+			)
+
+		* 3 Use serialized embeddings on a scikit transformer
+			from sklearn.base import BaseEstimator 
+			class EmbeddingsTransformer(BaseEstimator): 
+				def __init__(self, embeddings_file): 
+					self.embeddings_file = embeddings_file         
+				def fit(self, *args, **kwargs): 
+					self.embeddings = pd.read_pickle( self.embeddings_file) 
+					return self         
+				def transform(self, X): 
+					return self.embeddings.loc[X.index]     
+				def fit_transform(self, X, y): 
+					return self.fit().transform(X)
+
+		* 4 Helper functions: split datasets and get featuers
+			def train_test_split(corpus): 
+				indices = [index for index in corpus.index] 
+				train_idx = [idx for idx in indices if "training/" in idx] 
+				test_idx = [idx for idx in indices if "test/" in idx]
+				return corpus.loc[train_idx], corpus.loc[test_idx] 
+			train, test = train_test_split(dataset)
+
+			# Functions to get fetaures and labels
+			def get_features(corpus): 
+				return corpus["parsed"] 
+			def get_labels(corpus, topicsList=topicsList): 
+				return corpus["label"].apply( 
+					lambda labels: 
+						pd.Series( {label: 1 for label in labels} ).reindex(topicsList).fillna(0) 
+				)[topicsList] 
+
+			def get_features_and_labels(corpus): 
+				return get_features(corpus), get_labels(corpus) features, labels = get_features_and_labels(train)
+
+		* 5 Build model training pipeline
+			from sklearn.pipeline import Pipeline from sklearn.ensemble import RandomForestClassifier
+			from sklearn.multioutput import MultiOutputClassifier 
+			pipeline = Pipeline(
+				[ 
+					("embeddings", EmbeddingsTransformer( "my-place-holder") ), 
+					("model", MultiOutputClassifier( RandomForestClassifier()) ) 
+				]
+			)
+
+		* 6 Grid search
+			from glob import glob 
+			param_grid = { 
+				"embeddings__embeddings_file": 
+				glob("graphEmbeddings_*"), 
+				"model__estimator__n_estimators": [50, 100], 
+				"model__estimator__max_features": [0.2,0.3, "auto"], 
+			} 
+			grid_search = GridSearchCV( pipeline, param_grid=param_grid, cv=5, n_jobs=-1)
+
+		* 7 Train
+			model = grid_search.fit(features, labels)
+
+		* 8 Model inference & Evaluations
+			def get_predictions(model, features): 
+				return pd.DataFrame( model.predict(features), columns=topicsList, index=features.index) 
+			preds = get_predictions(model, get_features(test)) 
+			labels = get_labels(test)
+
+			from sklearn.metrics import classification_report 
+			print(classification_report(labels, preds))
+
+			Performance of the model depends on class, specifically how many dataset we have for that class.  This shows the weakness of shallow embeddings, ie transductive learnings.  This is the downside of semi-supervised training !!!
+
+
+	--> Method2: Graph Nerual Network (for a document prediciton)
+		* Apply to a heteregenous graph, where there are multiple types of nodes; each node migh have different set features. This is not just bipartite.
+
+		* Another reference: https://antonsruberts.github.io/graph/gcn/
+
+		* Step1: Build a feature for document nodes.
+			What features should I use for a node? 
+			In river2, I had item category, price, etc.. If one does not have features, on can use TF-IDF for each keyword.
+			
+			def my_spacy_tokenizer(pos_filter=["NOUN", "VERB", "PROPN"]): 
+				def tokenizer(doc): 
+					return [token.lemma_ for token in doc if (pos_filter is None) or (token.pos_ in pos_filter)] 
+				return tokenizer
+
+			cntVectorizer = TfidfVectorizer( 
+				analyzer=my_spacy_tokenizer(), max_df = 0.25, min_df = 2, max_features = 10000 
+			)
+
+			To make the approach truly inductive, we will only train the TF-IDF for the training set. This will only be applied to the test set: 
+
+			trainFeatures, trainLabels = get_features_and_labels(train) 
+			testFeatures, testLabels = get_features_and_labels(test) 
+			trainedIDF = cntVectorizer.fit_transform(trainFeatures) 
+			testIDF = cntVectorizer.transform(testFeatures)
+
+			documentFeatures = pd.concat([trainedIDF, testIDF])
+
+		* Step2: Build a feature vector for entities 
+			entityTypes = { 
+				entity: ith for ith, entity in enumerate(edges["type"].unique()) 
+			} 
+
+			entities = edges\ 
+				.groupby(["target", "type"])["source"]\ 
+				.count()\ 
+				.groupby(level=0).apply( 
+					lambda s: s.droplevel(0)\ .reindex(entityTypes.keys())\ .fillna(0))\
+			 	.unstack(level=1) 
+
+		 	entityFeatures = (entities.T / entities.sum(axis=1))
+
+		* Step3: Create instance of StellarGraph by merging document and entitie features. Filter documents that belongs to certain topics.
+			from stellargraph import StellarGraph 
+			_edges = edges[edges["source"].isin(documentFeatures.index)] 
+			nodes = {«entity»: entityFeatures, «document»: documentFeatures} 
+
+			stellarGraph = StellarGraph( 
+				nodes, _edges, 
+				target_column=»target», 
+				edge_type_column=»type» 
+			)
+
+			print(stellarGraph.info())
+
+		* Step4: Parse only the test data from the graph and put it a subgraph
+			targets = labels.reindex(documentFeatures.index).fillna(0) 
+			sampled, hold_out = train_test_split(targets) 
+			allNeighbors = np.unique(
+				[n for node in sampled.index for n in stellarGraph.neighbors(node) ]
+			) 
+			subgraph = stellarGraph.subgraph( set(sampled.index).union(allNeighbors) )
+
+
+		* Step5: Split data to training, test, and validation
+			from sklearn.model_selection import train_test_split 
+			
+			train, leftOut = train_test_split( 
+				sampled, train_size=0.1, test_size=None, random_state=42 
+			) 
+
+			validation, test = train_test_split( 
+				leftOut, train_size=0.2, test_size=None, random_state=100, 
+			)
+
+		* Step6: Since we are dealing with hetergenous graph, we need a generator which sample nodes from that specific class. We will use HinSAGENNodeGenerator to specify the node type we want.
+			from stellargraph.mapper import HinSAGENodeGenerator 
+			batch_size = 50 num_samples = [10, 5] 
+			generator = HinSAGENodeGenerator( 
+				subgraph, batch_size, num_samples, head_node_type="document"  # choose document
+			)
+
+			# Apply generator on train and validation datasets
+			train_gen = generator.flow(train.index, train, shuffle=True) 
+			val_gen = generator.flow(validation.index, validation)
+
+		* Step7: Create GraphSage model: 
+			Use HinSage
+			from stellargraph.layer import HinSAGE 
+			from tensorflow.keras import layers 
+			
+			graphsage_model = HinSAGE( layer_sizes=[32, 32], generator=generator, bias=True, dropout=0.5 ) 
+
+			x_inp, x_out = graphsage_model.in_out_tensors() 
+
+			prediction = layers.Dense( units=train.shape[1], activation="sigmoid" )(x_out)
+
+			# Compile Keras model
+			from tensorflow.keras import optimizers, losses, Model 
+			model = Model(inputs=x_inp, outputs=prediction) 
+			model.compile(
+				optimizer=optimizers.Adam(lr=0.005), loss=losses.binary_crossentropy, metrics=["acc"] 
+			)
+
+		* Step8: Train model
+			history = model.fit( train_gen, epochs=50, validation_data=val_gen, verbose=1, shuffle=False )
+
+		* Step9: Evaluate test set
+			test_gen = generator.flow(test.index, test) 
+			test_metrics = model.evaluate(test_gen) 
+			This should provide the following values: loss: 0.0933 accuracy: 0.8795
+
+		* Step10: Evaluate the best threshold to classify document by sweeping the thresholds to find highest F1-score with macro average
+			test_predictions = pd.DataFrame( 
+				model.predict(test_gen), index=test.index, columns=test.columns
+			) 
+
+			test_results = pd.concat({ "target": test, "preds": test_predictions }, axis=1) 
+
+			Then, we will compute the F1-score with a macro average (where the F1-score for the single classes are averaged) for different threshold choices: 
+
+			thresholds = [0.01,0.05,0.1,0.2,0.3,0.4,0.5] f1s = {} 
+
+			for th in thresholds: 
+				y_true = test_results["target"] 
+				y_pred = 1.0*(test_results["preds"]>th) 
+				f1s[th] = f1_score(y_true, y_pred, average="macro")     
+				pd.Series(f1s).plot()
+			#choose threahodl =0.2
+
+		* Step11: Extract classification report
+			classification_report( test_results["target"], 1.0*(test_results["preds"]>0.2)) 
+
+			F1 macro = 0.82
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------
+// 8 Graph Analysis for Credit Card
+// -------------------------------
+<-- 
+
+
+
+// -------------------------------
+// 9 Building a Data-Driven Graph Powered App
+// -------------------------------
+<-- 
+
+
+
+// -------------------------------
+// 10 Novel Trends on Graphs
+// -------------------------------
+<-- 
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
