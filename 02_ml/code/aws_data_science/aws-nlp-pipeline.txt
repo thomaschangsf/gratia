@@ -1,0 +1,601 @@
+// ----------------------------------
+// Setup
+// ----------------------------------
+<-- Adminstration
+	* videos will be stored onto https://youtube.datascienceonaws.com
+
+	* slack: https://app.slack.com/client/T017C2KU95Y/C01UKG9G4UR
+
+	* github: 
+		https://github.com/data-science-on-aws/workshop
+		https://github.com/data-science-on-aws/workshop/tree/master/oreilly_book
+
+<-- Setup account
+	https://github.com/data-science-on-aws/workshop
+
+
+	Sagemaker: 
+		https://labs.vocareum.com/main/main.php?m=clabide&mode=s&asnid=401359&stepid=401360
+
+		https://console.aws.amazon.com/sagemaker/home?region=us-east-1#/studio/d-rqkdbppgy22y
+
+		(*) https://d-rqkdbppgy22y.studio.us-east-1.sagemaker.aws/jupyter/default/lab?
+
+		open System terminal
+			git clone https://github.com/data-science-on-aws/workshop
+
+
+<-- Dataset used (Amazon review)
+	https://s3.amazonaws.com/amazon-reviews-pds/readme.html
+
+
+
+// ----------------------------------
+// Ingest And Explore Data
+// ----------------------------------
+<-- Pattern (00_quick_start/03_Visualize_Reviews_Data.ipynb)
+	* Use sql query to get df using Athena (ie BigQuery)
+		Ex: show proportion of stars per product category
+
+		statement = """
+		    SELECT product_category, year, ROUND(AVG(star_rating), 4) AS avg_rating_category
+		    FROM {}.{}
+		    WHERE product_category in ('Digital_Software', 'Gift_Card', 'Digital_Video_Games')    
+		    GROUP BY product_category, year
+		    ORDER BY year 
+		""".format(
+		    database_name, table_name
+		)
+
+		print(statement)
+
+		df = pd.read_sql(statement, conn)
+		df
+
+	* use df to dice: group by category, form dict, conv back to df, use plot
+		# Create grouped DataFrames by category and by star rating
+		grouped_category = df.groupby("product_category")
+		grouped_star = df.groupby("star_rating")
+
+		# Create sum of ratings per star rating
+		df_sum = df.groupby(["star_rating"]).sum()
+
+
+		# Create dictionary of product categories and array of star rating distribution per category
+		distribution = {}
+		count_reviews_per_star = []
+		i = 0
+		for category, ratings in grouped_category:
+		    count_reviews_per_star = []
+		    for star in ratings["star_rating"]:
+		        count_reviews_per_star.append(ratings.at[i, "count_reviews"])
+		        i = i + 1
+		    distribution[category] = count_reviews_per_star
+
+
+		 # Sort distribution by average rating per category
+		sorted_distribution = {}
+		average_star_ratings.iloc[:, 0]
+		for index, value in average_star_ratings.iloc[:, 0].items():
+		    sorted_distribution[value] = distribution[value]
+
+		# Convert back to DF    
+		df_sorted_distribution_pct = pd.DataFrame(sorted_distribution).transpose().apply(
+		    lambda num_ratings: num_ratings/sum(num_ratings)*100, axis=1
+		)
+		df_sorted_distribution_pct.columns=['5', '4', '3', '2', '1']
+								5			4			3			2			1
+			Gift_Card			87.002804	6.612962	2.116899	1.052413	3.214923
+			Digital_Video_Games	55.474417	14.031396	7.996232	5.328300	17.169654
+			Digital_Software	45.462560	16.352220	8.138396	6.749344	23.297481
+
+	* Visualize
+		categories = df_sorted_distribution_pct.index
+		# Plot bars
+		if len(categories) > 10:
+		    plt.figure(figsize=(10,10))
+		else: 
+		    plt.figure(figsize=(10,5))
+
+		df_sorted_distribution_pct.plot(kind="barh", 
+		                                stacked=True, 
+		                                edgecolor='white',
+		                                width=1.0,
+		                                color=['green', 
+		                                       'orange', 
+		                                       'blue', 
+		                                       'purple', 
+		                                       'red'])
+		plt.title("Distribution of Reviews Per Rating Per Category", 
+		          fontsize='16')
+
+		plt.legend(bbox_to_anchor=(1.04,1), 
+		           loc="upper left",
+		           labels=['5-Star Ratings', 
+		                   '4-Star Ratings', 
+		                   '3-Star Ratings', 
+		                   '2-Star Ratings', 
+		                   '1-Star Ratings'])
+		plt.xlabel("% Breakdown of Star Ratings", fontsize='14')
+		plt.gca().invert_yaxis()
+		plt.tight_layout()
+		plt.show()
+
+
+
+
+// ----------------------------------
+// Analyze Data for Bias
+// ----------------------------------
+<-- Teminology
+	Bias: An imbalance in the training data or the prediction behavior of the model across different groups, such as age or income bracket. Biases can result from the data or algorithm used to train your model. For instance, if an ML model is trained primarily on data from middle-aged individuals, it may be less accurate when making predictions involving younger and older people.
+
+	Bias metric: A function that returns numerical values indicating the level of a potential bias.
+
+	Bias report: A collection of bias metrics for a given dataset, or a combination of a dataset and a model.
+
+	Label: Feature that is the target for training a machine learning model. Referred to as the observed label or observed outcome.
+
+	Positive label values: Label values that are favorable to a demographic group observed in a sample. In other words, designates a sample as having a positive result.
+
+	Negative label values: Label values that are unfavorable to a demographic group observed in a sample. In other words, designates a sample as having a negative result.
+
+	Facet: A column or feature that contains the attributes with respect to which bias is measured.
+
+	Facet value: The feature values of attributes that bias might favor or disfavor.	
+
+
+<-- Pretraining Bias Metrics
+	Class Imbalance (CI): Measures the imbalance in the number of members between different facet values.
+
+	Difference in Proportions of Labels (DPL): Measures the imbalance of positive outcomes between different facet values.
+
+	Kullback-Leibler Divergence (KL): Measures how much the outcome distributions of different facets diverge from each other entropically.
+
+	Jensen-Shannon Divergence (JS): Measures how much the outcome distributions of different facets diverge from each other entropically.
+
+	Lp-norm (LP): Measures a p-norm difference between distinct demographic distributions of the outcomes associated with different facets in a dataset.
+
+	Total Variation Distance (TVD): Measures half of the L1-norm difference between distinct demographic distributions of the outcomes associated with different facets in a dataset.
+
+	Kolmogorov-Smirnov (KS): Measures maximum divergence between outcomes in distributions for different facets in a dataset.
+
+	Conditional Demographic Disparity (CDD): Measures the disparity of outcomes between different facets as a whole, but also by subgroups.
+
+<-- Reference
+	https://www.amazon.science/latest-news/how-clarify-helps-machine-learning-developers-detect-unintended-bias
+
+
+
+// ----------------------------------
+// Bert Feature Engineering
+// ----------------------------------
+<-- Overview and theory
+	The purpose of this notebook is to convert review text to bert embeddings
+
+	Terminologies:
+		input_ids: The id from the pre-trained BERT vocabulary that represents the token. (Padding of 0 will be used if the # of tokens is less than max_seq_length)
+
+		input_mask: Specifies which tokens BERT should pay attention to (0 or 1). Padded input_ids will have 0 in each of these vector elements.
+
+		segment_ids: Segment ids are always 0 for single-sequence tasks such as text classification. 1 is used for two-sequence tasks such as question/answer and next sentence prediction.
+
+		label_id: Label for each training row (star_rating 1 through 5)
+
+		input to model = element sum of position, segment, and token embeddings
+			embedding_position = sum(embedding_position)
+			embedding_segment = sum(embedding_segment)
+			embedding_token = sum(embedding_token)
+
+
+<-- Convert Raw Text to Bert Features using HuggingFace and TF
+	import tensorflow as tf
+	from transformers import DistilBertTokenizer # using hugginf ace
+
+	tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+
+	REVIEW_BODY_COLUMN = "review_body"
+	REVIEW_ID_COLUMN = "review_id"
+	LABEL_COLUMN = "star_rating"
+	LABEL_VALUES = [1, 2, 3, 4, 5]
+
+	label_map = {} #map label to numeric
+	for (i, label) in enumerate(LABEL_VALUES):
+	    label_map[label] = i
+
+
+	# class represents Berrt features; notice the bert terminology
+	class InputFeatures(object):
+	    def __init__(self, input_ids, input_mask, segment_ids, label_id, review_id, date, label):
+	        self.input_ids = input_ids
+	        self.input_mask = input_mask
+	        self.segment_ids = segment_ids
+	        self.label_id = label_id
+	        self.review_id = review_id
+	        self.date = date
+	        self.label = label
+
+    # A single training/test input for sequence classification.
+	class Input(object):
+	    def __init__(self, text, review_id, date, label=None):
+	        """Constructs an Input.
+	        Args:
+	          text: string. The untokenized text of the first sequence. For single
+	            sequence tasks, only this sequence must be specified.
+	          label: (Optional) string. The label of the example. This should be
+	            specified for train and dev examples, but not for test examples.
+	        """
+	        self.text = text
+	        self.review_id = review_id
+	        self.date = date
+	        self.label = label
+
+	# User Bert tranformer tokenizer; replacement of Spacy
+	def convert_input(the_input, max_seq_length):
+	    # First, we need to preprocess our data so that it matches the data BERT was trained on:
+	    # 1. Lowercase our text (if we're using a BERT lowercase model)
+	    # 2. Tokenize it (i.e. "sally says hi" -> ["sally", "says", "hi"])
+	    # 3. Break words into WordPieces (i.e. "calling" -> ["call", "##ing"])
+	    # Fortunately, the Transformers tokenizer does this for us!
+
+	    tokens = tokenizer.tokenize(the_input.text)
+	    tokens.insert(0, '[CLS]')
+	    tokens.append('[SEP]')
+	    print("**{} tokens**\n{}\n".format(len(tokens), tokens))
+
+	    encode_plus_tokens = tokenizer.encode_plus(
+	        the_input.text,
+	        pad_to_max_length=True,
+	        max_length=max_seq_length,
+	        truncation=True
+	    )
+	    
+	    # The id from the pre-trained BERT vocabulary that represents the token.  (Padding of 0 will be used if the # of tokens is less than `max_seq_length`)
+	    input_ids = encode_plus_tokens["input_ids"]
+
+	    # Specifies which tokens BERT should pay attention to (0 or 1).  Padded `input_ids` will have 0 in each of these vector elements.
+	    input_mask = encode_plus_tokens["attention_mask"]
+
+	    # Segment ids are always 0 for single-sequence tasks such as text classification.  1 is used for two-sequence tasks such as question/answer and next sentence prediction.
+	    segment_ids = [0] * max_seq_length
+
+	    # Label for each training row (`star_rating` 1 through 5)
+	    label_id = label_map[the_input.label]
+
+	    features = InputFeatures(
+	        input_ids=input_ids,
+	        input_mask=input_mask,
+	        segment_ids=segment_ids,
+	        label_id=label_id,
+	        review_id=the_input.review_id,
+	        date=the_input.date,
+	        label=the_input.label,
+	    )
+
+	    print("**{} input_ids**\n{}\n".format(len(features.input_ids), features.input_ids))
+	    print("**{} input_mask**\n{}\n".format(len(features.input_mask), features.input_mask))
+	    print("**{} segment_ids**\n{}\n".format(len(features.segment_ids), features.segment_ids))
+	    print("**label_id**\n{}\n".format(features.label_id))
+	    print("**review_id**\n{}\n".format(features.review_id))
+	    print("**date**\n{}\n".format(features.date))
+	    print("**label**\n{}\n".format(features.label))
+
+	    return features
+
+	# Map to TF Records
+	# We'll need to transform our data into a format that BERT understands.
+	# - `text` is the text we want to classify, which in this case, is the `Request` field in our Dataframe.
+	# - `label` is the star_rating label (1, 2, 3, 4, 5) for our training input data
+	def transform_inputs_to_tfrecord(inputs, output_file, max_seq_length):
+	    records = []
+	    tf_record_writer = tf.io.TFRecordWriter(output_file)
+
+	    for (input_idx, the_input) in enumerate(inputs):
+	        if input_idx % 10000 == 0:
+	            print("Writing input {} of {}\n".format(input_idx, len(inputs)))
+
+	        features = convert_input(the_input, max_seq_length)
+
+	        all_features = collections.OrderedDict()
+
+	        # Create TFRecord With input_ids, input_mask, segment_ids, and label_ids
+	        all_features["input_ids"] = tf.train.Feature(int64_list=tf.train.Int64List(value=features.input_ids))
+	        all_features["input_mask"] = tf.train.Feature(int64_list=tf.train.Int64List(value=features.input_mask))
+	        all_features["segment_ids"] = tf.train.Feature(int64_list=tf.train.Int64List(value=features.segment_ids))
+	        all_features["label_ids"] = tf.train.Feature(int64_list=tf.train.Int64List(value=[features.label_id]))
+
+	        tf_record = tf.train.Example(features=tf.train.Features(feature=all_features))
+	        tf_record_writer.write(tf_record.SerializeToString())
+
+	        # Create Record For Feature Store With All Features
+	        records.append(
+	            {
+	                "input_ids": features.input_ids,
+	                "input_mask": features.input_mask,
+	                "segment_ids": features.segment_ids,
+	                "label_id": features.label_id,
+	                "review_id": the_input.review_id,
+	                "date": the_input.date,
+	                "label": features.label,
+	            }
+	        )
+
+	    tf_record_writer.close()
+	    return records
+
+<-- See what one inference 
+		data = [
+		    [
+		        5,
+		        "ABCD12345",
+		        """I needed an "antivirus" application and know the quality of Norton products.  This was a no brainer for me and I am glad it was so simple to get.""",
+		    ]
+		]
+
+		df = pd.DataFrame(data, columns=["star_rating", "review_id", "review_body"])
+
+		# Use the InputExample class from BERT's run_classifier code to create examples from the data
+		inputs = df.apply(
+		    lambda x: Input(label=x[LABEL_COLUMN], text=x[REVIEW_BODY_COLUMN], review_id=x[REVIEW_ID_COLUMN], date=timestamp),
+		    axis=1,
+		)
+
+		max_seq_length = 64 # TWC: from our analysis (03_Visualize.ipyny), 64 tokens repsrent 80% of reviews
+		records = transform_inputs_to_tfrecord(inputs, output_file, max_seq_length)
+
+		**37 tokens**
+		['[CLS]', 'i', 'needed', 'an', '"', 'anti', '##virus', '"', 'application', 'and', 'know', 'the', 'quality', 'of', 'norton', 'products', '.', 'this', 'was', 'a', 'no', 'brain', '##er', 'for', 'me', 'and', 'i', 'am', 'glad', 'it', 'was', 'so', 'simple', 'to', 'get', '.', '[SEP]']
+
+		**64 input_ids**
+		[101, 1045, 2734, 2019, 1000, 3424, 23350, 1000, 4646, 1998, 2113, 1996, 3737, 1997, 10770, 3688, 1012, 2023, 2001, 1037, 2053, 4167, 2121, 2005, 2033, 1998, 1045, 2572, 5580, 2009, 2001, 2061, 3722, 2000, 2131, 1012, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+		**64 input_mask**
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+		**64 segment_ids** # we just have 1 sentence
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+		**label_id**
+		4
+
+
+<-- Ingest TF Records into a Feature Store
+	* pre-processing
+		records = transform_inputs_to_tfrecord(inputs, output_file, max_seq_length) # records is a TFRecord type
+		df_records = pd.DataFrame.from_dict(records)
+		df_records["split_type"] = "train"
+		df_records
+
+	* Cast to types FeatureStore (AWS) understands
+		def cast_object_to_string(data_frame):
+		    for label in data_frame.columns:
+		        if data_frame.dtypes[label] == "object":
+		            data_frame[label] = data_frame[label].astype("str").astype("string")
+		%%time
+		cast_object_to_string(df_records)
+		feature_group.ingest(data_frame=df_records, max_workers=3, wait=True)
+
+		record_identifier_value = "IJKL2345"
+		featurestore_runtime.get_record(
+		    FeatureGroupName=feature_group_name, RecordIdentifierValueAsString=record_identifier_value
+		)
+
+
+
+
+// ----------------------------------
+// Bert Fine-Tuning
+// ----------------------------------
+<-- Pre-Training vs Fine-Tuning
+	* Pre-training takes a raw dataset and learns 2 tasks: masked language model and next sentence predition, to learn embedding representation for words
+
+	* Fine-tuning uses the learned embeddings for a user task specifc task
+
+
+<-- Use distillbert; Load train, validation, test
+	import tensorflow as tf
+	from transformers import DistilBertTokenizer
+	from transformers import TFDistilBertForSequenceClassification
+	from transformers import DistilBertConfig
+
+	# Transforms TFRecord into tuple ( {input_id: _, intput_mask: _}, label)
+	def select_data_and_label_from_record(record):
+	    x = {
+	        "input_ids": record["input_ids"],
+	        "input_mask": record["input_mask"],
+	    }
+	    y = record["label_ids"]
+	    return (x, y)
+
+	# For training, we want a lot of parallel reading and shuffling.
+    # For eval, we want no shuffling and parallel reading doesn't matter.
+	def file_based_input_dataset_builder(channel, input_filenames, max_seq_length, is_training, drop_remainder):
+	    dataset = tf.data.TFRecordDataset(input_filenames)
+	    dataset = dataset.repeat(100)
+	    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+
+	    name_to_features = {
+	        "input_ids": tf.io.FixedLenFeature([max_seq_length], tf.int64),
+	        "input_mask": tf.io.FixedLenFeature([max_seq_length], tf.int64),
+	        "label_ids": tf.io.FixedLenFeature([], tf.int64),
+	    }
+
+	    def _decode_record(record, name_to_features):
+	        """Decodes a record to a TensorFlow example."""
+	        return tf.io.parse_single_example(record, name_to_features)
+
+	    dataset = dataset.apply(
+	        tf.data.experimental.map_and_batch(
+	            lambda record: _decode_record(record, name_to_features),
+	            batch_size=8,
+	            drop_remainder=drop_remainder,
+	            num_parallel_calls=tf.data.experimental.AUTOTUNE,
+	        )
+	    )
+	    dataset.cache()
+	    if is_training:
+	        dataset = dataset.shuffle(seed=42, buffer_size=10, reshuffle_each_iteration=True)
+	    return dataset
+
+	# Load test train dataset
+  	train_data = "./data-tfrecord/bert-train"
+	train_data_filenames = glob("{}/*.tfrecord".format(train_data))
+	print("train_data_filenames {}".format(train_data_filenames))
+
+	train_dataset = file_based_input_dataset_builder(
+	    channel="train", input_filenames=train_data_filenames, max_seq_length=64, is_training=True, drop_remainder=False
+	).map(select_data_and_label_from_record) # WOW, you can do map in python?
+
+
+<-- Set manual hyper parameters
+	epochs = 1
+	steps_per_epoch = 1
+	validation_steps = 1
+	test_steps = 1
+	freeze_bert_layer = True
+	learning_rate = 3e-5
+	epsilon = 1e-08
+	max_seq_length = 64
+
+
+<-- Load Pretrained Bert Model and Create Keras model architecture
+	CLASSES = [1, 2, 3, 4, 5]
+	config = DistilBertConfig.from_pretrained(
+	    "distilbert-base-uncased",
+	    num_labels=len(CLASSES),
+	    id2label={0: 1, 1: 2, 2: 3, 3: 4, 4: 5},
+	    label2id={1: 0, 2: 1, 3: 2, 4: 3, 5: 4},
+	)
+
+	# TWC: load distillbert embeddings
+	transformer_model = TFDistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", config=config)
+
+	input_ids = tf.keras.layers.Input(shape=(max_seq_length,), name="input_ids", dtype="int32")
+	input_mask = tf.keras.layers.Input(shape=(max_seq_length,), name="input_mask", dtype="int32")
+
+	embedding_layer = transformer_model.distilbert(input_ids, attention_mask=input_mask)[0]
+	X = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(50, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(
+	    embedding_layer
+	)
+	X = tf.keras.layers.GlobalMaxPool1D()(X)
+	X = tf.keras.layers.Dense(50, activation="relu")(X)
+	X = tf.keras.layers.Dropout(0.2)(X)
+	X = tf.keras.layers.Dense(len(CLASSES), activation="softmax")(X)
+
+	model = tf.keras.Model(inputs=[input_ids, input_mask], outputs=X)
+
+	for layer in model.layers[:3]:
+	    layer.trainable = not freeze_bert_layer
+
+
+<-- Setup training optimizer, metric, and loss
+	loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+	metric = tf.keras.metrics.SparseCategoricalAccuracy("accuracy")
+	optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, epsilon=epsilon)
+	model.compile(optimizer=optimizer, loss=loss, metrics=[metric])
+	model.summary()
+
+<-- Start training
+	# Setup tensorboard logging
+	callbacks = []
+	log_dir = "./tmp/tensorboard/"
+	tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+	callbacks.append(tensorboard_callback)
+
+	history = model.fit(
+	    train_dataset,
+	    shuffle=True,
+	    epochs=epochs,
+	    steps_per_epoch=steps_per_epoch,
+	    validation_data=validation_dataset,
+	    validation_steps=validation_steps,
+	    callbacks=callbacks,
+	)
+
+
+<-- Evaluate on holdout (ie test_dataset)
+	test_history = model.evaluate(test_dataset, steps=test_steps, callbacks=callbacks)
+
+
+<-- Save Model
+	tensorflow_model_dir = "./tmp/tensorflow/"
+	!mkdir -p $tensorflow_model_dir
+	model.save(tensorflow_model_dir, include_optimizer=False, overwrite=True)
+
+	!ls -al $tensorflow_model_dir
+
+	# What is this?
+	!saved_model_cli show --all --dir $tensorflow_model_dir
+
+
+<-- Predict with Saved Model
+	model = tf.keras.models.load_model(tensorflow_model_dir)
+	
+	tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+
+	sample_review_body = "This product is great."
+
+	encode_plus_tokens = tokenizer.encode_plus(
+	    sample_review_body, padding=True, max_length=max_seq_length, truncation=True, return_tensors="tf"
+	)
+
+	input_mask = encode_plus_tokens["attention_mask"]
+	# input_id : word to tokenId 
+	# input_ids=[[ 101 2023 4031 2003 2307 1012  102]] # 4 + segment + cls 
+
+
+	# Specifies which tokens BERT should pay attention to (0 or 1).  Padded `input_ids` will have 0 in each of these vector elements.
+	input_mask = encode_plus_tokens["attention_mask"]
+	# tf.Tensor([[1 1 1 1 1 1 1]], shape=(1, 7), dtype=int32)
+
+	outputs = model.predict(x=(input_ids, input_mask))
+
+	prediction = [{"label": config.id2label[item.argmax()], "score": item.max().item()} for item in outputs]
+
+	print('Predicted star_rating "{}" for review_body "{}"'.format(prediction[0]["label"], sample_review_body))
+	# Predicted star_rating "4" for review_body "This product is great."
+
+
+
+
+// ----------------------------------
+// Build End to End Bert Text Classifier Pipeline
+// ----------------------------------
+<-- Overview
+	We setup a pipeline (like Airflow) to process, train, evaluate, if condition met, register and deploy model
+
+	Interestingly, they have experiment support
+	This pipeline uses SageMaker pipeline
+
+
+
+<-- 
+
+
+
+
+// ----------------------------------
+// Analyze Model for Bias and Explainability
+// ----------------------------------
+<-- Uses Shap to explain model
+	#TODO: Read
+	https://papers.nips.cc/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf
+
+
+
+<-- 
+
+
+
+
+// ----------------------------------
+// Register and Deploy Model
+// ----------------------------------
+<-- 
+
+
+<-- 
+
+
+
+

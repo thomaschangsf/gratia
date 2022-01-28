@@ -1,0 +1,60 @@
+// -----------------------------------------------
+// References
+// -----------------------------------------------
+<-- Locations
+    GDrive | Learn | DataScience | Ray
+
+    Mac:
+        /Users/chang/Documents/dev/git/ml/ray
+        ml_tools.git/tools/ray
+
+    Web:
+        Official DOC: https://docs.ray.io/en/master/installation.html
+        https://rise.cs.berkeley.edu/blog/ray-tips-for-first-time-users/
+        Crash course: https://www.youtube.com/watch?v=2dgIEwkGYGI
+        Summit: Recommender: https://www.youtube.com/watch?v=8GTd8Y_JGTQ
+        medium: https://medium.com/distributed-computing-with-ray/ray-for-the-curious-fa0e019e17d3
+
+    Git (copies on mac @
+        https://github.com/ray-project/tutorial
+        https://github.com/anyscale/ray-summit-demo-2020
+
+
+
+// -----------------------------------------------
+// Ray-Tutorial.git
+// -----------------------------------------------
+<-- Setup
+    cd /Users/chang/Documents/dev/git/ml/ray/tutorial
+    pyenv local
+        create a local file .pyenv-version. Otherwise, pyenv will refer to global, defined in /Users/chang/.pyenv/versions
+    python -m venv venv venvRayTutorial
+    pip install --upgrade pip
+    pip3 install -U https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-2.0.0.dev0-cp37-cp37m-macosx_10_13_intel.whl
+        Find the wheel from https://docs.ray.io/en/master/installation.html
+    ray --version
+
+    alias pyVenvRayTutorial='/Users/chang/Documents/dev/git/ml/ray/tutorial/venvRayTutorial/bin/python3'
+    alias pyRT=pyVenvRayTutorial
+
+    cd /Users/chang/Documents/dev/git/ml/ray/tutorial/utilities/pong_py
+    pyRT setup.py install
+
+    pyRT -c "import ray"
+        ls venvRayTutorial/lib/python3.7/site-packages/ray
+
+    pip install -r requirements.txt
+
+    jupyter notebook -p 7001 &
+
+<-- exercise01-Introduction
+    from __future__ import absolute_import
+    from __future__ import division
+    from __future__ import print_function
+
+    import ray
+    import time
+
+    ray.init(num_cpus=4, ignore_reinit_error=True)
+        # Dashboard http://127.0.0.1:8265/#/
+        # Mac has 8 CPU cores

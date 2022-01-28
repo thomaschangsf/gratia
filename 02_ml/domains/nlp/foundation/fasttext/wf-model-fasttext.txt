@@ -1,0 +1,405 @@
+// -------------------------------
+// Step00: Background
+// -------------------------------
+<-- DF >> Panda Series >> Numpy array >> python list
+    df: pd.core.frame.DataFrame = dfGiftCard
+    series: pd.core.series.Series = df['overall']
+    np_array = series.values
+
+    from typing import List
+    lst: List = np_array.to_list()
+
+<-- DF Loc vs ILOC
+    * assuming we have dataset of
+                weather     Temperature     Wind       Humidity
+        days
+        Mon
+        Tu
+
+    * loc selects panda series via row and cols labels
+        df.loc[ ROW_LABELS, COL_LABLES]
+
+        df.loc[['Thu', 'Fri'], 'Temperature':'Humidity' ]       # Select Thu and Fri rows with column slicing
+        df.loc[ df.Humidity >50, :]                             # Select rows where humidity > 50
+        df.loc[ (df.Humidity>50) & (df.Weather == 'Shower'),:]  # Select rows with humidity and shower constraintss
+
+
+    * iloc selects panda series by integer index
+
+
+<-- Drop na
+    df.dropna(inplace=True)     #inPlace=True means df is updated.  if inplace=False, we need b=df.dropna() or we will not save the changes.
+
+<-- Pandas
+    gift_card = df_all [ df_all['product_category'] = 'Gift_Card' ]
+    gift_card['average_len']  = gift_card.apply( lambda row: len(str(row.review_text).split(" ")) )
+    gift_card['review_text'].hist(bins=numBins)
+    
+    product_ratings = df[ ['product_category', 'star_rating' ] ]
+        .groupby(['product_category'])
+        .mean()
+        .reset_index()
+   
+    df_joined = df1
+        .join(
+            df2, # can select sub columns, like this df2['col1', 'col2']
+            on = ['col1', 'col2'],
+            how = 'left'
+        )
+        # Vs merge.  
+        #  join and merge to combine 2 dataframes. The join method works best when we are joining dataframes on their indexes (though you can specify another column to join on for the left dataframe). The merge method is more versatile and allows us to specify columns besides the index to join on for both dataframes
+
+// -------------------------------
+// Step0: Prepare Data
+//  - Read raw
+//  - Rename columns
+//  - Some distribution analysis
+// -------------------------------
+    import os
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import pandas as pd
+
+<-- Read and Filter Data
+    file_path = os.path.join(os.environ['KRYLOV_DATA_DIR'], os.environ['KRYLOV_PRINCIPAL'], 'path/to/raw/data')
+
+    item_details: pd.core.frame.DataFrame = pd.read_csv(file_path, sep='\t')
+
+    #rename column
+    item_details = item_details.rename(columns={"item_is": "label"})
+
+    #Remove duplicates if item_id, auct_title, and label are the same
+    item_details = item_details.drop_duplicates(subset=['item_id', 'auct_title', 'label'], keep='last').reset_index(drop=True)
+
+    #For items with same title and item_id, but with DIFFERENT label, keep the ones with OTHER label
+    item_details = item_details.drop_duplicates(subset=['item_id', 'auc_title'], keep='last').reset_index(drop=True)
+
+    #see label distribution
+    item_details['label'].value_counts()
+
+    item_details.head(3)
+
+    # Reshuffle data
+    item_details = item_details.sample(frac=1).reset_index(drop=True)
+
+<-- Analyze Data
+    # Find average ratings across categories
+    product_ratings = df[ ['product_category', 'star_rating' ] ]
+        .groupby(['product_category'])
+        .mean()
+        .reset_index()
+    product_ratings.rename(columns={'star_rating': 'avg_star_rating}, inplace=True)
+
+    # Plot bar plots
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    barplot = sns.plot(y='product_category', x='avg_star_rating', data=product_ratings)
+    plt.xlabel('Average Rating')
+    plt.ylable('Product Category')
+    plot.show(bar_plot)
+
+    # What's the average text length ?
+    gift_card = df_all [ df_all['product_category'] = 'Gift_Card' ]
+    gift_card['average_len']  = gift_card.apply( lambda row: len(str(row.review_text).split(" ")) )
+    gift_card['review_text'].hist(bins=numBins)
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
+    plt.legend()
+
+<-- Split Data
+    # Convert exist str time column to time type and return max and min date
+    # It is imperative to sort by time, before split, to MINIMIZE data leakage.
+    item_details['auct_end_date'] = pd.to_datetime(item_details.auct_end_dt)
+    item_details = item_details.sort_values(by='auct_end_dt')
+    print(f"Time spans from {min(item_details['auct_end_dt'])} to {max(item_details['auc_end_dt'])}")
+
+    head = int(item_details.shape[0] * 0.9) # for training and test
+    tail = item_details.shape[0] - head
+    train_test = item_details.head(head)
+    oot_data = item_details.tail(tail) # HOLD OUT DATA
+
+    from sklearn.model_selection import train_test_split
+    train_ratio = 0.89 # 0.11 for test
+    train_data, test_data = train_test_split(
+            train_test, test_size=1-train_ratio, random_state=1,
+            stratify=train_test['label']  # train_data and test_data has the same proportion of labels
+        )
+
+    @dataclass
+    class DataMeta:
+        df: pd.core.frame.DataFrame
+        output_path: str
+
+    data_mapping = {
+        'train_data' : DataMeta(train_data, f'{dir_output_base}/train_data.parquet'),
+        'test_data': DataMeta(test_data, f'{dir_output_base}/test_data.parquet'),
+        'oot_data': DataMeta(oot_data, f'{dir_output_base}/oot_data.parquet')
+    }
+
+<-- Write Data
+    dir_output_base='/data'
+    for name, dMeta in src_data_mapping.items():
+        print(f' {name} : shape={dMeta.df.shape}  cnts={dMeta.df.value_counts()}')
+        table = pa.Table.from_pandas(d)
+        pq.write_table(table, dMeta.output_path)
+
+
+// -------------------------------
+// Step1: Pre-process data for FASTTEXT
+// -------------------------------
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import pandas as pq
+    import os
+    import sys
+
+<-- Read data in and normalize text with spacy
+    data_mapping = {
+        'train' : DataMeta(pd.DataFrame(), f'{dir_output_base}/train_data.parquet'),
+        'test': DataMeta(pd.DataFrame(), f'{dir_output_base}/test_data.parquet'),
+        'oot': DataMeta(pd.DataFrame(), f'{dir_output_base}/oot_data.parquet')
+    }
+
+    import spacy
+    nlp = spacy.load("en_core_web_sm", disable = ['ner', 'tagger', 'parser', 'textcat'])
+    def preprocess(sent):
+        text = nlp(sent)
+        return ' '.join(token.text for token in text).lower().replace('\n', ' ')'
+
+    for name, dMeta in data_mapping:
+        df = pd.read_parquet(dMeta.output_path, engine='pyarrow')
+
+        # rewrite label to match fasttext; keep only label and auct_Title
+        mapping_for_fasttext = {'Other': '__label__no', 'Software': __label__yes'}
+        df = df[ ['label', 'auct_title'] ].replace({'label', mapping})
+
+        # apply Spacy normalization
+        for index, row in df.iterrows():
+            df.at[index, 'auct_title'] = preprocess(row['auc_title'])
+
+        # Write back to disk
+        dMeta.output_path = dMeta.output_path.replace('parquet', 'tsv')
+        df.to_csv(dMeta.output_path, sep='\t', header=None, index=None)
+
+
+// -------------------------------
+// Step2: Train FastText
+// -------------------------------
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pandas as pq
+import os
+import sys
+
+import fasttext
+
+from sklearn.metrics import matthews_corrcoef, accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score
+from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import auc, precision_recall_curve
+import matplotlib.pyplot as plt
+
+<-- Helper functions
+    def print_results(N, p, r):
+        print("N\t" + str(N))
+        print("P@{}\t{:.3f"}.format(1,p))
+        print("R@{}\t{:.3f"}.format(1,r))
+
+    # Overwrite python eval, which enables one to run string in python code
+    def eval(trues, predictions):
+        """ Metrics we want to use for model evaluation """
+        results = {
+            "F1": f1_score(y_true=trues, y_pred=predictions, average="macro"),
+            "Precision+": precision_score(y_true=trues, y_pred=predictions, pos_label='__label__yes'),
+            "Recall+": recall_score(y_true=trues, y_pred=predictions, pos_label='__label__yes'),
+            "Precision-": precision_score(y_true=trues, y_pred=predictions, pos_label='__label__no'),
+            "Recall-": recall_score(y_true=trues, y_pred=predictions, pos_label='__label__no'),
+            "Matthews": matthews_corrcoef(y_true=trues, y_pred=predictions),
+            "Accuracy": accuracy_score(y_true=trues, y_pred=predictions)
+        }
+
+<-- Train and evaluate
+    # WOW; that was easy
+    model = fasttext.train_supervised(data_mapping['train'].metaData.output_path)
+    print(f'Model.labels={model.labels}     VocabSize={len(model.words)}')
+
+    # A more traditional and readable way to read
+    testDF = pd.read_csv(data_mapping['test'].metaData.outputPath, sep='\t', header=None)
+    pred_test = model.predict(testDF.iloc[:,1].to_list())[0] # pass into python list of all the second columns, ie title?
+    true_test = testDF.iloc[:, 0].to_list() #aka label
+    assert len(true_test) == len(pred_test)
+    eval(true_test, pred_test)
+
+    # See performance on test and OOT with some e serious magic here
+    print_results(*model.text( data_mapping['test'].metaData.output_path ) )
+    print_results(*model.text( data_mapping['oot'].metaData.output_path ) )
+
+
+<-- Training data analysis
+    train_data = pd.read_csv(data_mapping['train'].metaData.output_path, sep='\t', header=None)
+    prediction = model.predict(train_data.iloc[:, 1].to_list())
+
+    # add 2 cols: model pred, and pred confidence
+    train_data['pred'] = [item[0] for item in prediction[0]]
+    train_data['prob'] = [item[1] for item in prediction[1]]
+
+    # invert pron for label=NO
+    train_data.loc[train_data.pred == '__label__no", "prob'] = 1 - train_data['prob']
+
+    true_train=  train_data.iloc[:, 0].to_list()
+    pred_train=  train_data.iloc[:, 2].to_list()
+    prob_train=  train_data.iloc[:, 3].to_list()
+
+<-- Plot: ROC and AUC
+    TPR = model predicts pos, and actual label is pos
+    FPR = model predicts pos, and actual label is neg
+    ROC = plot of FPR vs TPR; probability curve
+    AUC = area under ROC curve
+    higher AUC --> model is better at predicting 0 for label 0 ; better at predictive 1 for label 1
+
+    fpr, tpr, thresholds = roc_curve(true_train, prob_train, pos_label='__label__yes')
+    roc_auc = auc(fpr, tpr)
+    plt.figure()
+    plt.plot(fpr, pr, label='FasText (area = %0.2f)' % roc_auc)
+    plt.plot([0,1], [0,1], 'r--', label='No Skill')
+    plt.xlm([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('FPR')
+    plt.ylabel('TPR')
+    plt.title('Training data -- True(yes) Response')
+    plt.lenged(loc="lower right")
+    plt.show()
+
+<-- Plot: Precision Recall Cure
+    Important for class imbalance distributions
+
+    precision, recall, thresholds = precision_recall_curve(true_train, prob_train, pos_label='__label__yes')
+    auc_pr = auc(recall, precision)
+    plt.figure()
+    no_skill = len([i for i in true_train if i == '__label__yes']) / len(true_train)
+    plt.plot([0,1], [no_skill, no_skill], 'r--', label='No Skill')
+    plt.plot(recall, precision, label='Fastext (area=%0.2f)' % auc_pr)
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(' Precision Recall')
+    plt.legend(loc='lower right')
+    plt.show()
+
+
+<-- Save and quantized model
+    dir_model_path = 'XYZ'
+    model.save_model(f'{dir_model_path}/model-software-base.bin')
+
+    # quantize & evaluate
+    model.quantize(input=f'{data_mapping['train'].metaData.output_path}', retrain=True)
+    print_results(*model.test(data_mapping['test'].metaData.output_path)
+    model.save_model(f'{dir_model_path}/model-software-base.quantized.bin')
+
+
+
+// -------------------------------
+// Step3: Inference
+// -------------------------------
+    import spacy
+    import fasttext
+
+    model = fasttext.load_model('PATH')
+    nlp = spacy.load("en_core_web_sm", disable = ['ner', 'tagger', 'parser', 'textcat'] )
+
+    def preprocess(sent):
+        text = nlp(sent)
+        return ' '.join(token.text for token in text).lower().replace('\n', ' ')
+
+    def predict(sent):
+        prediction = model.predict(preprocess(sent))
+        return precision[0], prediction[1][0]
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+
+
+
+// -------------------------------
+//
+// -------------------------------
+
+

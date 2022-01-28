@@ -14,3 +14,7 @@
 	path = 01_languages/python/codes/python_devops_book
 	url = git@github.com:thomaswchang/python_devops_book.git
 	branch = master
+[submodule "02_ml/code/aws_data_science/oreilly_book"]
+	path = 02_ml/code/aws_data_science/oreilly_book
+	url = git@github.com:thomaswchang/oreilly_book.git
+	branch = master

@@ -1,0 +1,161 @@
+
+
+
+// ----------------------------------------------------
+// Search Expereince (SaaS)
+// ----------------------------------------------------
+<-- Data Enrichment
+	
+	--> UMS: Unified Metadata Service: category related information, aspect, and values
+
+	--> DSBE: ranking features
+			Query.Cat
+			query average size
+			category.demand
+
+	--> Category:
+
+
+<-- Business logics and Strategies
+	seach guidance (ie shop by category)
+	Answers
+
+
+// ----------------------------------------------------
+// Backend
+// ----------------------------------------------------
+<-- QSS - Query Serving Stack (Cassini)
+	--> Responsibilities: 
+		Query Rewrite
+		Distribute to Query Nodes
+		Merge result from Query Nodes
+
+<-- Query Nodes
+	
+
+<-- Indexing
+	
+
+// ----------------------------------------------------
+// Search Science
+// ----------------------------------------------------
+<-- Query Understanding
+	--> Precision vs Recall: 
+		why not increase recall, and use a ranker with larger relevance weight? BC there is also deterministic sorts, like by price.
+
+	--> Types of query rewrites
+		- keyword rewrites: {synonyms, acronymps, stems, phrasing, stop-word-removal}
+		- strucuted data: token --> aspect=value
+		- special handking
+			null recovery: recursively drop query terms
+			site level
+			category specific
+
+	--> Pipeline
+		BehaviorLogs/Inventory/Wikis --> Offline requires --> query rewrite dictionary
+
+
+
+<-- Content Understanding
+	--> Purpose: understand item across tiles, images, aspects, semnatics, products, and their relationships, categories, price, and description
+			Item Quality: fraud/spam, image quality, price
+			Inventory: Understanding: how item relates to other items
+
+
+	--> Details: there is a doc with permission
+
+
+<-- Ranking
+	https://docs.google.com/presentation/d/1KsRmtBnmvza2vpl3ndPZ-Si3Zs9U9dFXDllbD380TeI/edit#slide=id.p60
+	https://docs.google.com/document/d/1e63RjKoYDGc7O8zCgr3jI9aFt_cjgapvXEfJO3ib3Vg/edit# (Nadia doc)
+
+	--> Architecture:
+		- Query Node: enables parallel computation where each node calculate score given (query, item)
+			Query nodes runs a 2 round ranker
+		- Aggregator combines multiple query nodes
+
+	--> Features
+		- Item:
+			* Item Metrics Accumulator: over 7 days: {sale count, sale/impressions, view cnt, viewCnt/Impression}
+			* Watch Cnt
+			* Itemprice/SimilarItemPrice
+			* ItemLeft
+		- Query/Item Features
+			* BM25 + Text
+				BM25: improvement to TF-IDF
+				Query vs Item matchs; bigram, document
+			* Demand (DSBE) --> (query, site) --> 
+				Category Demand: for this query, what is the top category scores?
+				
+				Title Demand: Item title are treated as features
+					P(relevance | item_title, query_title ) with a GBM
+					P(skip | item_title, query_title) with MLE
+
+				Price
+					for this query, what is the price bucket users are interested in?
+
+				Aspect Dmeand
+					for this query, what aspects are important
+
+			* This is used by many systems (Transformer, TLA)
+
+			* Pipeline uses Sojourner user behavior data
+
+
+		- good features has a linear relations between model output vs feature values
+
+		- Rule blender: uses behavorial data to give diversity of: price, brand, category, condition
+
+	--> ML Techniques
+		- Multiple GBMS
+			* Conversion: pair wise
+			* Relevance: point wise
+
+		- Conversion model
+			* collection: sample random traffic and collect features
+			* multi-level tarets: sale > bid > offer > add2Cart > Click > Skip
+			* offline metrics: sale rank, skip rank, price weighted variation
+
+			* key features
+				IMA: view/impressions, sales/impression
+				watch count
+				seller conversion rate
+
+		- Relevance Model 
+			* Binary classifier using GBM
+			* Data: look at top3 items per query, get featuers, and use human label data (SPOT)
+			* Offline metrics: precision/recall/f1-score
+
+			* Important Features
+				BM25 Text features
+				Position Match Text Feature
+				Title Demand
+				Price Relevance
+				Query/Item Category Comparisons
+
+
+	--> 2 Round Rankers
+		- 1st round ( I think this is a linear model )
+			* Use Lasso Regularization for feature selection (https://towardsdatascience.com/feature-selection-in-machine-learning-using-lasso-regression-7809c7c2771a)
+				linear model use this loss =  for all samples N { y_actual - y_pred+ alpha * feature_j }
+				loss function will try to remove features which does not help, since it will push loss to 0
+
+				this applies to linear models ONLY (?), where target and feature have linear relationships
+
+			* Key features:
+				sale/impression, session category demand, abs imporession cnt, query/category slae count, relevance adjustment
+
+		- 2nd round
+			* pairwise conversion model
+			* binary relevance model
+			* category demand
+			* spam detection
+			* post ranking diversification (Rule blender)
+
+
+
+
+<-- Navigation and Whole Page Optimization
+
+
+

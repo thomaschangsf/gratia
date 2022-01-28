@@ -1,0 +1,161 @@
+// ----------------------------------------
+// Insights
+// ----------------------------------------
+- Multi-Lingual (Multi-Task) Models: 
+	Inspired to Pinterest paper on multi-task visual embeddings, model each langauge as a task.  All task shares same embeddings, then each task has its own FC + softmax loss. Then scalarize the loss and use propagation. 
+
+- Inspired by Colbert (Matei Zaharia), deploy EBERT embeddings to production via Information Retreival integration. Instead of representing query and document as a singular embeddings, we represent every token in the query and document as its embedding.  To enable this, we push the document encoding offline. At inference, we do maxSim operator for every query token. MaxSim outputs the max_cosine_similarity between query_token and document token. The tokens with the largest cum sum is the most relevant document. Uses FAIS/HNSW for indexing. Github: https://github.com/stanford-futuredata/ColBERT#indexing. See notes on Google Doc: https://docs.google.com/document/d/1h8DAaZQp-XpNMbD1ZjwU_6KGep2mHdVX7LizXFGFqD4/edit?usp=sharing
+
+- Bipartite Graph for Abuse Detection: BiDyn
+
+<-- DL Day
+	microsoft tool to model caompabtility, backward compatibility
+		read best paper of software in ML
+		github.com/microsoft/responsible-ai-widgets
+
+	model assertion of stanford dawn
+		model assertion & label checking
+
+	james zhou's 
+		How data contribute to model behavior: weighted sum; leave one out 
+		human in the loop data collection: gradio
+
+
+// ----------------------------------------
+// Logistics
+// ----------------------------------------
+- Confirmation #: WMNQWXT6JQS
+	https://kdd.org/kdd2021/files/sponsors/KDD21_ProgramSummary.pdf
+- Time Converter
+	https://savvytime.com/converter/sgt-to-pst
+	(SGT is 15 hours ahead of PST) or PST 1 day behind= SGT+9hrs+!*M
+
+	Ex:
+		SGT: 8AM Aug14, Sat
+		PST: 8AM +9hr = 5PM, Aug13, Fri
+
+	SGT    	PST 
+	8AM 	5PM
+	12PM    9PM
+
+- Schedule
+	https://kdd.org/kdd2021/files/sponsors/KDD_Full_Program.pdf
+
+
+
+
+// ----------------------------------------
+// Lectures & Tutorials
+// 	https://kdd.org/kdd2021/tutorials
+// ----------------------------------------
+<-- Building Product KG (Amazon)
+	https://naixlee.github.io/Product_Knowledge_Graph_Tutorial_KDD2021/
+	slides alreay provided
+
+<-- Deep Learning on Graphs for NLP
+	https://dlg4nlp.github.io/
+	pip install graph4nlp
+
+<-- Multi-Objective Reommendations
+	Aug 14, 9AM-12PM; Singapore Time
+	https://moorecsys.github.io/
+
+<-- Data Quality for ML Tasks
+	https://researcher.watson.ibm.com/researcher/view_group_subpage.php?id=10754
+
+<-- Explainability for NLP
+	https://xainlp.github.io/kddtutorial/
+	github: https://github.com/xainlp/kddtutorial
+	slides: https://www.slideshare.net/YunyaoLi/explainability-for-natural-language-processing-249912819
+
+<-- Fake News, Disinofrmation, Propaganda
+	https://propaganda.math.unipd.it/kdd21-tutorial/
+
+
+<-- Graph Representation Learning: Methods, Appliaccations
+	Aug 14, all day
+	https://kdd2021graph.github.io/
+
+
+
+
+
+// ----------------------------------------
+// Workshops
+//	https://kdd.org/kdd2021/workshops#
+// ----------------------------------------
+<-- Data Quality Assessment for ML
+	http://data-readiness-kdd-2021.mybluemix.net/
+
+
+
+
+
+
+// ----------------------------------------
+// Invited Speakers
+//	https://kdd.org/kdd2021/speakers/ADS-invited-speakers
+// ----------------------------------------
+
+
+
+
+<-- Recent Advances in AI to Detec Online Harmful Content *
+	Hao Ma, Facebook
+
+
+MONDAY
+<-- Rethink e-Commerce Search * 
+	Haixun Wang
+	Aug 16, Monday, 10AM SGT --> 7PM PST, Sunday
+
+<-- Learning to Solve Traveling Salesman Problem (with Graph NN)
+	Xavier Bresson
+	Aug 16, 2:30PM SGT --> 11:30AM PST, Sunday
+
+
+
+
+<-- Semantic Scholar: TeraScale NLP to Accelerate Scientific Research
+	Daniel Weild, Allen Institue for AI
+	Aug 17, Tu, 2AM SGT --> Aug16, Tu, 10:45AM-11:30
+
+<-- What’s Next in Infrastructure for Machine Learning? *
+	Matei Zaharia
+	Aug16, Mon, 1:45PM-2:30 PST
+
+<-- Google Dataset Search: Building an open ecosystem for dataset Discovey
+	Natasha Noy
+	Aug 16, 2:30PM -3:15PST
+
+
+<-- Can Machines Generate Ideas
+	Ron Karidi, SparkBeyond
+	Aug 18, Wed, 12AM SGT --> Aug17, Tu, 9PM PST
+
+<-- Challenges and solutoins for industry scale 
+	Yangqing Jia, Alibaba
+	Wed, Aug 18, 10AM SGT --> Aug17, Tu, 7AM PST
+
+
+<-- Revisiting KG from a Pratical Perspective
+	Danai Koutra
+	Calibrating GNN
+	Aug18, Wed, 4:15AM SGT
+
+
+
+
+// ----------------------------------------
+// Deep Learning Days
+//	https://deeplearningday.github.io/
+//	meeting: https://virtual.2021.kdd.org/Deep_Learning_Day.html
+//	Aug 15, PST Time, 8AM, Sunday
+//  Aug 19, Th, 12AM-6AM SGT --> Aug18, Wed, 9AM-3PM
+// ----------------------------------------
+<-- Theoretical Undersanding of DL
+<-- Scaling DL
+<-- Fairness and Transparency of DL
+<-- Evaluating and Debugging DL Models
+
+

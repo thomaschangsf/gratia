@@ -1,0 +1,124 @@
+-1 Data
+    Data sampling
+        is it tied to the task
+        
+    Robust data
+        unintented correlation of label to features. 
+
+    Data augmentation
+        semi-supervised, unsupervised
+        model inference: 
+        graph label propagatinon
+
+    Data label    
+        label asserstion
+        crow turke; appian;  can be noisy
+
+    Data cleaning
+        imputation
+        duplicates
+
+
+
+0. Text Representations 
+	Bag of word model
+		voc
+
+	Embeddings
+		Intuion: Use 
+			- auximlary tasks 
+				* Language modeling: predict the next word in a sequence of words
+				* Continuous Bag of Words(CBOW): Given a sequence of words before and after, predict the missing word
+				* Skipgram: Given a word, predict neighboring words that occurs witin a window
+			- on implicily labeled data
+			- to capture statistical and linguistic properties of the corpus 
+
+        Add nots from stanford NLP
+
+
+	Sequence Models
+		sequence_with_n_tokens --> 1 vector
+			RNN/LSTM
+
+		sequence_with_n_tokens --> m labels where m<<n | App=NER
+			
+		sequence_with_n_tokens --> n | App=NeuralMachineTranslation
+			encoder-decoder 
+				the units in encoder/decoder can be consists of RNN,LSTM,GRU
+
+			To capture more info from the sequence
+				bidrectional: extend RNN,LSTM to bidirectional
+				attention:
+					help 
+						capture information for entire input
+						vanishing gradient 
+					by 
+						incorporating more "attention" to different parts of the input sequence, and not just the context vector
+
+
+
+1. BERT vs. transformer
+
+2. RNN vs. LSTM
+    RNN: sequence model
+    	RNN learns a vector representation for a sequence. We maintain a hidden vectors that represents the current state of a sequence.
+
+    	input --> output=1vector
+
+
+
+    LSTM: gates, but can be complicated to deploy and slow
+        next generation improvement on RNN
+        
+        2 inputs: current token, context from previous words
+
+3. attention
+	in a encode-decoder architecture, the input is a SINGULAR context vector.  This is non-ideal for long input sequences becuase of (i) vanishing gradient (ii) context vector loses some input sequence information. 
+
+	attenntion is the mechanism where the model selectivley attenstion to different part of the input sequence and not just the entire input.
+
+        sequence of words: basketball tennis RuntimeWarning
+        target: Warriors
+        
+        P( Warriors | token1, token2, token2) = cross entropy derived objective function
+
+4. Bag of Words
+    Bag of word is one way to extract numerical representation from texts.
+
+    In particular, 
+    	we create a vocabulary consisting of unigrams, ie whole words and no ngram
+    	we represent a word based on its histogram, term frequency, TF-IDF, word hahing
+    	But notice we discard informmation about a word's context/neigboaring word
+
+    
+5. sigmoid function; softmax function
+    y_sigmoid: f(x) = 1 / (1 + e^-x)
+    
+    y_softmax = [0- 1] =  e^z_i / sum[j->1:k] (e^z_j) ; k classes
+
+6. vanishing gradient problem
+    microbatch --> parameter update 
+    back propagate --> layer_n --> layer_n-1
+    
+    sequences of token; especially long sequence
+    
+    how to reduce:
+        RELU
+        bring feedback signal in, like the gate
+    
+        
+7.recall, precision, roc-auc curve
+       
+    confustion matrix
+                    PredictT.      PredictF
+        Actual T.     a               b         recall | TPR
+        Acutal F.     c               d.        FPR =c/(c+d)
+                    precision
+                    
+                    precision = a/ (a+c)
+                    recall = a/ (a+b)
+                    FPR = c/(c+d)
+                    
+                    ROC: TPR(recall) vs FPR(?)
+                    AUC: area under curve
+                    

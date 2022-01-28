@@ -1,0 +1,67 @@
+# -------------------------------------
+# Why StreamLit?
+# -------------------------------------
+JupyterNotebook, as a mean to share model, has several deficiencies:
+    - hard to share reproducible model code: top down execution, environments
+    - encourages prototpye code: no abstractions, unit tests, etc..
+    - cannot deploy
+    - version control is hard with Jupyter
+    - https://www.youtube.com/watch?v=7jiPeIFXb6U
+
+Ideally, we want:
+    - well factored python abstractions: model.py, load_data.py, run_script.py
+    - unit tests
+    - deployment: requirements.txt | poetry with pyenv && Dockerfile
+
+Streamlit addresses some of these concerns by:
+    - sharing the result with an app that can be deployed
+    - can decouple the code nicely
+    - using their editor of choice (VS Code on left side of image)
+
+
+# -------------------------------------
+# Running example
+# -------------------------------------
+    cd
+   export LC_ALL=C.UTF-8
+   export LANG=C.UTF-8
+       Reason: unix command line is in bytes; python uses unicode text model
+       More details: https://click.palletsprojects.com/en/7.x/python3/
+   streamlit run examples/streamlit/hello_world.py &
+
+
+
+# -------------------------------------
+# Adding Documentation via Sphinx
+# -------------------------------------
+- I created python doc via sphinx
+- Follow instructions in .bash_ebay_nlp.sh:nlpPyBayGenerateDoc
+- Instructions
+    nlpPyBaySetEnvOnMac
+    cd streamlist/docs
+    setup: sphinx-quickstart
+    update docs/source/index.rst. RST is similar to Markdown.
+    make html # will generate the docs/build/html/ output
+
+- Another sphinx example, but using markdown
+    Example: https://stackoverflow.com/questions/2471804/using-sphinx-with-markdown-instead-of-rst
+
+    nlpPyBaySetEnvOnMac
+
+    pip install recommonmark
+
+    cd streamlit
+    mkdir docs && cd docs
+    sphinx-quickstart
+
+    update conf.py
+        from recommonmark.parser import CommonMarkParser
+        source_parsers = {
+            '.md': CommonMarkParser,
+        }
+        source_suffix = ['.rst', '.md']
+
+    create docs/source/abc.md
+
+    make html
+        generate docs/build/html/abc.html

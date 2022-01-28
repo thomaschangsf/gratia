@@ -1,0 +1,490 @@
+// ---------------------------------------
+// Overview
+// ---------------------------------------
+- Course link 
+	https://www.linkedin.com/learning/advanced-nlp-with-python-for-machine-learning/leveraging-the-power-of-messy-text-data?u=2101921
+
+- Notes 
+	/Users/chang/Documents/dev/git/ml-tools/ml/nlp/nlp_advance_linkedin/nlp_advance_linkedin.txt
+
+- Lab excercises code @ /Users/chang/Documents/dev/git/ml/pyspark_linkedin
+	/Users/chang/Documents/dev/git/ml/nlp_advance_linkedin/Ex_Files_Adv_NLP_Python_ML
+
+
+// ---------------------------------------
+// 1 Review NL Basics
+// ---------------------------------------
+<-- 1.2 NLTK Setup (Natural Language Task Kit)
+	cd /Users/chang/Documents/dev/git/ml/pyspark_linkedin
+	source venvNLPAdvance/bin/activate
+	pip3 install --upgrade pip
+	pip3 install jupyter
+
+
+<-- 1.3 Reading text data into python
+	messages = pd.read_csv('../../../data/spam.csv', encoding='latin-1')
+	messages = messages.drop(labels = ["Unnamed: 2", "Unnamed: 3", "Unnamed: 4"], axis = 1)
+	messages.columns = ["label", "text"]
+
+<-- 1.4 Cleaning data
+	def remove_punct(text):
+	    text = "".join([char for char in text if char not in string.punctuation])
+	    return text
+	messages['text_clean'] = messages['text'].apply(lambda x: remove_punct(x))
+
+
+	def tokenize(text):
+	    tokens = re.split('\W+', text)
+	    return tokens
+	messages['text_tokenized'] = messages['text_clean'].apply(lambda x: tokenize(x.lower()))
+
+	import nltk
+	stopwords = nltk.corpus.stopwords.words('english')
+	def remove_stopwords(tokenized_text):    
+	    text = [word for word in tokenized_text if word not in stopwords]
+	    return text
+	messages['text_nostop'] = messages['text_tokenized'].apply(lambda x: remove_stopwords(x))
+
+
+<-- 1.5 Vectorize using TF-IDF
+	--> Concept
+		* 			Term1		Term2
+			Doc1
+			Doc2
+			  :
+			DocN
+
+			TF-Idf:
+				weight_tokeni_docj = tf_ij * log ( totalNumDocs / numDoc_with_toki )
+
+
+	--> Code
+		def clean_text(text):
+		    text = "".join([word.lower() for word in text if word not in string.punctuation])
+		    tokens = re.split('\W+', text)
+		    text = [word for word in tokens if word not in stopwords]
+		    return text
+
+		corpus = [
+		    'This is the first document.',
+		    'This document is the second document.',
+		    'And this is the third one.',
+		    'Is this the first document?',
+		]
+		vectorizer = TfidfVectorizer(analyzer=clean_text)
+
+		X = vectorizer.fit_transform(corpus)  # X_matrix = [Doc x WordToken]
+		# X_matrix = [Doc x WordToken]
+		# X.shape = [ numDocs x numTokens ]
+
+		print(f'feature_names={vectorizer.get_feature_names()}')    
+		# feature_names=['and', 'document', 'first', 'is', 'one', 'second', 'the', 'third', 'this']
+
+		X[0].toarray()  # document0
+		array([[0.        , 0.46979139, 0.58028582, 0.38408524, 0.0.        , 0.38408524, 0.        , 0.38408524]])
+
+
+
+
+
+<-- 1.6 Building a Random Forest model on top of vectorized text
+		# Continuing from X, where we vectorized the text, and label is spam or not. Document here is the text message.
+
+		X_train, X_test, y_train, y_test = train_test_split(X_features,
+                                                    messages['label'],
+                                                    test_size=0.2)
+
+        rf = RandomForestClassifier()
+		rf_model = rf.fit(X_train, y_train)
+
+		y_pred = rf_model.predict(X_test)
+
+		precision = precision_score(y_test, y_pred, pos_label='spam')
+		recall = recall_score(y_test, y_pred, pos_label='spam')
+		print('Precision: {} / Recall: {}'.format(round(precision, 3), round(recall, 3)))
+
+
+
+// ---------------------------------------
+// Word2Vec
+// ---------------------------------------
+<-- What is word2vec [word to vector]
+	A numerical representation for a word that uses semi-supervised contextual labels, where words that appear together should have more similarity measurment. 
+ 
+	Skipgram: learn the target (center) word based on the context surrounding word
+
+
+<--  What makes word2vec powerful
+	words that have common neighbors will have similar measurment. 
+
+	Reduce dimensions; before in tfidf, the length of the vector is the vocab size. 
+
+
+<-- How to implememnt word2vec
+	Load spam data; Use gensim to learn skipgram
+
+	messages = pd.read_csv('../../../data/spam.csv', encoding='latin-1')
+	messages = messages.drop(labels = ["Unnamed: 2", "Unnamed: 3", "Unnamed: 4"], axis = 1)
+	messages.columns = ["label", "text"]
+	messages.head()
+
+		label	text
+	0	ham		Go until jurong point, crazy.. Available only in bugis n great world la e buffet... Cine there g...
+	1	ham		Ok lar... Joking wif u oni...
+
+
+	messages['text_clean'] = messages['text'].apply(lambda x: gensim.utils.simple_preprocess(x))
+
+	X_train, X_test, y_train, y_test = train_test_split(messages['text_clean'], messages['label'], test_size=0.2)
+
+	w2v_model = gensim.models.Word2Vec(X_train,
+                                   size=100,
+                                   window=5,
+                                   min_count=2)
+
+    # Explore the word vector for "king" base on our trained model
+	w2v_model.wv['king']
+
+
+<-- How to prepare word vector for modleing
+	?? What is there to prepare. Don't we just use the vectors?
+	# Desired: 1 message ==> 1 embedding
+
+	# w2_vect = loop through each message in the entire list
+	# 	loop through each word in the message
+	#		if word_i is in our learned embeddings
+	#			append the word_i_embedding to array
+	w2v_vect = np.array
+		(
+			[np.array(
+				[ w2v_model.wv[i] 
+					for i in ls 
+						if i in w2v_model.wv.index_to_key
+				]
+		) for ls in X_test])
+
+	# w2_vect_avg = loop through each array of vector
+		mean()
+
+
+
+
+
+// ---------------------------------------
+// Doc2Vec
+// ---------------------------------------
+<--  What is doc2vec
+	Creates an embedding for a given setence, paragraph, or document
+
+	Averaging embeddings in word2vec is a very naive way to capture information; there may be some information loss
+
+
+<-- What makes doc2vec powerful
+
+
+<-- How to prep document vectors for modeling
+
+
+
+
+
+
+
+
+// ---------------------------------------
+// RNN
+// ---------------------------------------
+<-- What is NN
+
+<-- What is RNN
+	Learn the data's sequential nature, by using feedbacks loops that form a sense of memory
+
+
+<-- What makes RNN powerful for RNN
+	TFIDF:  
+		creates a largse sparse matrix, where the dimension is the corpus size. Alot of 0s; ineficient memory; hard for convergence
+
+	word2vec:
+		setence = average ( emebdding_word)
+		smaller dimension vectors
+		capture some elements of seuqnece with the hyper parameter window size
+
+	RNN: 
+		Does a better job capturing the window size 
+
+<-- How to implment basic RNN (with keras)
+	from keras.preprocessing.text import Tokenizer
+	from keras.preprocessing.sequence import pad_sequences
+
+	# convert token -> integer_id
+	tokenizer = Tokenizer()
+	tokenizer.fit_on_texts(X_train)
+	X_train_seq = tokenizer.texts_to_sequences(X_train)
+	X_test_seq = tokenizer.texts_to_sequences(X_test)
+	#1 setnence = [12, 66, 11, 2, ..]
+
+	#  pad
+	X_train_seq_padded = pad_sequences(X_train_seq, 50)
+	X_test_seq_padded = pad_sequences(X_test_seq, 50)
+
+	# Define model
+	model = Sequential()
+	model.add(Embedding(len(tokenizer.index_word)+1, 32))
+	model.add(LSTM(32, dropout=0, recurrent_dropout=0))
+	model.add(Dense(32, activation='relu'))
+	model.add(Dense(1, activation='sigmoid'))
+	model.summary()
+
+	model.compile(optimizer='adam',
+          loss='binary_crossentropy',
+          metrics=['accuracy', precision_m, recall_m])
+
+	# Fit the RNN model
+	history = model.fit(X_train_seq_padded, y_train, 
+        batch_size=32, epochs=10,
+        validation_data=(X_test_seq_padded, y_test))
+
+
+
+// ---------------------------------------
+// Compare Advance NLP Techniques
+// ---------------------------------------
+<-- Prep for data modeling
+	stopwords = nltk.corpus.stopwords.words('english')
+
+	messages = pd.read_csv('../../../data/spam.csv', encoding='latin-1')
+	messages = messages.drop(labels = ["Unnamed: 2", "Unnamed: 3", "Unnamed: 4"], axis = 1)
+	messages.columns = ["label", "text"]
+	messages['label'] = np.where(messages['label']=='spam', 1, 0)
+
+	def clean_text(text):
+	    text = "".join([word.lower() for word in text if word not in string.punctuation])
+	    tokens = re.split('\W+', text)
+	    text = [word for word in tokens if word not in stopwords]
+	    return text
+
+	messages['clean_text'] = messages['text'].apply(lambda x: clean_text(x))
+
+	X_train, X_test, y_train, y_test = train_test_split(messages['clean_text'], messages['label'], test_size=0.2)
+
+	# Let's save the training and test sets to ensure we are using the same data for each model
+	X_train.to_csv('../../../data/X_train.csv', index=False, header=True)
+	X_test.to_csv('../../../data/X_test.csv', index=False, header=True)
+	y_train.to_csv('../../../data/y_train.csv', index=False, header=True)
+	y_test.to_csv('../../../data/y_test.csv', index=False, header=True)
+
+	def read_data():
+		X_train = pd.read_csv('../../../data/X_train.csv')
+		X_test = pd.read_csv('../../../data/X_test.csv')
+		y_train = pd.read_csv('../../../data/y_train.csv')
+		y_test = pd.read_csv('../../../data/y_test.csv')
+
+		return X_train, X_test, y_train, y_test
+
+<-- Build a Random Tree model on TF-IDF vectors
+	X_train, X_test, y_train, y_test = read_data()
+
+	tfidf_vect = TfidfVectorizer()
+	tfidf_vect.fit(X_train['clean_text'])
+	X_train_vect = tfidf_vect.transform(X_train['clean_text'])
+	X_test_vect = tfidf_vect.transform(X_test['clean_text'])
+
+	# What words did the vectorizer learn?
+	tfidf_vect.vocabulary_
+
+	# How are these vectors stored?
+	X_test_vect[0] #Sparse vector; not very efficient
+
+
+	rf = RandomForestClassifier()
+	rf_model = rf.fit(X_train_vect, y_train.values.ravel())
+	y_pred = rf_model.predict(X_test_vect)
+
+
+	precision = precision_score(y_test, y_pred)
+	recall = recall_score(y_test, y_pred)
+	print('Precision: {} / Recall: {} / Accuracy: {}'.format(round(precision, 3), round(recall, 3), round((y_pred==y_test['label']).sum()/len(y_pred), 3)))
+	# Precision: 1.0 / Recall: 0.796 / Accuracy: 0.973
+
+
+<-- Build a model on Word2Vec
+	X_train, X_test, y_train, y_test = read_data()
+	
+	# Train a basic word2vec model
+	w2v_model = gensim.models.Word2Vec(X_train,
+                                   size=100,
+                                   window=5,
+                                   min_count=2)
+
+   	# Replace the words in each text message with the learned word vector
+	words = set(w2v_model.wv.index2word)
+	X_train_vect = np.array([np.array([w2v_model.wv[i] for i in ls if i in words])
+	                         for ls in X_train['clean_text']])
+	X_test_vect = np.array([np.array([w2v_model.wv[i] for i in ls if i in words])
+	                         for ls in X_test['clean_text']])
+
+
+	# This is really the deficiency of word2vec; average can yield information loss
+	# Average the word vectors for each sentence (and assign a vector of zeros if the model
+	# did not learn any of the words in the text message during training
+	X_train_vect_avg = []
+	for v in X_train_vect:
+	    if v.size:
+	        X_train_vect_avg.append(v.mean(axis=0))
+	    else:
+	        X_train_vect_avg.append(np.zeros(100, dtype=float))
+	        
+	X_test_vect_avg = []
+	for v in X_test_vect:
+	    if v.size:
+	        X_test_vect_avg.append(v.mean(axis=0))
+	    else:
+	        X_test_vect_avg.append(np.zeros(100, dtype=float))
+
+	# What does the unaveraged version look like?
+	X_train_vect[0]  # word --> dense vector
+
+
+	rf = RandomForestClassifier()
+	rf_model = rf.fit(X_train_vect_avg, y_train.values.ravel())
+
+
+	precision = precision_score(y_test, y_pred)
+	recall = recall_score(y_test, y_pred)
+	print('Precision: {} / Recall: {} / Accuracy: {}'.format(round(precision, 3), round(recall, 3), round((y_pred==y_test['label']).sum()/len(y_pred), 3)))
+	# Precision: 0.596 / Recall: 0.211 / Accuracy: 0.877  Wow, this sucks
+
+
+
+<-- Building a model on doc2vec
+	X_train, X_test, y_train, y_test = read_data()
+	
+	# Created TaggedDocument vectors for each text message in the training and test sets
+	tagged_docs_train = [gensim.models.doc2vec.TaggedDocument(v, [i])
+	                     for i, v in enumerate(X_train['clean_text'])]
+	tagged_docs_test = [gensim.models.doc2vec.TaggedDocument(v, [i])
+	                    for i, v in enumerate(X_test['clean_text'])]
+
+    # Train a basic doc2vec model
+	d2v_model = gensim.models.Doc2Vec(tagged_docs_train,
+	                                  vector_size=100,
+	                                  window=5,
+	                                  min_count=2)
+
+
+	# Infer the vectors to be used in training and testing
+	train_vectors = [d2v_model.infer_vector(eval(v.words)) for v in tagged_docs_train]
+	test_vectors = [d2v_model.infer_vector(eval(v.words)) for v in tagged_docs_test]                    
+
+
+	rf = RandomForestClassifier()
+	rf_model = rf.fit(train_vectors, y_train.values.ravel())
+
+	y_pred = rf_model.predict(test_vectors)
+
+	precision = precision_score(y_test, y_pred)
+	recall = recall_score(y_test, y_pred)
+	print('Precision: {} / Recall: {} / Accuracy: {}'.format(
+	    round(precision, 3), round(recall, 3), round((y_pred==y_test['label']).sum()/len(y_pred), 3)))
+    Precision: 0.771 / Recall: 0.367 / Accuracy: 0.902
+
+
+<-- Build a RNN model
+	X_train, X_test, y_train, y_test = read_data()
+
+	# Train the tokenizer and use that tokenizer to convert the sentences to sequences of numbers
+	tokenizer = Tokenizer()
+	tokenizer.fit_on_texts(X_train['clean_text'])
+	X_train_seq = tokenizer.texts_to_sequences(X_train['clean_text'])
+	X_test_seq = tokenizer.texts_to_sequences(X_test['clean_text'])
+
+	# Pad the sequences so each sequence is the same length
+	X_train_seq_padded = pad_sequences(X_train_seq, 50)
+	X_test_seq_padded = pad_sequences(X_test_seq, 50)
+
+	# Define metrics
+	import keras.backend as K
+	from keras.layers import Dense, Embedding, LSTM
+	from keras.models import Sequential
+	def recall_m(y_true, y_pred):
+	        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+	        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+	        recall = true_positives / (possible_positives + K.epsilon())
+	        return recall
+	def precision_m(y_true, y_pred):
+	        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+	        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+	        precision = true_positives / (predicted_positives + K.epsilon())
+	        return precision
+
+	# Construct our basic RNN model framework
+	model = Sequential()
+	model.add(Embedding(len(tokenizer.index_word)+1, 32))
+	model.add(LSTM(32, dropout=0, recurrent_dropout=0))
+	model.add(Dense(32, activation='relu'))
+	model.add(Dense(1, activation='sigmoid'))
+	model.summary()
+
+	# Compile the model
+	model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy', precision_m, recall_m])
+
+
+	# Fit the RNN
+	history = model.fit(X_train_seq_padded, y_train['label'], 
+	                    batch_size=32, epochs=10,
+	                    validation_data=(X_test_seq_padded, y_test))
+
+
+    #Plot basic evaluation metrics across epochs
+	import matplotlib.pyplot as plt
+	%matplotlib inline
+
+	for i in ['accuracy', 'precision_m', 'recall_m']:
+	    acc = history.history[i]
+	    val_acc = history.history['val_{}'.format(i)]
+	    epochs = range(1, len(acc) + 1)
+
+	    plt.figure()
+	    plt.plot(epochs, acc, label='Training Accuracy')
+	    plt.plot(epochs, val_acc, label='Validation Accuracy')
+	    plt.title('Results for {}'.format(i))
+	    plt.legend()
+	    plt.show()
+
+	Recall=0,9; Precision=0.9; Accuracy>0.95
+
+<-- Compare all methods using key performance metrics
+
+
+<-- Keey take aways
+
+
+
+
+
+
+
+// ---------------------------------------
+// 
+// ---------------------------------------
+
+
+
+
+
+// ---------------------------------------
+// 
+// ---------------------------------------
+
+
+
+
+
+
+// ---------------------------------------
+// 
+// ---------------------------------------
+
+
