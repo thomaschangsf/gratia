@@ -1,0 +1,287 @@
+// ---------------------------------
+// Onsite #1: ML & Research Scientist
+// ---------------------------------
+- Fasttext: 
+	how it is different from Word2Vec
+
+- How to represent a sequence of directors, movies?
+
+- Problem
+	Given movies with meta from different datastores, how do you know if 2 movies are similar? how does one cluster the movie set
+
+	Learn a movie representation
+
+	Recall
+
+	Ranking
+		P(engagement )
+
+
+// ---------------------------------
+// Onsite #2: ML & Data Engineer
+// ---------------------------------
+Design a large scale ML pipeline to match internal movie knowledge base  with externally obtained movie data. 
+
+Given this is a system design question, you can assume you already have a trained an ML model such that, 
+given a pair of Internal_Movie and External_Movie metadata, it can output a matching score :
+
+ie;  model.score(Internal_Movie, External_Movie) = score/confidence
+
+Your goal is to design an end-end system that:
+- Takes this ML model and productionize it for large usecases.
+- Makes sure the pipeline is robust and have enough checks and audits.
+- Easier to onboard new external movie sources.
+- Model is improving over time and continues to work as expected as new data flows in.
+
+
+Internal Movie Knowledge base (Millions of entries) 
++--+-------------+------------+---------------+------+
+|id|title        |release_date|director       |genre |
++--+-------------+------------+---------------+------+
+| 1| The Irishman|  2019-11-27|Martin Scorsese| Drama|
+| 2|   Wonderland|  2003-10-24|      James Cox| Drama|
+| 3|     Bird Box|  2018-12-21|   Susanne Bier|Sci-Fi
+| .........
++--+-------------+------------+---------------+------+
+
+
+External Movie Feed (Millions of entries) 
++-+--------------+------------+--------------+------+
+|id|name         |release_year|director_name |genre |
++--+-------------+------------+--------------+------+
+| a| The Irishman|        2019|    M.Scorsese| Drama|
+| b|   Wonderland|        1999|M.Winterbottom| Drama|
+| c|   Wonderlnad|        2003|         J.Cox|  null| 
+| d|     Bird Box|        2019|        S.Bier| SciFi|
+| e|     Bird Box|        2018|        B.Mann|Comedy
+| .......
++--+-------------+------------+--------------+------+
+
+
+Final output : Match External feed -> Internal knowledge base.
++-+--------------+------------+--------------+------+----------+
+|id|name         |release_year|director_name |genre |netflix_id|
++--+-------------+------------+--------------+------+----------|
+| a| The Irishman|        2019|    M.Scorsese| Drama|         1|
+| b|   Wonderland|        1999|M.Winterbottom| Drama|      null|
+| c|   Wonderland|        2003|         J.Cox|  null|         2|
+| d|     Bird Box|        2019|        S.Bier| SciFi|         3|
+| e|     Bird Box|        2018|        B.Mann|Comedy|      null|
++--+-------------+------------+--------------+------+----------+
+
+
+
+# To Production
+
+# Batch Or Stream
+# scale: millions --> distributed 
+# weekly update
+# model:   python scikit  or JVM friendly
+
+# Airflow/Scheduler
+  control/read config over time
+
+
+# JOB on spark mechanism
+#    config : model_name, model_version
+#      source_Locatio
+#      model meta info, threshold
+#      dest_location
+
+#    model --> pull into model
+
+# partition( drama, year) N2
+
+# clustering
+#    movie emebdding --> clusters
+
+# candidates
+    feature --> 
+    
+    
+# Logging model performance
+    1) prediction,  label
+    
+    2) # predictions classes, # unsures
+    
+    3) sample some number of rows --> give to labeler
+          model-X --> Binary classifcation --> confusion matrix, precision.recall
+          
+          
+          
+
+
+// --------------------------------
+// Interview Feedback
+// --------------------------------
+Datapipeline
+	Set the Whole Vision
+
+	Data Quality
+
+	Continuous Improvement
+
+
+Fasttext
+	Embeddings: drill deeper the reasoning 
+		alternative
+
+
+
+Good Breadth but dig deeper
+
+
+Entity Resolution
+	ML Depth
+		high level --> loss function --> optmization/bias and skews
+
+	Systems
+		pick a topic and drill down
+
+
+
+
+// ----------------------------
+<-- What to expect
+2 Rounds
+	1st round: 4 conversations, 
+		45 minutes with Colby, ask about vision and fit
+			prioritization
+			how to handle ambiguity
+			how to learn, and thought leadership
+
+		30 minute: With Jen 
+			Culture pieces
+			Netflex cluture; what resonates what doesn't
+			Ask question
+			Past experience and application
+
+		ML Modeling in depth 45min
+
+		ML System 45 min
+
+
+		Good signals
+			understand your communication and orgainziation of thoughts
+			DL depth by designing a real life business 
+
+			has coderpad and drwing
+
+			how to come up with decision, pros and cons
+
+
+
+// ---------------------------------
+// Behavorial
+// ---------------------------------
+- Tell me a time when you did not agree with your manager
+	See if you have any subordination issue
+
+- What is an example of something you worked on that you were really prod of
+	To see if you can make a difference?
+	This is a gift, because it focuses on your strength
+		strenghts: use successful project within a team context
+
+- How do you stay organized? How do you handle competing tasks or projects?
+	Management skill to priortize competeinig items;
+		identify high risk and dependency early
+			risk: design mitigation
+			dependency: clarify early and scope
+
+		parallel tasks
+
+		define, prune scopes and version releases
+
+		reuse / recycle
+
+
+	show you are good listener, go above an beyond to get the job done
+
+- What has been your biggest challegne at owrk
+	To see how you handle challenge situation
+	Show recent, relevant projects
+	Emphasize a team player, and listen
+
+- Describe a time when your revevei a difficult feedback (ie manager)
+	Emphases ability to listen, and act in a diplomatic way to reach best compromose.  
+
+	In explaination, show some dramatic issue.
+
+	Show you are not blaming, try to show the positive or learning
+
+	are you coahable? 
+
+- Tell me you work experience an how you would make Netflix even better than it is (Synonm: Why Netflix)
+	I want to work at Netflix for the following 3 reasons
+
+	Emphsize what's in for netflix and also for yourself
+
+- What do you think about our culture memo?
+	Understand how it is different from other high performing companies
+
+
+
+- Good Signals
+	data driven
+
+	be able to work with over people/teams and also self-driven
+
+	minimal direction
+
+	how to priortize:
+
+
+
+
+
+
+
+
+// ------------------------
+// Netflix Culture Deck
+// ------------------------
+-Values are what we values:
+	judgement, communication, impact, curiosity, innovation, courage, passion, honesty, selflessness
+
+- High Performance
+	we are sports team; not a family. Do no measure how many hours or how much they are in the office
+
+
+- People over process
+	Freedom & Responsibility
+		short term optimization kills long term innovation.
+			tolerate short term loss for long term goals
+
+- Context, not control
+	work on incredible people on hard problem
+
+	incredible people do not want to be micro-managed; give context
+		versus product 1 "geniuses" dictating the direction; Apply Way
+		
+		versus process; dummy proof; IBM way
+
+		better to have a set of distributed thinkers
+
+	Make as less decision as possible
+
+
+- Highly Algined and Loosely Aligned
+	Teamwork effectiveness dpenonds on performance poeple and good context. Goal needs to be big and fast and flexible
+
+	Live the values; be authentic; values be your self
+
+	Need feedback when action is not consistent the values; 
+		tune the values or say my action
+
+		Honest, but respectful. Seek first to understand, be curious. Take both side and understand
+
+- Pay top of market
+	One outstanding employee get more done and costs less than 2 employees. 
+
+	Stay Nimble;  Rolling Forecast; Technology moves fast; If compnay is compliant to 1 year plan.
+
+	No Cash Bonuses
+
+- Promotions and Development
+	We develop poeple by giving htem oppotunity to develop themselves, by surrounding them with stunning collegaues and giving them big challenges to work on.  Career planning is not for us.
+

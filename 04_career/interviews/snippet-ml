@@ -1,0 +1,123 @@
+// --------------------------
+// Principles
+// --------------------------
+	Clarify, Clarify
+		edge cases
+		collobartive and back&forth
+
+	Multiple Approaches -> Tradeoffs & Remediation;   Edge cases
+
+	Timebox youself; 
+		give initial response and ask if they want me elaborate
+		watch out for rabbit holes
+
+	Clarify -> Establish Baseline -> Quantify -> Backup
+		(1) Clarify key definitions, goals, defition of good enough
+		(2) 
+		(3) Quantify
+			- learning curve
+		(4) If not good enough
+			- data collection: more, 
+			- feature
+			- model
+				* linear -> SVM -> MART -> NN
+				* cost function: convex? local minima -> global minima 
+				* regularization: L1, L2, decrease complexity
+			- metric
+
+
+// --------------------------
+// 1 Business Product Metrics
+// --------------------------
+	Clarify Product & Purpose
+	Define Success Metrics
+		AARRR: acqusition|activation|retention|revenue|referral
+
+
+// --------------------------
+/ 2 Data
+// --------------------------
+	Increase data
+		Source
+		Sampling (also for class imbalance)
+			Bootstrap
+			Class
+
+// --------------------------
+// 3 ML Problem Framing
+// --------------------------
+	Regression/Classification/Unsuperivsed
+
+	Metrics
+		Regression: MAE, MSE
+		Classification: Accuracy | Precision Recall | ROC
+
+	Model
+		ex:
+			linear/mart/dl
+			recommendations: collaborative/content based
+		tradeoffs
+
+	Feature Engineering
+		Numbers
+			Counts:	Binarization | Quantization
+			Log Transform: Changes Distribution 
+			Scaling: Min-Max | Standadization | L2Norm
+		Categorical
+			Low Cardinal: OneHot | Dummy 
+			High Cardignal: feature hashing | bin_count
+		Interaction Feature
+		Text
+			Vector: Bag of Words | Ngram
+			Filter: stop words | frequency based | stemming
+			Parsing -> Tokenization -> Chunking/POS
+			Scale bow: TFIDF
+			embeddings
+		Automatic
+			Deep Learning model	
+	Deeper
+		Softmax vs entropy vs logistic regression
+			softmax: normalizaiton layer uses softmax fn 
+				P(b|a) = exp(x_a * w_b) /  for b' in V exp(x_a * w_b' )
+				a = x_a * w_b = [0..1]; sum(all classes) = 1
+
+			entropy : loss function
+				H(y, p) = [- y_i * p(y_i) for i in samples ]
+				y_i = supervised label
+				p(y_i) = from softmax of the most likely class
+
+			logistic regression: linear model uses signoimd fn
+				p(y=1| x; theta) = 1/ (1 + e^-t)
+				theta = parameter we are learning
+				t = theta_0 + theta_1 * x; where x = input 
+
+// ----------------------------
+// Deployment
+// ----------------------------
+	How to use model & score?
+		tradeoffs; 
+		edge cases: 
+			cold starts
+				non-ml solution: UI/demand-aggregation
+				make prediction with static features or feature imputation
+
+	Feature Store
+		source: batch + NRT
+		consumption: batch + NRT 
+
+	Monitoring
+		Feature Drift
+		Model performance
+		When to retrain?
+
+	A/B Tests
+		Design A/B Tests
+			pick top&guardrail metrics -> thresholds -> sample_size&length -> assign groups
+		Pitfalls
+			Non-Normality
+			Multiple tests
+			Network effects
+			Novelty and Primary effect
+			Long term health: AB test holdout
+
+		Diagnose Metric Changes

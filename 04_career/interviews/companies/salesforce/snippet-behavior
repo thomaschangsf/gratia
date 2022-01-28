@@ -1,0 +1,172 @@
+// --------------------------------------
+// Questions
+// --------------------------------------
+Who are the best engineers you worked with and why?
+	indirectly show your value system
+
+
+Would other people follow you?
+	very strong signal
+
+Who amoung your peers/reports get promoted and why?
+
+what is your career arc?
+	why you choose is important
+
+
+
+
+// --------------------------------------
+// Salesforce
+// --------------------------------------
+
+
+
+
+
+// --------------------------------------
+// Google (leadership interview)
+// --------------------------------------
+- Last Minute Hints
+	Please be sure to use real code (don't rely on pseudocode); code should work in a compiler.
+	
+	Before you begin to find your solution, take a moment to explain your approach and how you plan to solve the problem.
+	
+	Ask clarifying questions if you don't fully understand the problem/question being asked.
+	
+	Check to make sure your code works - run through at least one or two examples to check for correctness.
+	
+	Be receptive to any feedback from the interviewer.
+	
+	If you can't come up with the most refined solutions right away, you can work on the brute force solution and improve on it - but let the interviewer know that's what you're doing.
+	
+	If you're making assumptions as you reason through the problem, be sure to communicate those assumptions to your interviewer.
+	
+	Interviewers will be looking at the approach to answering questions as much as the answer: 
+
+
+
+- Leadership
+	* show examples how you resolved complex situations? 
+		deal challanges in a BALANCED way?
+	* How do you 
+		influence
+			data, trust, and empathy
+		solve problems
+			understand problem: why? context of problem
+			
+			show good judgments: 
+				scoping feature
+				risks: anticipate likely issues and mitigate
+				appropriate metrics: OKR
+			
+			execution: quality, efficiency, iterate, reuse
+
+			delivering values: communicate, evengalize, 
+
+
+			strove for appropriate level of simplicity
+			iterative: walk -> run
+
+		drive improvement?
+			measurable: datapipeline with metrics
+			
+		take ownership, but at same time move quickly?
+			datapipeline with good engineering practice, design
+
+	* Working with people & team
+		* how to develp and retain team members?
+		* address skill gap or personality conflict?
+		* ensure team is dversve and inclusive?
+
+- Googleyness
+	* comfort with ambiguity
+		How do you handle ambiguous situations?
+		How do you handle projects without defined end dates?
+		How to priortize multiple projects of varying complexity?
+		How to balance process vs execution (flexibility and process in an agile environment)
+
+	* bias for action
+	* collobarative
+	* how would you support a team to help them navigate tough challenges in a non-hierarchical team environment. What is your leadership style?
+
+- Deliver Results
+	* examples where you were the end-to-end ownder? 
+		How do you evaluate the success and failure of project?
+		
+		[TODO] Strategies for handling competing visions on how to execute a project?
+			adrate guidance with search and ads team: 2 teams in 2 divisions are tasked with delivering adrate guidance.
+				meetings: brainstorm approaches,
+				in the end, 1 team creaed the algo; 
+					minimize waste of resource; maximize cooperation
+		
+		[TODO] How to use data to effectively move critical decisiosn forward and mesure impact
+
+
+
+
+
+// --------------------------------------
+// DoorDash
+// --------------------------------------
+[Mission Statement]
+	We’re working to empower local communities and in turn, creating new ways for people to earn, work, and thrive. We believe in delivering goods by connecting people and possibility.
+
+	Vision: Our vision is to build a last-mile logistics platform, create a set of services to grow a merchant’s sales, and produce a membership program that connects consumers to the merchants that sustain them
+
+- Why doordash?
+	Mission: feels good I am helping local communiites to earn and people who can't get
+	Opportunity: last mile logistics + blend digital with real world
+
+- We are leaders
+	* Be an owner: no problem is too big or small or outside of scope. We all jump in and help
+		ex: guided search
+		ex: NLP deployment
+
+	* Dream big, start small: start small ideas and help them grow using data and rigorous testing.  We show evidence and double down
+		ex: Layout optimization: select the type and number of modules on the search page to maximize search efficiency and revenue
+			price vs item attributes: cond, leafcat, title, aspects
+			data: 
+				feasiblity study: rolex watch, data coverage; removed aspects
+				A/B tests: 
+
+	* We choose optimism, especially when things are tough
+
+- We are learners
+	* Seek truth: not afraid to dig in and uncover truth. Use data and common sense to solve problems
+		Ex: CPS 
+
+	* 1% better every day: seek not perfection, but constant improvement. Look for opportunity, share feedback, and celebrate growth mindset
+		Ex: Look for opportunity: wanted to learn about NLP and Deep Learning bc...  	
+			In companies: I advocate for projects to work with people I admire and can learn from. Seek mentorship 1-1 meeting with our tech lead.
+			Outside: Took Stanford classes, personal projects
+
+	* Consumer obsessed, not competitor ofocused
+		Ex: internal customers
+			M2M
+		Ex: adRate Guidance
+
+- We are doers
+	* Bias for action. Launch solutions quickly, test them, and make changes because growth compunds
+		Ex: 
+		Ex: Adrate guidance, CPS
+
+	* Operate at lowest level of details. 
+		Ex: Very hands on.
+			NLP model --> deployment --> understand K8s resource and yaml line by line; and its interdependencies
+
+	* not either or: We don't get sucked into false dichotomies; we engineer a way to do both
+		Ex: NLP R&D and deployment
+
+- We are one team
+	* Make room at the table: We're committed to growing and empowering more diverse and inclusive community.  
+		Ex: In meetings I make it a point to get people's feedback and thoughts. Ex: team activities, Friday Boba
+
+	* Think outside of the room: strive to be as inclusive
+
+	* One team, one fight:
+		Ex: ad and search.  Shared search know how with ad team. Mentored team member from the ads team. Jointed their meetings. 
+
+		Ex: NLP deployment
+
+

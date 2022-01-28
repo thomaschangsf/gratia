@@ -1,0 +1,118 @@
+# import requests
+# import mysql.connector
+# import pandas as pd
+
+# Given a 2-dimensional grid of characters, and a dictionary, find all words in the grid that also appear in the dictionary. A word can be formed by traversing the grid by going #either left, right, top, or down, but NOT diagonal. Also, a single grid position can not be used more than once in a word.
+#  For instance, in the following 3x3 grid, with a dictionary of [ CAT, COPY, ASK, SOS ]
+# C A T
+# O S K
+# P Y U
+
+# The first 3 words can be found in the grid, but not SOS, since one cannot use S twice.
+
+def find_words(dict_word, matrix):
+    num_rows = len(matrix)
+    num_cols = len(matrix[0])
+    print(num_rows, num_cols)
+    
+    valid_words = []
+    visited = [[0] * num_cols ] * num_rows
+    
+    def b_within_bound(i, j):
+        return 0<= i < num_rows and 0<= j < num_cols
+
+    def traverse(i, j, curr_candidate):
+        print("i=", i, "j=", j, curr_candidate)
+        
+        if visited[i][j] == 1:
+            return
+        
+        visited[i][j] = 1                
+        
+        # check if word in valid
+        if curr_candidate.lower() in dict_word:
+            valid_words.append(curr_candidate)
+        
+        for r, c in [(i-1, j), (i+1, j), (i, j-1), (i, j+1) ]:
+            print("\tr=", r, "c=", c)
+            if b_within_bound(r,c):
+               traverse(r, c, curr_candidate + matrix[r][c])
+
+        return
+    
+    #for i in range(num_rows):
+    #    for j in range(num_cols):
+    traverse(0, 1, matrix[0][1] )                
+
+    return valid_words
+
+
+# TC1: example
+m = [["C", "A", "T"], ["O", "S", "K"], ["P", "Y", "U"] ] 
+words_dict = set(["cat", "copy", "ask", "sos"])
+print(find_words(words_dict, m))
+
+# TC2: empty matrix
+# TC3: 1 row matrix
+# TC4: 1 col matrix
+# TC5: empty dict
+# TC6: emtpy matrix
+
+
+m = [
+    ["C", "A", "T"], 
+    ["O", "S", "K"], 
+    ["P", "Y", "U"] 
+    ] 
+            C
+    CA              CO
+
+CAT    CAS      cop     cos
+
+
+m = [["C", "A", "T"], ["O", "S", "K"], ["P", "Y", "U"] ] 
+num_rows = len(m)
+num_cols = len(m[0])
+visited = [[0] * num_cols ] * num_rows
+
+def traverse(candidate, i, j, paths):
+    if (i, j) in paths:
+        return
+    candidate = candidate + m[i][j]
+    paths.append( (i, j))
+    print(i, j, candidate, paths)
+    if 0<=i+1<num_rows and 0<=j<num_cols:
+        traverse(candidate, i+1, j, paths)
+    if 0<=i<num_rows and 0<=j+1<num_cols:
+        traverse(candidate, i, j+1, paths)
+    if 0<=i<num_rows and 0<=j-1<num_cols:
+        traverse(candidate, i, j-1, paths)
+    if 0<=i-1<num_rows and 0<=j<num_cols:
+        traverse(candidate, i-1, j, paths)
+    candidate = candidate[:-1]
+    paths.pop()
+    print('\tAfter_POP:', candidate, paths)
+
+
+3visited does not work because the 4 iteration cycles need to be indepedent form each other; visited 
+m = [["C", "A", "T"], ["O", "S", "K"], ["P", "Y", "U"] ] 
+num_rows = len(m)
+num_cols = len(m[0])
+visited = [[False] * num_cols ] * num_rows
+
+def traverse(i, j, paths):
+    if (i, j) in paths:
+        return
+    paths.append( (i, j))
+    candidate = ''.join([m[i][j] for i, j in paths])
+    print(i, j, candidate, paths)
+    for r, c in [(i+1, j), (i, j+1), (i, j-1), (i-1, j)]:
+        if 0<=r<num_rows and c<=b<num_cols:
+            traverse(r, c, paths)
+    paths.pop()
+    print('\tAfter_POP:', candidate[:-1], paths)
+
+
+
+
+traverse(0, 0, [])

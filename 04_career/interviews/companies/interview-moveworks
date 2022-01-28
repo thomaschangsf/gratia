@@ -1,0 +1,326 @@
+https://moveworks.zoom.us/j/98261108410?pwd=NHZnM0lLQm5DcnI2ZittaThVcHlFUT09
+
+// ------------------------------------------------------------
+// 9:00AM (PST) - 9:45AM (PST): Cody Kala (Software) [Design Interview]
+// ------------------------------------------------------------
+ML Operations
+route tickets
+
+Feature: 
+	open phone recommend 1 app
+		scale works at; 100 million device
+
+	requirements
+		P(click | App )
+			analytic
+
+		1 billion inference request
+			100 million device
+
+	modeling
+		logistic / tree
+		feature
+			entities
+				user
+					age 
+					user_interest: score | cnt
+					P(click)
+					country
+				app
+					demand
+				categorical vs numerical
+
+	systems
+		offline
+						time of day		f1
+				App	
+		
+				fragile
+
+		online inference
+						user_features		app_features
+			model
+
+	train lifecycle
+		data
+			feature conversion logic
+			
+		training
+			repeatability
+			experiments
+			metrics:
+				ml
+				success look like: online, success metrics
+
+		deploy
+			model registry
+
+
+	ml models per customer
+		orchestration still works 
+
+
+
+// ------------------------------------------------------------
+// 10:00AM (PST) - 10:50AM (PST): Alexander Lazar (Software Engineer) [Coding Interview] Infra
+// ------------------------------------------------------------
+	https://app.codility.com/test/CL-7GKH36-73P/
+
+	Given ["aba", ]
+		- compute proportion per word
+		- choose the word(s) with lowest proportions
+		- remove chars from words not in prev_chr
+
+		s = set()
+		s.update("hi")
+		s.update("Tom")
+		
+		* Do better on the reading and planning. Perhaps write down the pseudocode
+
+
+from collections import Counter, defaultdict
+def min_cnt(words):
+	def compute_proportion(word):
+		proportions_to_word = []
+		counts = Counter(word)
+		total = sum(counts.values())
+		proportions = map(lamda kv: v[1]/total, counter.items())
+		return reduce(lambda p1, p2: p1 + p2)
+	
+	proportion_to_words = defaultdict(list)
+	for word in words:
+		proprtion_to_words[compute_proportion(word)].append(word)
+	
+	max_words = max(proportion_to_words)[1]
+
+	prev_chars = set()
+	for word in words:
+		if word not in max_words:
+			prevchars.update(word)
+
+	solution = []
+	for max_word in max_words:
+		for c in max_word:
+			if c not in prev_chars:
+				solution.append(c)
+		solution.append(" ")
+
+	return ''.join(solution)
+
+
+
+
+
+
+
+// ------------------------------------------------------------
+// 11:00AM (PST) - 11:30AM (PST): Hujia Yu (Software) [Moveworks Product Demo]
+// ------------------------------------------------------------
+	Domain Classification: HR, IT
+
+	Intent
+		Privision IT
+
+	Entities Resolution
+		Person
+
+		File ticket
+
+	Skills
+		10 skills: capability/feature of bot
+		ask
+
+		NLU --> bidding across skills (auctioneer) --> skills
+			DirectLink = fnc(entity, domain, entities)
+			separation of utility
+		
+		Form filling skills
+		
+		Enterprise search
+
+	Dialogue card
+		design conversation flow
+
+			Disambiguation
+
+			confirmation card
+
+	Given multiple menu
+		fuzzy match
+
+	Switching topics and domain
+
+
+
+
+// ------------------------------------------------------------
+// 1:00PM (PST) - 1:50PM (PST): Michael Young (Software) [Coding Interview]
+// ------------------------------------------------------------
+- https://app.codility.com/test/CL-CZMSW4-YUX/
+
+# LEARNINGS: 
+# 	Read carefully (requireemnts)
+#	Work through examples; if you don't do it up front, you will likely end up fixing code later; coming up with the algorithm is more than just the skeleton, and high level constructs. To come up with algo, work through the example . Come up with recurrence states, and then work through step by step. ACT LIKE A ROBOT.
+	
+# Big O: what is the branch --> determines the base --> if m--> m ^ b
+#	recursion: exponential
+def solution(S, B):
+    solutions = []
+
+    # pine applepenapple  
+    # i  j 4   i       
+    # BigO = m^n
+    #    m = branch = number of words breaks in sequence
+
+    prev_visited = set() #next time include memoization early on
+    def recurse(i, candidate):
+        if i >= len(S):
+            solutions.append(candidate[1:])
+            return
+        j = 0
+        next_pos = i
+        while next_pos < len(S):
+            next_pos = i+j+1
+            if S[i:next_pos] in B:
+                recurse(next_pos, candidate + " " + S[i:next_pos])                
+            j +=1
+        return False
+
+    recurse(0, "")
+    return solutions
+
+
+// ------------------------------------------------------------
+// 2:00PM (PST) - 2:45PM (PST): Vaibhav Nivargi (CTO)
+// ------------------------------------------------------------
+	- common treads:
+		extract value from via automation & algorithms
+		curiosity, learn, and evolve
+
+	- Where do you envision the IT chatbot evolving in the next 3 years?
+		- What are the road blocks to bring resolution rate from 40% to 60%? 
+			data?  
+			NLU?
+
+			wider adoption and market penetration?
+			
+	- culture: engineer led culture.  
+		Can you elaborate on what this means at Moveworks?
+
+	- Forbes article: extract small data --> 
+		transfer learning: Bert
+			IT for Bert ?
+		collective learning: collect different companies data
+			legal/confidential 
+		meta learning: use meta data/context (ie location, role, department)
+
+	- Burn Rate: given $, how long does it go without requiring another infusion?
+
+
+	- LEARNINGS
+		who are the best engineers you worked with ?
+			indirectly shows your value system
+
+		would other people follow you?
+			very strong signal
+
+		what is your career arc?
+			deep analysis for why you choose the what you choose
+
+		who among your peers gets promoted and how does impact you?
+
+
+
+// ------------------------------------------------------------
+// 3:00PM (PST) - 3:45PM (PST): Jayadev Bhaskaran (Software) [Design Interview]
+//	Search Ranking
+// ------------------------------------------------------------
+Design: Jeopardy
+	Given a fact, answer with a questtion.
+
+input:
+	fact
+
+output:
+	question: who | what | where
+data:
+	wiki pedia
+
+	simplifying: P(relevance | wikipedia, fact)
+		point-wise
+
+		P (domain | fact)
+			subset_wiki_pdeia
+
+reasonable systems
+
+P (domain | fact)
+		feature: data_entity locaaction text_presentation
+
+
+P P(relevance | wikipedia, fact)
+	relevance: 
+		human label 
+		
+		3rd open party source
+
+		heuristic
+		
+		implicit human behavor
+
+		wikipedia
+			meta_dataa
+
+	model	
+		tree / emsemble
+
+		DL
+
+	deploy
+		mrr
+		map
+		ndcg
+
+
+Recall Set (fact, )
+	filter wiki_pedia --> ( )
+		fact --> 1k top
+		10k -> 1k
+
+V0  --> V1
+	data loggin --> 
+		analysis --> category 
+
+		data
+			sampling
+			featureing enginner
+			introduce signals
+		feature
+
+		model
+
+
+System performace
+	latency
+		lower latency
+
+	memory lekage
+	throughput
+
+
+
+Question: what do you do at a deeper level?
+	training models --< features --> hyperparameters
+		working with stake hlders --< come with new problems
+		annotation team: labeling team, design UI
+		inspecting moodel output
+			data augmentation, feature
+			model robust
+
+		UX product team
+
+	2 search meetings
+	interal forms meetings
+
+
+

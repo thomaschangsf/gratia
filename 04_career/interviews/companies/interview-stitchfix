@@ -1,0 +1,171 @@
+https://mail.google.com/mail/u/0/#inbox/FMfcgzGllMMSzGKjXsQZhJlzcXsRNjGd
+
+https://stitchfix.zoom.us/j/99931103832
+
+// -------------------------
+// Coding
+// 3-3:45
+// https://coderpad.io/3W3FEQGJ
+//	 Ahmad Mahmoody, Data Scientist- Damien Martin
+// -------------------------
+
+
+
+
+
+
+
+// -------------------------
+// Experience & Partnership
+//  4-5 PM
+//	Chris Rinaldi, Data Scientist- Xiyu Peng
+// -------------------------
+
+
+
+
+
+
+// -------------------------
+// Problem Framing
+// 	9:15-10
+//	Millie Huang, Data Scientist- Javad Hashemi
+// -------------------------
+- Transform Business problem to ML problem(s)
+	* Business
+		what does success look like?
+			competing goals
+			metrics
+		learnings
+			current implements:
+				previous ML attemps?
+			v0 version?
+
+	* Data
+		labels?
+		source: how/what is collected
+
+		exploration
+			class imbalances
+			feature coverage
+
+		data preparation/cleaning
+		class imbalances | sampling 
+
+	* ML problem
+
+	* Depoyment
+		online vs batch/offline
+		A/B tests
+
+- 100 fix=1 client 
+		random stylist
+
+	PM: what are you 
+		boolean: fix satisfaction = boolean
+		keep rate: 1 metric: how many kept
+
+		customer reviews: sentiment:
+
+	data 
+		stylist:
+			historical: suggestions and score
+			no enriched: score_per_style
+
+		user:
+			historical data
+			on boarding
+			style 
+
+		item
+
+		fix
+
+
+	offline metric
+
+
+	modeling
+		supervised 
+		
+		P ( satisifed | fix, stylist)
+			linear
+
+			tree
+
+		PRO:
+			greedy: 
+				stylist:
+				fixes
+
+			con:
+				diversity
+
+	monitoring
+		production
+			online use case
+
+
+		monitoring
+
+
+
+// -------------------------
+// ML Coding
+// 10-11
+// Agnieszka Szefer, Data Scientist- Albert Yuen
+// -------------------------
+
+
+
+
+// -------------------------
+// System Design
+//	12-1PM
+//	Elijah ben Izzy, Data Scientist- Vasanth Kalingeri
+// -------------------------
+DS models: recomm to platform
+
+	client_id --> model --> sku_item_id
+
+	current: jupyter notebook --> CSV --> sql --> DB
+		training	-->  inference --> sql
+
+	automation: airflow
+
+	refactoring flow
+
+	A clientId_A
+		features				
+
+	B clientId_B
+
+
+model is success 
+	pink jeans --> empty recommendations
+
+	Increasing new criteria
+
+	Debugagability system: 
+		replicate
+		client
+
+	validation loss
+
+
+
+Elijah ben Izzy
+	public cloud: AWS 
+	home built: microservice, 
+		worker approach
+	tec
+		S3, Hive, Spark, Kafka
+
+ML and Platform
+	build platform
+
+	ML 
+		infra (partnership: design )
+
+
+

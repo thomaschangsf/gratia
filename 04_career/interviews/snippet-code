@@ -1,0 +1,200 @@
+// --------------------------------
+// Softmax vs Entropy vs Logistic Regression
+// --------------------------------
+Entropy: cost function
+	H(y, p) = [ -y_i * p(y_i) for i in in samples ]
+		p = learned function
+
+Softmax: Normalization layer
+	P(b|a) = exp( x_a * w_b) / for b' in V exp(x_a * w_b' )
+	V = batch set
+	x = features 
+	w = weights
+
+Logistic Regression: Model
+	P(y=1 | x; theta ) = 1 / (1 + e^-t)
+		x = feature
+		theta = learned parameter = vector
+		t = theta_0 + theta_1 *x
+
+
+		
+// --------------------------------
+// Traversal: BFS
+// --------------------------------
+	def bfs(root):
+		queue = deque(root)
+		while queue:
+			for _ in range(len(queue)):
+				curr = queue.popleft()
+				#BL
+				if curr.left: queue.append(node.left)
+				if curr.right: queue.append(node.right)
+// --------------------------------
+// Traversal: DFS
+// --------------------------------
+<-- Via Iterative
+	def dfs_iterative_inorder(root):
+		stack = deque()
+		curr = root
+		while True:
+			if curr:
+				stack.append(curr)
+				curr = curr.left
+			elif stack:
+				curr = stack.pop()
+				# BL with curr
+				curr = curr.right
+			else:
+				break
+<-- Via recursion
+	def inorder(root):
+		if root:
+			inorder(root.left)
+			#BL on root
+			inorder(root.right)
+
+	def dfs(node, states): #ie LCA
+		if not node: return
+		states.append(node.val)
+		if node.left: dfs(node.left)
+		if node.right: dfs(node.right)
+
+	def dfs_with_backtrack(i,j, candidate, result):
+		if base:
+			update result
+		else:
+			for k in range(i, j):
+				candidate.append( input[k] )
+				dfs_with_backtrack(k, j, candidate)
+				candidate.pop() # backtrack
+
+// --------------------------------
+// Graphs
+// --------------------------------
+	def topological_sort(edges):
+		from collections import defaultdict
+		indegrees = defaultdict(int) 	# for each child, how many incoming edeges
+		graph = defaultdict(list)		# graph[parent] = [children]
+		for parent, child in edges:
+			graph[parent].append(child)
+		sources = deque( for parent in graph.keys() if parent not in indegrees)
+		while sources:
+			curr = sources.popleft()
+			#update state
+			for child in graph[curr]:
+				indegree[child] -= 1
+				if indegree[child] == 0:
+					sources.append(child)
+		return state
+	def traverse_grid(i, j, paths):
+	    if (i, j) in paths: return
+	    paths.append( (i, j))
+	    candidate = ''.join([m[i][j] for i, j in paths])
+	    for r, c in [(i+1, j), (i, j+1), (i, j-1), (i-1, j)]:
+	        if 0<=r<num_rows and c<=b<num_cols:
+	            traverse(r, c, paths)
+	    paths.pop()
+	def traverse_graph_doordash(n, m, max_capacity, beauty, u, v, t)
+		# graph = build_graph(u, v, t)
+		visited = [0] * n
+		max_beauty = float('-inf')
+		def recurse(curr_node, capacity, beauty_collected, path):
+			nonlocal max_beauty
+			if capacity < 0: return
+			if curr_node == 0: # hotel
+				max_beauty = max(beauty_collected, max_beauty)
+			visited[curr_node] += 1
+			for next_node, cost in graph[curr_node]:
+				if capacity >= cost:
+					added_beauty = beauty[next_node] if visited[nexted_node] == 0 else 0
+					path.append(next_node)
+					recurse(next_node, capacity-cost, beaut_collected+added_beauty, path)
+					visited[next_node] -= 1
+					path.pop()
+		recurse(0, max_t, beauty[0], [])
+		return max_beauty
+// --------------------------------
+// Sliding Window (1ptr): Constraint: state within contiguous element
+// --------------------------------
+	def sliding_window(arr, num_contiguous):
+		curr_state, i = init_state, 0
+		for i in range(len(arr)):
+			update state
+			if i >= max_contiguous: #check constraint
+				result = max(result, curr_state)
+				i += 1 
+// --------------------------------
+// 2 Pointers: Constraint: state var in a sorted List
+// --------------------------------
+	def two_pointers(arr, target):
+		i,j = 0, len(arr)
+		while i< j:
+			state = fn(i, j)
+			if state == target: return Y
+			elif fnc(state,target): i+=1
+			else: j+=1
+// --------------------------------
+// Subset/Permutation
+// --------------------------------
+	def subset(nums):
+		subsets = [ [] ]
+		for i in range(len(nums)): # Loop through nums
+			start_index = BL
+			for j in range(start_index, len(subsets)):# Loop through previous sols
+				copy = list(subset[j])
+				subsets.append(copy.append(nums[i]))
+	def permutation(nums):
+		permutations = deque( [] )
+		for i in range(len(nums)): # Loop through nums
+			for j in range(len(permutations)): # Loop through previous permutations
+				curr_candidate = permutations.popleft()
+				for k in range(len(curr_canddiate)+1): # Loop through elements of 1 permutation
+					new_perm = list(curr_candidate)
+					new_perm.insert(k, nums[i])	# insert new value into index
+					if len(new_perm) == len(nums):
+						update result
+					else:
+						permutations.append(new_perm)
+// --------------------------------
+// Merge Intervals
+// --------------------------------
+	def b_intersects(a, b):
+		return (b.start <= a.start <= b.end) or (a.start <= b.start <= a.end)
+	def merge(intervals):
+		intervals.sort(key=lambda t: t.start)
+		start, end = intervals[0].start, intervals[0].end
+		for i in range(1, len(intervals)):
+			if intervals[i].start < end:
+				end = interval[i].end
+			else:
+				start = min(start, intervals[i].start)
+				end = max(end, intervals[i].end)
+				merged.append(Interval(start, end))
+// --------------------------------
+// Linked list
+// --------------------------------
+def delete(lst, value):
+	# edge cases: empty list, first element, etc..
+	curr_node = lst.get_head()
+	prev_node = None
+	while curr_node:
+		if curr_node == value:
+			prev_node.next = curr_node.ntext
+			curr_node.next = None
+			break
+		prev_node = curr_node
+		curr_node = curr_node.next
+def reverse(head):
+	prev, curr
+// --------------------------------
+// Heap
+// --------------------------------
+def find_top_k_elemnts(lst, k):
+	max_elements = []
+	for i in range(k):
+		heapq.heappush(max_elemnts, lst[i])
+	for j in range(k, len(lst)):
+		if lst[j] > max_elements[0]:
+			heapq.heappush(max_elements, list[j])
+	return sorted(max_elements, reverse=True)

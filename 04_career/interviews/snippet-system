@@ -1,0 +1,258 @@
+Transform abstract to a framework
+	Gather Key requirements
+		Nonfunctional: performance, latency, legal, maintaibility, capacity, geographic, cross DC considerations
+
+		Latency
+			--> parallelism and concurrency 
+			--> caching: application server, CDN, cache invalidation
+			--> computation vs IO bound
+				computation: parallel
+				IO Bound: 
+
+		Robustness
+			--> push to offline
+
+		Maintainable
+	
+
+	
+	Identify key components (1-2)
+		technoligies (relational or NOSQL)
+		share stories
+
+	Identify tradeoffs of different decisions
+
+	Deep dive into a specific subproblem AND/OR what process to arrive
+
+	Problem solve
+		interviewer measure your problem solving approach 
+			ask clarifying questions
+			challenge your own design, and be ready to justify
+			listen: interview may give hings, do not ignore
+
+
+Domains
+	- Machine Learning Design
+		* Open ended, so you can dive deeper into solution
+		* Components: 
+			Data analysis, Use cases, users, scalability, limitations, and tradeoff
+		* Speciaity
+			search, recommendation/ranking systems, NLP
+
+	- Systems
+		* Distributed System Design relates to problems of coordination between autonomous system 
+			cross task coordination, communication, synchronization, and failure modes
+		* System design: problem constrained to a single execution
+			Managing complexity of large bodies of software
+
+
+
+
+
+
+
+
+// ---------------------------------
+// Concurrency
+// ---------------------------------
+Mutex (aka lock)
+	mutex = Lock()
+	mutex.acquire()  -->  mutex.release()
+
+Semaphore
+	Ex1: Producer Consumer vs Publish/Subscribe
+		# Shared Memory variables
+		CAPACITY = 10
+		buffer = [-1 for i in range(CAPACITY)]
+		in_index = 0
+		out_index = 0
+		 
+		# Declaring Semaphores
+		mutex = threading.Semaphore() # guards the buffer var
+		empty = threading.Semaphore(CAPACITY) # num of empty slots in buffer
+		full = threading.Semaphore(0) # num of full slots that are full
+
+		# Producer Thread Class
+		class Producer(threading.Thread):
+		  def run(self):
+		    global CAPACITY, buffer, in_index, out_index
+		    global mutex, empty, full
+
+		    items_produced = 0
+		    counter = 0
+		    while items_produced < 20:
+		      empty.acquire() # decrement resource count; any non-owning thread can call acquire or release
+		      mutex.acquire()
+		       
+		      counter += 1
+		      buffer[in_index] = counter
+		      in_index = (in_index + 1)%CAPACITY
+		      print("Producer produced : ", counter)
+		       
+		      mutex.release()
+		      full.release() # increment resource count
+		       
+		      items_produced += 1
+
+		# Consumer Thread Class
+		class Consumer(threading.Thread):
+		  def run(self):
+		     
+		    global CAPACITY, buffer, in_index, out_index, counter
+		    global mutex, empty, full
+		     
+		    items_consumed = 0
+		     
+		    while items_consumed < 20:
+		      full.acquire()
+		      mutex.acquire()
+		       
+		      item = buffer[out_index]
+		      out_index = (out_index + 1)%CAPACITY
+		      print("Consumer consumed item : ", item)
+		       
+		      mutex.release()
+		       empty.release()      
+		        
+		      time.sleep(2.5)
+		       
+		      items_consumed += 1
+
+
+	Ex: 2 semaphore used as a singaling construct for producer(finder) consumer(print)
+		from threading import Thread, Semaphore
+		def printer_thread():
+		    global primeHolder
+		    while not exitProg:
+		        # wait for a prime number to become available
+		        sem_find.acquire()
+		        # print the prime number
+		        print(primeHolder)
+		        primeHolder = None
+		        # let the finder thread find the next prime
+		        sem_print.release()
+
+		def finder_thread():
+		    global primeHolder
+		    i = 1
+		    while not exitProg:
+		        while not is_prime(i):
+		            i += 1
+		        primeHolder = i
+		        # let the printer thread know we have a prime available for printing
+		        sem_find.release()
+		        # wait for printer thread to complete printing the prime number
+		        sem_print.acquire()
+		        i += 1
+
+		# semaphore guardes the shared variable primeHolder
+		sem_find, sem_print = Semaphore(0), Semaphore(0) 
+		primeHolder, exitProg = None, False
+
+		printerThread = Thread(target=printer_thread)
+		printerThread.start()
+		finderThread = Thread(target=finder_thread)
+		finderThread.start()
+
+		# Let the threads run for 3 seconds
+		time.sleep(3)
+		exitProg = True
+		printerThread.join()
+		finderThread.join()
+
+
+Monitor
+	Pseduocode:
+		void efficient_waiting_function() {
+		    mutex.acquire()
+		    while (predicate == false) {
+		      cond_var.wait()
+		    }
+		    // Do something useful
+		    mutex.release()     
+		}
+
+		void change_predicate() {
+		    mutex.acquire()
+		    set predicate = true
+		    cond_var.signal()
+		    mutex.release()
+		}
+	Code
+		from threading import Condition, Thread
+
+		flag = False # aka predicate
+		cond_var = Condition()
+
+		def child_task():
+		    cond_var.acquire()
+		    if (flag == False):
+		        cond_var.wait(1)
+		    # don't forget to release the lock    
+		    cond_var.release()
+		thread = Thread(target=child_task)
+		thread.start()
+
+	time.sleep(3)
+	thread.join()
+
+
+High Level Construct: ThreadPool Executor: Create + Delte Threads
+	from concurrent.futures import ThreadPoolExecutor
+	from threading import current_thread
+
+	def say_hi(item):
+	    print("\nhi " + str(item) + " executed in thread id " + current_thread().name, flush=True)
+
+	if __name__ == '__main__':
+	    executor = ThreadPoolExecutor(max_workers=10)
+	    lst = list()
+	    for i in range(1, 10):
+	        lst.append(executor.submit(say_hi, "guest" + str(i)))
+	    for future in lst:
+	        future.result()
+
+	    executor.shutdown()
+
+High Level Construct: Future : Abstraction to Represent Deferred Computatoin
+	Practical: chain a sequence of parallel construction
+	
+	Code
+		from concurrent.futures import ThreadPoolExecutor
+		
+		def square(item):
+		    # simulate a computation by sleeping
+		    time.sleep(5)
+		    return item * item
+
+		if __name__ == '__main__':
+		    executor = ThreadPoolExecutor(max_workers=10)
+		    future = executor.submit(square, 7)
+		    print("is running : " + str(future.running()))
+		    print("is done : " + str(future.done()))
+		    print("Attempt to cancel : " + str(future.cancel()))
+		    print("is cancelled : " + str(future.cancelled()))
+		    executor.shutdown()
+
+Async.io : python module for concurrency: multiple threads on 1 CPU
+
+
+// -----------------------------------
+// Classes
+// -----------------------------------
+class SomeAbstraction:
+    pass  # lots of stuff - but missing something
+
+class Mixin1:
+    def something(self):
+        pass  # one implementation
+
+class Mixin2:
+    def something(self):
+        pass  # another
+
+class Concrete1(SomeAbstraction, Mixin1):
+    pass
+
+class Concrete2(SomeAbstraction, Mixin2):
+    pass

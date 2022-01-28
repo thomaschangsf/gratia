@@ -1,0 +1,360 @@
+https://meet.google.com/uyt-zijj-yyi
+
+https://hr.gs/43e9eda
+
+Job description
+	https://jobs.smartrecruiters.com/Twitter2/743999799202235-senior-machine-learning-engineer-trends-and-events-discovery
+
+
+Refer to Twitter V1
+
+// -----------------------------------------------------------------------------------
+// 1/25 Tuesday  		11:45 AM - 12:00 PM (Pacific Time US & Canada) Greet with Coordinator 
+// -----------------------------------------------------------------------------------
+
+
+
+
+// -----------------------------------------------------------------------------------
+// 1/25 Tuesday  		12:00 PM - 1:00 PM (Pacific Time US & Canada) Pooja Consul, <Botong Sui> (Coding) 
+// -----------------------------------------------------------------------------------
+
+
+
+# There is a Twitter account called “supervocalic” that retweets Tweets that have exactly one of each vowel: A, E, I, O, and U.
+ 
+# How would you implement a method that checks whether a Tweet is "supervocalic"? As an example, "education" is supervocalic, while "how are you this evening" and "hello world" are not.
+ 
+# input: any chars ASCII
+
+# Clarification
+#   - case sensitive: A a --> 1 or 2
+#   -       A a E e I i O o U u. --> (a A) --> a
+
+#   - empt string -
+
+#   Pseudo code
+#       c = Counter(input)
+#       all ( value == 1 iterate c that are vowels )
+
+#       run time: O(n)  ; space : O(n) - optimize-> O(6)
+
+def is_supervocalic(sentence):
+    vowels_cnt = {'a': 0, 'e':0, 'i':0,  'o': 0, 'u':0 }
+
+    for ch in sentence:
+        curr_ch = ch.lower()
+        if curr_ch in vowels_cnt.keys():
+            vowels_cnt[curr_ch] += 1
+            
+    return  all ( [cnt == 1 for cnt in vowels_cnt.values() ] )
+
+#print(is_supervocalic("education"))
+#print(is_supervocalic("A a E e I i O o U u"))
+
+
+# Let's say you have a long list of Tweets. How would you identify all pairs(2) of Tweets that, when combined, are "supervocalic"?
+ 
+#  input: list<Tweets>: ("edu", "cation", "cation x") # N tweets, M is the length of the tweet
+#       Brute force: N2 * M
+ 
+#  output: {"edu", "cation"}, {"edu", "cation x"} 
+
+# ("edu", "cation", "cation x")
+#   edu --> 
+#           Method1: eu --> candidates that has both aio --> M = length of tweet 
+#                check(aio) for j in range(i, N) 
+
+#           Method2: lookup = {'a' --> [cation, ], 'e': [] } --> O(1)
+
+#           Method3: lookup_v2 = {'aio' --> [cation, ], 'eu': [edu] } --> O(1)  --> order:5!   non_order: (n-k)
+
+#   Step1: Build lookup map     --> O(N) ; space= (n-k)
+#   Step2: Iterate through tweets
+#               i=0:    eu --> look iou form pairs by using map ; if exist --> supervolic --> update result array
+
+from collections import defaultdict, Counter
+def find_pairs(tweets):
+    result = []
+    vowels = set('a', 'e', 'i', 'o', 'u')
+    lookup_map = defaultdict(list)
+ 
+    def extract_vowels(word):
+        key = ''.join([ ch.lower() for ch in tweet if ch in vowels ])
+        key.sort()
+        return key
+    
+    # Step1: Build lookup map 
+    for tweet in tweets:
+        # key = 'eu'
+        # key = 'aa'. --> edge case to consider below 
+        key = extract_vowels(tweet)
+        cnts = Counter(key)
+        if all ( cnt==1 for cnt in cnts.values() ):
+            lookup_map[key].append(tweet)
+        
+    # Step2: Iterate through tweets
+    for tweet in tweets:
+        key = extract_vowels(tweet)
+        cnts = Counter(key)
+        if all ( cnt==1 for cnt in cnts.values() ):
+            # missing vowels
+            missing_vowels = vowels.diff(set(key)) # key = ['a', 'a']
+            missing_vowels.sort()
+            
+            if missing_vowels in lookup_map.keys():
+                for matching_pair in lookup_map[missing_vowels]:
+                    # output: [ {"edu", "cation"}, {"edu", "cation x"} ]
+                    result.append( [tweet, matching_pair] ) 
+            
+    return result
+
+
+
+// -----------------------------------------------------------------------------------
+// 1/25 Tuesday  		1:00 PM - 2:00 PM (Pacific Time US & Canada) Shamanth Kumar, <Fin Vermehr> (Applied ML)
+// -----------------------------------------------------------------------------------
+
+
+
+
+# You are working on a binary classification problem: given 50 continuous numerical features, predict a binary target:  (x1, x2, ..., x50) -> y.  You have access to 1 million rows of labeled data.
+
+# Suppose that you are given a pre-trained model ŷ = f(x) , and asked to roll out the model to production.  You notice that production data is sometimes corrupt:  the value of x1 can be sometimes missing (i.e. having value NaN) with a very small chance.
+
+# Without retraining a different model, how do you deal with the data corruption? I.e. how to make predictions using f when the value of x1 is missing?
+
+
+
+# Given a 2D matrix D with dimension 1,000,000 by 50, which is the complete training data.
+
+# Given a vector x with the first dimension missing:  (None, x2, x3, ..., x50), impute the value of x1 using k-nearest-neighbor.
+
+#       x_1         ...         x_50
+# 1M
+
+
+# x_1 = [ ]  1x1M
+# x_2 = [ ]  1x1M
+
+# distance = eucledian
+
+
+# vector = [_, x2, x3, ..., x50]
+
+# for other other 999k
+#       calculate distance
+#       upate min heap
+
+#   sum[ x_ for heap.pop) ]/ num
+
+# matrix = 1m x 50
+# x = 1 x 50
+import heapq
+
+# sum ( (x1[0] - x2[0])**2 )
+def calculate_distance(v1, v2):
+    assert len(v1) == len(v2)
+    return sum( [(v1-v2)**2 for v1, v2 in zip(v1, v2) if v1 is not None and v2 is not None ] )
+    
+def impute(matrix, x, k=5):
+    max_heap = []
+    
+    # TODO: handle edge case for matrix
+    num_rows, num_cols = len(matrix), len(matrix[0])
+    
+    for r in range(num_rows): #3 
+        distance = calculate_distance(matrix[r], x)
+        
+        if r < k:
+            heapq.heappush(max_heap, (-distance, matrix[r]))
+        else:
+            heapq.heappushpop(max_heap, (-distance, matrix[r]))
+    
+    vals = []
+    while len(max_heap) > 0:
+        curr_tuple = max_heap.pop()
+        vals.append(curr_tuple[1] [0])
+
+    return sum(vals)/len(vals)
+    
+
+#M = [ [1, 1, 1], [2,2,2], [3,3,3] ]
+#x = [None, 1, 1]
+#print(impute(M, x, k=2)) # expecst 1.5
+
+
+
+#M = [ [1, 1, 1], [2, None,2], [3,3,3] ]
+#x = [ None, 1,  1]
+#print(impute(M, x, k=2)) # expecst 1.5
+
+
+M = [ [1, 1, 1], [2, 2 ,2], [3, None,3] ]
+x = [ None, 1,  1]
+print(impute(M, x, k=2)) # expecst 1.5
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------------------
+// 1/26 Wednesday  	1:00 PM - 2:00 PM (Pacific Time US & Canada) Oussam Elachqar, Abhinav Shrestha (ML Sys Design)
+// -----------------------------------------------------------------------------------
+
+
+
+
+Question: The background of tweet search is that given a query we retrieve a set of tweet candidates. Then, we rank these candidates using an ML model and present the end results to users. The ML model uses supervised learning, which means we need to first train a model, deploy the model, and then let the model serve production traffic.
+
+The business and product requirements for tweet search are to:
+- increase the daily usage of the search functionality
+- promote healthy conversations within search results.
+
+Entities:
+    query
+    tweet    
+    user
+    context
+
+Goal
+    online: engagment balanced with some long term health
+    
+    engagment: clicks, views
+
+    health conversation: P( obscene | fraud | insult )
+        human label --> high quality low volume
+        explicit: user can flag 
+        implicit: unfollow, block --> implicit message  ; maybe more volume
+        
+        multi-stage model to blend differnt types of labels
+        
+        stage1: (implicit | explicit)
+            NN /
+        stage2: (human label)
+            MART/ linear 
+        
+    P( engagment | query, tweet, user, context={device, location} )
+    
+    health : ranking in multi-objective 
+
+
+Training Data
+    query = "covid 19 vaccine"
+    user 
+        userId
+        gender
+
+Candidtrate Retreival
+    Loss function = k1 * P(engagment) + k2 * P(health) + regulraization
+
+    representation learning (offline) --> feature store
+    
+    simlarity: query-tweet --> ANN
+    
+    token based : search recall: reerse + forward index
+        Elastic search;
+            shard scoring function:  P(health) + P(engamgment) --> topK per shard
+                
+Ranking
+    multi obectives: k1 * P(relevance) + k2* P(health)
+        y-axis: metric: DAU, 
+        x-axis: 
+        
+    manual lookup table
+        (country, category) --> (k1, k2)
+        
+    x model: TOO COMPLICATED 
+    x    NN --> harder to interpet pehaps
+    x    (query, user, context, ) --> (k1, k2)    
+        
+        
+Model deployment
+    model registry
+    
+    MART --> code
+    
+    P(engagment)
+        --> touch point
+                look up table, which is offline
+                oneline codes
+            one source of truth
+            
+            
+            
+Client  (query, context, user ID)
+    
+Backend
+    Candidate Retreival
+        query --> embedding
+        
+        
+    Ranking
+    
+    --> feature store: (offline)
+
+    --> data store: (offline)
+        ANN: f(query) --> tweets
+        
+    --> models micro-service
+    
+    
+Offline
+    Representation learning
+        query - vs - tweet
+        
+        data collection / sampling
+        
+        training: two -tower; shallow emedding
+        
+        query --> embedding
+        tweet --> embedding
+        
+        load into ANN datastore
+        
+        
+        content based: 
+            query --> bert bembeddings
+            tweet --> autherId, topic, text_representation
+            
+            NRT --> new queryes, tweets --> ingested in ANN        
+                kafka --> worker pulls auto-scaled --> ANN DS
+                
+            Batch:
+
+Ranking
+    models: P(engamgent), P(health)
+        meta data: v1, location S3, type_of_model
+        
+    offline model training
+        model registry --> v2
+                
+    redploy model service (k8s)
+        model service: rolling update to next version
+        
+Serviing
+    Ranking
+        performance: latency, throughput
+        resource usage: memory bandwidth
+
+        telemtry: promethesu, open telemetry
+        
+    ANN        
+
+    
+
+
+
+
+
+// -----------------------------------------------------------------------------------
+// 1/26 Wednesday  	3:00 PM - 4:00 PM (Pacific Time US & Canada) Yi-Chin Wu, Sherali Tukra (Top Grading) 
+// -----------------------------------------------------------------------------------
+
+
+

@@ -1,0 +1,408 @@
+// -----------------------------
+// Onsite
+// -----------------------------
+<-- Logistics
+	* video:	https://meet.google.com/tea-ofqz-uat
+	* coding:	https://hr.gs/7ea2a8f
+	* drawing: 	google drawings
+
+
+<-- Itinary
+	9:45-10		Nathan Pucket
+	10-11AM		Coding&Algo				WeiAn & Max
+	11-12PM		ML Fund and Coding 		Jianzhi Wu & Hafeezul Rahman Mohammad
+	2:30-3:30	Top Grade				Tian Wang & Yi-Chin Wu
+	4:00-5:00	ML Systems				Praveen Bommannavar & Sriram Gopalakrishnan
+
+
+
+
+
+
+
+
+
+
+
+// -----------------------------
+// Preparation
+// -----------------------------
+- Two Interviewers Per Sssion
+	1 driving; another taking notes
+
+
+<-- Previous Projects
+	Learn about your learnings of previous projects
+
+	how to work cross team
+
+
+<-- High Level Design (30 min)
+	
+
+<-- ML Systems Design
+	Overal ML Design
+	Google drawings, draw diagram
+
+	scalability
+	why you are making the decision
+
+	are you involving other people
+		really share the why/how
+
+		follow up with your collobration
+
+		also acknowledge, and act upon their suggestin
+
+	They will ask you a real world 
+
+
+<-- ML FUndamentals and Coding: will use DS
+	1 or 2 ML concepts
+
+	Explain solution and code
+
+	ML related concepts
+
+	"Explain with code and formulas"
+
+	Ex:
+		Dataset of tweets, and how would you group tweets
+
+	use any language you want to use; python
+
+<-- Non-technical (Behavorial)
+	Deep background and experiences
+
+	on resume
+
+	Learn about roles to lead projects and mentor others
+
+	Gone above and beyond to help team members
+
+	Want to learn about my growth mindset, and how it has shaped in
+
+	Why Twitter
+
+	Prepare: Think of previous exmaples, 
+		challenges
+		and successes 		
+		how to interact with manager in the past
+
+
+
+
+
+// -----------------------------
+// Top Grading
+// -----------------------------
+- For each project/resume
+	- what are you most proud of
+
+
+	- how do you work with people
+
+
+	- Manager
+		how do you work with you manager
+
+		what would your manager say what is your greatest strength and weakness
+
+
+- How are projects chosen
+	factors: 	risk, envelope sizing, 
+				internal speed, 
+
+
+
+// -----------------------------
+// ML Deep
+// -----------------------------
+- Design Tweet Recall 
+	user --> 	topic
+				topic --> tweet
+
+
+
+
+// -----------------------------
+// ML Fundametnals & Coding
+// -----------------------------
+# Given some training data with a single feature and a single label, 
+# explain how you will find the optimal split point to classify the data, 
+# such as how it’s done in decision trees?
+
+# Y       X=[]
+# 1       12.0
+# 1       11.1
+# 0
+# 0
+# 0.      ..
+
+
+# Trees
+#     Information Gain = Imprity(root) - N_Left/N * Impurity(left) - N_Right/N * Impurit(rgiht)
+    
+#     Impurity: Entropy or Gini 
+    
+
+# Entropy = -p(1) * log(p(1)) -p(2) * log(p(2)) ... -p(n) * log(p(n))
+#           
+
+# X = [feature1, label]
+# dist = [x1, 0], [x2, 1], [x3, 0]
+from collections import defaultdict
+import math    
+
+
+def entropy(X):
+    # label_cnt - [label, cnt]
+    # 0 -> 2
+    # 1 -> 1
+    # entropy = - (2/3)log(2/3) - (1/3)log(1/3)
+    
+    counter = defaultdict(int)
+    for feature, label in X:
+        counter[label] += 1
+        
+    N = sum(counter.items())
+    entropy = 0
+    for label, cnt in counter.items():
+        entropy -= (cnt/N) * math.log(cnt/N)
+        
+    return entropy
+
+# Information Gain = Imprity(root) - N_Left/N * Impurity(left) - N_Right/N * Impurit(rgiht)
+from collections import NamedTuple
+
+# NOde: {samples: [ [f1, label] , [] ] }
+Node = NamedTuple('Node', ('samples'))
+def information_gain(node):
+    split_candidates = [feature for feature, label in node.samples]
+    
+    score_root = entropy(node)
+    scores = []
+    for split_val in split_candidates:
+        left, right = [], []
+        for s in node.samples:
+            if s.feature < split_val:
+                left.append(s)
+            else:
+                right.append(s) 
+
+        score_left = entropy(left)
+        score_right = entropy(right)
+        
+        information_gain = score_root - score_left - score_right
+        
+        scores.append(information_gain, split_val)
+    
+    # descending order
+    scores.sort(ascending=False)
+    
+    if scores:
+        return scores[0][1]
+    else:
+        return -1
+    
+    
+    
+Problem:
+    Existing model with 1000 features
+
+    Evaluate a new feature againt this model
+    
+Questions
+    model: agnostic, simple neural
+    predict: simple classification:  multipclass --
+    
+
+Recommend
+    
+Data
+    dev, test, valid
+        no leakage, time line 
+    clean, 
+    respresntinat of data category
+    
+
+Offline evaluation on past data
+    data warehouse --> dataset
+    
+statistical evaluation
+    correlation feature_new, label
+                feature to other features
+                
+1000 features --> weights
+    loss =  
+        l2 = square():
+        l1 = w1, --> sparsity
+                    
+100 hundres of features
+    logistic regression --> [0, 1]
+    
+    
+Offline
+    mathematical higher confidence on offline metrics
+    
+    
+
+// ----------------------------
+// ML Systems
+// ----------------------------
+# Reverse Chronologic --> Rank Order
+
+# Product
+- 300 million user 
+-   user --> 100 tweets
+
+# Online metrics
+# P( engagement | tweet, user, context) ; tweet -> topic
+    # context: time of day, day of week, season
+    
+    # engagmenet: click, thumbs up, retweet
+    
+    
+# Engagmeent
+    # daily active, return betwee, revist
+    # # clikes/session
+    
+# Exposure
+
+# Revenue
+
+
+# Data
+- online behavorial: 
+    pro: volumne; clicks << imporession
+    con: noisy
+    
+    model
+    label distribution : resampling/upsampling
+        data balance: upsample clicks or weight in training; replace or 
+    
+- human labeledd
+    higher quality smmaller dataset
+    
+    clicked: 
+
+    human labeled: relevant
+    
+    
+    
+Features
+    Tweet
+        - text: token based, embeding
+        - date
+        - author: # followers
+        - demand: #retweets/last hour; ...    
+        
+    User
+        - gender
+        - age
+        - interests: #topics --> 100[]
+    
+    
+    User-Tweet
+        - user-tweet similary
+        - cross features: { f1xf2, genderxauthor }
+    
+    Context
+        Time
+        last 5 clicked tweets by user
+        
+Data Processing
+    numerical
+        log-transforms
+        
+    text
+        clean, tokenizer, tfidf/emebddings
+        
+    categorical
+        feature hasing, one hot
+        
+Features
+    Tree bast --> feature importat
+    
+    statiscal
+        feature to label correlation (peasson)
+    
+    L1 regularization
+    
+    
+Model
+    Linear
+        Pro: simle to train, explainable, fast to infer <usec>
+        Con: more complicate feature enginering, feature are not correlated
+    
+    Tree/Ensembles
+        Pro: nonlinear, robust featurei , understanding, relativel fast 
+        Con: overfit
+    
+    
+    NN/DL:
+        Pro: powerful, can
+        Con: ..
+        
+Offline Metrics
+    Binary: click or not click
+    
+    Accuracy
+    
+    Confusion Metrics
+        Precision = TP / (TP + FP)
+    
+        Recall = TPR = TP/ (TP + FN)
+        
+        F1
+        
+        ROC: single number, no threshold
+    
+    Ranking
+        MRR:
+        
+        nDCG
+        
+        nDCG
+    
+    
+Model
+    Monitoring
+    
+    A/B Tests: Online Metrics
+        p value : 
+
+        statsical power: 
+        
+Productization
+    Edges cases
+        data shift
+        cold start
+        model retrain: how when do you decide to retrain, how to deploy
+        logging
+            user beavior
+            model perfoamnce
+            
+        service
+            inference : logging --> analytics on hdfs on model perf
+            
+Features : Frequent
+  sources -->  NRT --> features datastore
+        tweet: click/3hours
+  
+  user behavior --> pubsub --> HDFS
+    
+    Data source: 
+        HDFS, time series DB
+            
+    Feature datastore:
+        tweet --> features
+        user --> features 
+
+        document
+        
+        
+
+        
+
+

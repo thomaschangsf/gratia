@@ -1,0 +1,577 @@
+
+
+
+
+// ------------------------------------------------------------------------------------
+// Coding
+// ------------------------------------------------------------------------------------
+
+# 7. Delivery Routes Problem (30 min) (Yes)
+
+
+# Suppose a person is trying to deliver items, each items has its own pickup place and destination. Given an integer that defines how many items waiting for delivery. Each item needs to be picked up first before deliver to destination
+
+# Output all possible routes (30 min)
+
+
+# Example:
+
+# Input: 2
+    #  0 < n <100
+# Output:
+
+# [P1, P2, D1, D2], [P1, D1, P2, D2], [P1, P2, D2, D1], [P2, P1, D1, D2], [P2, P1, D2, D1], [P2, D2, P1, D1]
+
+# Given n
+#   permutation : [ [P!, P2], [ ] ]
+#       with constraints on order: DS strucuture to check if counterpart is not in permutation
+# output possibles permutation
+
+
+https://www.quora.com/Is-it-possible-to-do-back-tracking-in-an-iterative-code
+def find_possible_routes(n):
+    res = []
+    stack = [ f'P{i}' for i in range(1, n+1)]
+    print(f'stack={stack}')
+    while stack:
+        subset = [stack.pop()]
+        if len(subset) > 2*n:
+            continue
+        if len(subset) == 2*n:
+            res.append(subset)
+        else:
+            for d in range(1, n+1):
+                copy = list(subset)
+                copy.append(f'D{d}')
+                stack.append(copy)
+    print(res)
+find_possible_routes(2)
+
+seed = [P1 P2 D1 D2]
+
+def find_possible_routes(n):
+    seed = [ f'P{i}' for i in range(n)] + [ f'D{i}' for i in range(n)]
+    solutions = []
+
+    def check_is_valid():
+        return all([seed.index(f'P{i}') < seed.index(f'D{i}') for i in range(n)])
+
+    def recurse(i):
+        if i == n-1 :
+            solutions.append(seed.copy())
+        for j in range(i, len(seed)):
+            seed[i],seed[j] = seed[j],seed[i]
+            if check_is_valid():
+                recurse(j + 1)            
+            # backtrack
+            seed[i],seed[j] = seed[j], seed[i]
+             
+    recurse(0)
+    print(solutions)
+    return solutions
+
+
+
+P1 D1 P2 D2
+P2 P1 D1 
+
+P{i}.index > D{}.index for i in range(n) if 
+
+insert
+P1  
+D1
+
+    
+insert
+P1  P2  --> form permutation -> [P1 P2 D1 D2]
+D1  D2
+
+pop
+P1   
+D1  
+
+
+pop
+
+
+insert
+P2
+D2
+
+insert
+P2 P1
+D2 D2
+
+P1 P2 D1 D2
+
+results = []
+
+def recurse(candidate):
+    if len(candidate) == 2*n:
+        results.append(list(candidate))
+    elif len(candidate) > 2*n:
+        return
+    else:
+        for i in range(n):
+            key_p = f'P{i+1}'
+            if key_p in candidate:
+                continue
+            for d in range(i, n):
+                key_d = f'D{d+1}'
+                if key_d in candidate:
+                    continue
+                candidate.append(key_d)
+                recurse(candidate)
+                candidate.pop()
+
+candidate = []
+recurse(candidate)
+print(results)
+
+
+
+def find_possible_routes(n):
+    
+    # create P1 P2 D1 D2 : part of constraints P1 --> D1
+    pickups = [ (f'P{i}', f'D{i}' ) for i in range(n)]
+    pickups = [ (f'P{i}', f'D{i}' ) for i in range(n)]
+    
+    permutations = [] 
+    
+    # pairs = [ (P1, D1), (P2, D2)]
+    # pairs: e0 -> e1; e1->0
+    for i in range(len(pairs)):
+        pickup, delivery = pairs[i]
+
+        # loop through prev permutation
+        for j in range(len(permutations)):
+            # if constraint met, create a new copy and add to permutation
+            copy = list(permutations[j])
+            copy.append(pickup)
+            
+            
+    return permutations
+
+    
+    
+    
+pickups =   [P1, P2]
+            [D1, P1, P2]
+            
+[1, 2, 3]
+
+pickup[P1]
+delivery[D1]
+
+pickup[P1, P2]
+delivery[D1, D2]
+
+pickup[P1]
+delivery[D1]
+
+
+pickup[]
+delivery[]
+
+pickup[P2]
+delivery[D2]
+
+pickup[P2, P1]
+delivery[D2, D1]
+
+
+def find_possible_routes(n):
+    solutions = []
+    for p in range(1, n+1):
+        print(f'p={p}')
+        subset = [f'P{p} ']
+        for d in range(1, p+1):
+            print(f'd={d}')
+            subset.append(f'D{d} ')
+            solutions.append(subset)
+    print(solutions)
+    return solutions
+find_possible_routes(2)
+
+
+// ------------------------------------------------------------------------------------
+// Design
+// ------------------------------------------------------------------------------------
+Features
+    User
+        user-embeddings --> semi-supersized
+        gender
+        age
+            
+    Item
+        price
+        
+        category vs numerical
+        sparse/dense
+
+
+Neural Network
+    User Layers
+        dropout, poooling,
+        
+    Item layers
+        
+    
+    (u, v) label: 1, 0
+
+    user --> two tower -->  embedding_user
+    item -->                embedding_item
+
+
+
+// ------------------------------------------------------------------------------------
+// Coding
+// ------------------------------------------------------------------------------------
+
+
+Algorithm/coding:
+
+Given N cards between values 1-13, and a target sum, output Yes, if we could use +-*/()to get target sum  with all cards used.
+
+Example
+    input
+        target=7
+        cards = [ 2 3 1]
+    returns 
+        True because (2*3) + 1
+
+def is_valid(target, cards):
+
+    def recurse(i, candidate):
+        if i==len(cards)-1 and sum(candidate) == target:
+            solution.append(candidate.copy())
+
+        # range(1, 3) [3, 1]
+        for j in range(i+1, len(cards)): 
+            for operator in ['*', '-', '+', '/']:
+                new_num = operator(cards[i], cards[j]) #2*3
+                candidate.append(new_sum)
+                recurse(j, candidate)
+                candidate.pop()
+
+    num_cards = len(cards) #3
+    solution = []
+    candidate = []
+    recurse(target, i=0, candidate)
+
+
+     Example:
+
+     inputs = 
+        n = 4
+
+        4 4 4 4
+        
+     output Yes (4*4 + 4 +4 =24)
+
+     n = 4
+
+     1 1 1 1
+
+     output No
+     
+     n = 4 
+     
+     2 3 2 3 
+     
+     output Yes. (2+2) * (3 +3)
+
+     
+        
+
+
+2 3 2 3
+    curr_val = 2
+    operators = ( +-*/ )
+    
+    
+
+def is_valid(n, cards):
+
+    def recurse(target_sum):
+        if target_sum == n:
+            return True
+        
+    for i in range(len(cards)):
+        new_cards = []
+        
+        for j in range(i, len(cards)):
+        
+            for k in range ['*', '/']:
+                                
+                new_number = operator(i, j)
+                
+                new_cards.append(new_number)
+                
+            new_cards.pop()
+
+
+
+
+recurse([], i=0)
+    recurse( [ n[0] +  n[1] ], i=1)
+        for j in range(2, 4):
+            recurse( )
+
+// ------------------------------------------------------------------------------------
+// Design
+// ------------------------------------------------------------------------------------
+startup news recommendation, 
+1. top/headline recommendation  (10 )
+2. personalized news recommendation (10)
+
+scale:  
+    assuming crawling top 100 news (articles) from 10k news website daily (CNN) and you have 1 million users (have 1 million news daily to recommend)
+
+    what are you trying to predict?
+        tied to label, domain, business metrics
+
+
+1. top/headline recommendation  (10 )
+    Entities:
+        User (not needed for headline)
+        
+        Document (News)
+        
+        User 
+        Websites
+            
+        Customer Base
+        
+        Context
+            time, user
+            
+    p(click | document, context)
+
+    how do you aggregate across multiple websites (aggregate CTR)
+
+Metrics
+    Engagments: 
+        CTR
+        searching: nDCG
+        prcisiont at N
+    
+    Trust/Validity: 
+    
+
+Data
+
+
+
+2. personalized news recommendation
+    p(click | entities)
+    
+    Logistics
+        y = 1/ (1+e^z)
+        where z = mx + b 
+
+        cost function = loss function = J = 
+            MSE = sum (Y_pred - Y-actual)^2 / n
+                issue: put y into MSE cost function --> non-convex --> optmizer will have problem finding global miniumum
+
+            log loss (binary cross entropy ) = y_i * log( p(y_i)) + (1-y_i) * log(1 - p(y_i)) 
+
+    Tree 
+        GBT
+        Ensemble
+        relatively : infer
+        data size amillion targeting
+        
+    Neural network
+        
+        user -> how to incorporate reading history
+            document --> aggregate user embeddings
+                bert : title, catogory
+            
+            content embeddings
+            
+        user - interactions
+            semi-supervised
+                word2vec
+            graphical 
+                node embeddings : node2vec
+
+
+
+// ------------------------------------------------------------------------------------
+// System
+// ------------------------------------------------------------------------------------
+Question Description
+
+Let's assume we have a simplified MovieLens dataset, where
+
+ 
+
+User Ids
+MovieLens users were selected at random for inclusion. Their ids have been anonymized. User ids are consistent between ratings.csv and tags.csv (i.e., the same id refers to the same user across the two files).
+
+ 
+
+Movie Ids
+Only movies with at least one rating or tag are included in the dataset. These movie ids are consistent with those used on the MovieLens web site (e.g., id 1 corresponds to the URL https://movielens.org/movies/1). Movie ids are consistent between ratings.csv, tags.csv, movies.csv, and links.csv (i.e., the same id refers to the same movie across these four data files).
+
+ 
+
+Ratings Data Files Structure
+Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
+
+userId,movieId,rating,timestamp
+
+schema (table name: ratings)
+
+userId  movieId rating  timestamp
+A   item1   1.0 2020-01-01
+B   item2   2.0 2020-01-02
+C   item3   3.0 2020-01-03
+     
+
+Movies Data File Structure
+
+Each line of this file after the header row represents one movie, and has the following format:
+
+movieId,title,genres
+
+schema (table name: movies)
+
+movieId title   genre
+item1   The Matrix  SciFi 
+item2   The Hunger Games    
+Action
+
+item3   The Lord of the Rings   Fantasy
+     
+
+Constraints: 
+  - number of users > 10 millions
+
+  - number of items is about 10 thousands
+
+  - nubmer of gerne is about 100
+
+ 
+
+------------------------------------
+
+ 
+
+Question 1 (data preprocessing, Popularity model):
+Find the top K popular movies in each genre, based on some big data platform(Spark/Hive/Flink/MapReduce/..) 
+
+Follow-up:
+
+  - how it works inside the platform? E.g. What if the data is skewed? e.g. 95% of the movie are Action movies or 80% of the rating are only for one movie
+
+ 
+
+ 
+
+ 
+
+Question 2 (model design and building):
+Predict the rating of a user to a movie
+
+Constraints (optional):
+
+  - the dataset is too big to fit in memory
+
+  - the data is very sparse (many users and items don't have ratings ) 
+
+  - the label is unbalanced (assuming you are using a classification model)
+
+ 
+
+ 
+
+Question 3 (serving / deployment)
+(Option 1)
+
+Let's assume you build an embedding model with user embedding and item embeddings, and the dot product of the user embeddings and item embeddings will give the probability that a user will watch the item.
+
+How to design an online serving system?
+
+(Option 2) 
+
+Let's assume you are using a separate model serving technique, e.g. TensorFlow serving, how could you deploy your model to production?
+
+ 
+
+
+
+
+// ----------------------------------------------------------
+// Page Optimization
+- what are you predicting?
+    KPIs -proxy-> offlne metrics
+
+- cold start
+
+- Deployment
+    online vs offline
+
+
+// ----------------------------------------------------------
+<-- KPI 
+   reward = 
+        revenue = 
+            ads
+            subscriptoin 
+        amount streaming
+   
+    long term = retention
+    
+objectives    
+    model_engamgemtn = P( 
+         | user, context )
+    model_revenue = P(revenue)
+
+Multi-objective opmization
+    rank_score = w1 * model_engamgemtn + w2 * model_revenue - penality(adjacent channel for diversity)
+    
+    python moo
+        scalarization
+            - simplest: weighted sum
+                engagmemnt=wached cnts (*),duration, metric/
+                
+                                                                    revenue
+        
+                cold start --> 
+                    new_user :          gender |     age     | interests | location
+                                            M.       Genx.      SciFi       Ca/US
+ 
+                all_roku_users :
+ 
+ 
+        genatic algorithm
+
+
+Deployment
+    website --> instanta
+        deploy online :
+            latency model? 
+            
+            offline vs online
+                how complicated the features/ model --> push offline
+                    cold start issues
+                    
+            oneline
+                instant gratificatoin
+                    instantaneous decision making in application logic 
+                    
+Exploration
+    Multi-arm bandit
+    
+    
+candidate generate --> ranking --> blender/ eploration 
+
+
+long term metrics
+    metric --> proxy: duration betwen user returninging,how many times in 3 months, 6 months
+    
+    P( duration | )
+                
+        

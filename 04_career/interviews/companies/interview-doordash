@@ -1,0 +1,628 @@
+https://doordash.zoom.us/j/92117089396?pwd=V2VqVG9JRE45dThtQ1hFNUxmTUJhUT09
+	Look at calendar
+
+// ---------------------------------
+// 10:00AM (PST) - 10:45AM (PST): Rohini Harendra (Engineering Values: DirOfEng of Growth)
+// ---------------------------------
+
+Best engineer you work with
+	ownership and understand customer problems
+	bottoms up
+
+
+
+
+
+
+
+// ---------------------------------
+// 10:45AM (PST) - 11:45AM (PST): Renjie Weng (Coding)
+// https://hr.gs/3ac652c
+// ---------------------------------
+general SW and problem slving; algo and DS
+tips: 
+	don't just dive into the code, clarify and gather requireemnts
+	* communicate effectively; thorugh process and execution
+	actively listening: interview will try to give hint, so you will get back on track; rectify
+
+
+
+"""
+Closest DashMart
+
+A DashMart is a warehouse run by DoorDash that houses items found in convenience stores, grocery stores, and restaurants. We have a city with open roads, blocked-off roads, and DashMarts.
+City planners want you to identify how far a location is from its closest DashMart.
+You can only travel over open roads (up, down, left, right).
+Locations are given in [row, col] format.
+
+[
+#     0    1    2    3    4    5    6    7    8    
+    ['X', ' ', ' ', 'D', ' ', ' ', 'X', ' ', 'X'], # 0
+    ['X', ' ', 'X', 'X', ' ', ' ', ' ', ' ', 'X'], # 1
+    [' ', ' ', ' ', 'D', 'X', 'X', ' ', 'X', ' '], # 2
+    [' ', ' ', ' ', 'D', ' ', 'X', ' ', ' ', ' '], # 3
+    [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'], # 4
+    [' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', 'X']  # 5
+]
+
+' ' represents an open road that you can travel over in any direction (up, down, left, or right).
+'X' represents an blocked road that you cannot travel through. 
+'D' represents a DashMart.
+
+
+Step1: Given | Return | Constraints | Clarification
+    Given:
+        grid -- MxN
+        locations -- K
+    Return
+        array of distance corresponding locations
+    Constraints
+        closest distance
+    Clarification
+        out of grid --> -1
+        X --> normal
+        grid:  assume alwasy valid; 
+        grid: 1000 x 1000 ~
+    answer = [-1, 2, 0, -1, 6, 9] --> EXPECTED ANSER MAY SHOWS THE EDGE CASES
+
+
+Step2: Brain strom Algo: high level
+    [1, 4], --> 2
+    
+    memorization: solution[i][j] = #
+        recurse(i, j)
+        
+        exponentailta
+        memorization --> M X N X K 
+
+Step3: Work through example in details; acknowledge the edge cases as well
+    grid = [
+          0    1    2    3    4    5    6    7    8
+        ['X', ' ', ' ', 'D', '1', '2 ','X', '6', 'X'], 0
+        ['X', ' ', 'X', 'X', '2', '3', '4', '5', 'X'], 1
+        [' ', ' ', ' ', 'D', 'X', 'X', '5', 'X', '9'], 2
+        [' ', ' ', ' ', 'D', '1', 'X', '6', '7*','8'], 3
+        [' ', ' ', ' ', '1', '2', 'X', '7', '8', 'X'], 4
+        [' ', ' ', ' ', ' ', 'X', '9', '8', 'X', 'X']  5
+    ]    
+
+    locations = [
+        [200, 200], --> -1
+        [1, 4], --> 2
+        [0, 3], --> 0 becase its a D
+        [5, 8], --> -1 becase blocked
+        [1, 8], --> 6; X cells have a distance, but cannot go to next iteration
+        [5, 5], --> normal    
+    ]
+
+
+
+
+def find_closest_mart_v3(locations, grid):
+    BLOCKS = 99
+    n_rows, n_cols = len(grid), len(grid[0])
+    memo = [ [ BLOCKS for _ in range(n_cols)] for _ in range(n_rows) ]
+
+    # DFS to fill distances from cells marked as 'D'
+    def fill_in(i, j, distance, paths):
+        curr_distance = distance + 1
+        for x, y in [ (i+1, j), (i-1, j), (i, j+1), (i, j-1)]:
+            if 0<=x<n_rows and 0<=y<n_cols and grid[x][y] != 'D':
+                if (x, y) in paths: # CONSTRAINT: don't revisit parent nodes 
+                    continue
+                if grid[x][y] == 'X': # CONSTRAINT: HANDLE X CELLS
+                    lowest_neighbor = min( [memo[a][b] for a, b in [(x-1, y), (x+1, y),(x, y-1),(x, y+1)] if 0<=a<n_rows and 0<=b<n_cols] )
+                    memo[x][y] = 1 + lowest_neighbor
+                    continue
+                if curr_distance < memo[x][y]: # CONSTRAINT: recurse only if current distance is less than previous memo[x][y]
+                    memo[x][y] = curr_distance
+                    paths.append((x,y))
+                    fill_in(x, y, curr_distance, paths)
+                    paths.pop()
+
+    # Find all the MARTS
+    marts = deque()
+    for r in range(n_rows):
+        for c in range(n_cols):
+            if grid[r][c] == 'D':
+                memo[r][c] = 0
+                marts.append((r,c))
+    
+    # Loop through each mart
+    while marts:
+        mart_x, mart_y = marts.popleft()
+        fill_in(mart_x, mart_y, 0, [(mart_x, mart_y)])
+
+    # Use memo to return an array of solutions
+    result = [ ]
+    for x, y in locations:
+        if not (0<=x<n_rows and 0<=y<n_cols) or (memo[x][y] == BLOCKS):
+            result.append(-1)
+        else:
+            result.append(memo[x][y])
+    return result
+
+
+# TRY BFS TRAVERSAL instead of DFS; looks like rotten oranges
+
+# [(1,4)] --> [2]
+
+# TODO:
+# NO!!!: This will create a same resference; updating memo[0][3] will update all rows
+# memo = [ [0] * n_cols ] * n_rows ]
+
+Lessons
+- need paths variale so DFS do not revisit parent paths
+- grid instantiation: 
+    YES: [ [ BLOCKS for _ in range(n_cols)] for _ in range(n_rows) ]
+    NO: [ [0] * n_cols ] * n_rows
+- Pay attention to when to start a traversal. Minimize number of dfs calls with constraints and memo reference
+- For grid traversal, one of the question is where to start traversing from.  In this problem, we traverse from the D-MART cells
+- Expected answers may show some of the edge cases !!!
+
+# TODO: WORK THROUGH THE EXAMPLE IN FURTHER DETAILS BEFORE CODING
+from collections import deque
+
+
+def find_closest_mart_debug(locations, grid):
+    BLOCKS = 99
+    n_rows, n_cols = len(grid), len(grid[0])
+    print('n_rows', n_rows, 'n_cols', n_cols)
+    memo = [ [ BLOCKS for _ in range(n_cols)] for _ in range(n_rows) ]
+    def print_memo(memo):
+        for r in range(len(memo)):
+            print('\t', memo[r])
+    def fill_in(i, j, distance, paths):
+        print('\tFillIn-Enter', (i,j))
+        curr_distance = distance + 1
+        for x, y in [ (i+1, j), (i-1, j), (i, j+1), (i, j-1)]:
+            if 0<=x<n_rows and 0<=y<n_cols and grid[x][y] != 'D':
+                if (x, y) in paths:
+                    continue
+                if grid[x][y] == 'X':
+                    lowest_neighbor = min( [memo[a][b] for a, b in [(x-1, y), (x+1, y),(x, y-1),(x, y+1)] if 0<=a<n_rows and 0<=b<n_cols] )
+                    memo[x][y] = 1 + lowest_neighbor
+                    continue
+                if curr_distance < memo[x][y]:
+                    memo[x][y] = curr_distance
+                    paths.append((x,y))
+                    print("\t",(x, y), paths)
+                    fill_in(x, y, curr_distance, paths)
+                    paths.pop()
+        print('\tFillIn-Exit', (i,j))
+        print('\n')
+    marts = deque()
+    for r in range(n_rows):
+        for c in range(n_cols):
+            if grid[r][c] == 'D':
+                memo[r][c] = 0
+                print('Set ', (r,c), "to", memo[r][c])
+                marts.append((r,c))
+    print('marts', marts)
+    print_memo(memo)
+    while marts:
+        mart_x, mart_y = marts.popleft()
+        print('\nSTART MART:', (mart_x, mart_y))
+        fill_in(mart_x, mart_y, 0, [(mart_x, mart_y)])
+        print_memo(memo)
+    result =[]
+    for x, y in locations:
+        if not (0<=x<n_rows and 0<=y<n_cols) or (memo[x][y] == BLOCKS):
+            result.append(-1)
+        else:
+            result.append(memo[x][y])
+    return result
+
+grid = [\
+    ['X', ' ', ' ', 'D', ' ', ' ', 'X', ' ', 'X'],\
+    ['X', ' ', 'X', 'X', ' ', ' ', ' ', ' ', 'X'],\
+    [' ', ' ', ' ', 'D', 'X', 'X', ' ', 'X', ' '],\
+    [' ', ' ', ' ', 'D', ' ', 'X', ' ', ' ', ' '],\
+    [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'],\
+    [' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', 'X']] 
+locations = [\
+    [200, 200],\
+    [1, 4],\
+    [0, 3],\
+    [5, 8],\
+    [1, 8], \
+    [5, 5] ]
+    
+locations_simple = [ [1,4], [5, 8] ]
+find_closest_mart_v2(locations_simple, grid)
+
+
+
+def find_closest_mart(location, grid):
+    num_rows, num_cols = len(grid), len(grid[0])
+    solutions = [ [-1] * num_cols ] * num_rows
+    print('num_rows', num_rows, 'num_cols', num_cols)
+    def traverse(i, j, path): #1,4
+        if solutions[i][j] != -1:
+            return False
+        if grid[i][j] == 'D':
+            print('\tEUREKA')
+            return True        
+        for r, c in [(i+1, j), (i-1, j), (i, j+1), (i, j-1)]: # [(2,4), (1,4), (2,5), (1,3)            
+            if 0 <= r < num_rows and 0<=c<num_cols:
+                if grid[r][c] == 'X':
+                    continue
+                if (r, c) not in path: 
+                    path.append( (r, c) )
+                    print('Add ', (r, c), 'path=', path)
+                    if traverse(r, c, path):
+                        v = 0
+                        for x, y in path[::-1]:
+                            print('\tUpdate', (x,y), 'to', v )
+                            solutions[x][y] = v
+                            v+= 1
+                        solutions[i][j] = v + 1
+                    path.pop()
+        print("\n")
+        return False
+    r, c = location[0]
+    traverse(r, c, [(r,c)])
+    print('ANSWER-->', solutions[r][c])
+    return solutions[r][c]
+    
+locations_simple = [ [1,4] ]
+find_closest_mart(locations_simple, grid)
+
+# UNIT TESTS
+"""Clarification
+    out of grid --> -1
+    X --> normal
+    grid:  assume alwasy valid; 
+    grid: 1000 x 1000 ~
+
+    [
+#     0    1    2    3    4    5    6    7    8    
+    ['X', ' ', ' ', 'D', '1', ' ', 'X', ' ', 'X'], # 0
+    ['X', ' ', 'X', 'X', '+', 'B ', ' ', ' ', 'X'], # 1
+    [' ', ' ', ' ', 'D', 'X', 'X', ' ', 'X', ' '], # 2
+    [' ', ' ', ' ', 'D', ' ', 'X', ' ', ' ', ' '], # 3
+    [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'], # 4
+    [' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', 'X']  # 5
+]   
+
+
+
+TC1: out of grid, ie [200, 200]
+TC2: X point, *ie 
+TC3: D point, [0, 3]
+TC4: general path [1, 4]
+TC5: road bloced [5, 8]
+TC6: boundaries of grid, fnc (num_rows, num_cols), [5, 8] [1, 8]
+"""
+
+grid = [\
+    ['X', ' ', ' ', 'D', ' ', ' ', 'X', ' ', 'X'],\
+    ['X', ' ', 'X', 'X', ' ', ' ', ' ', ' ', 'X'],\
+    [' ', ' ', ' ', 'D', 'X', 'X', ' ', 'X', ' '],\
+    [' ', ' ', ' ', 'D', ' ', 'X', ' ', ' ', ' '],\
+    [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'],\
+    [' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X', 'X']] 
+locations = [\
+    [200, 200],\
+    [1, 4],\
+    [0, 3],\
+    [5, 8],\
+    [1, 8], \
+    [5, 5] ]
+locations_simple = [ [1,4] ]
+results = find_closest_mart(locations_simple, grid)
+
+print(results)
+
+
+
+// ---------------------------------
+// 12:15PM (PST) - 12:45PM (PST): Radhika Wadegaonkar (Informal Chat - Manager)
+// ---------------------------------
+Hi Radhika,
+
+Thank you so much for taking the time to meet with me today. After our conversation, I believe my experiences and interests are well aligned with the role on your team. In particular, I would like to highlight the following:
+
+- I have bootstrapped teams throughout my careers at Ebay, Apple, and ServiceNow, where I made key contributions to near-term deliverables and long-term team culture.
+
+- Throughtout my time at Ebay, I have consistently leveraged my technical breadth and communication skill to work efficiently across engineering, analytics, and product teams in different divisions.
+
+Once again, thank you for the opportunity to speak with the team. I look forward to hearing from the committee about the next steps in the hiring process. 
+
+Best Regards,
+Tom
+
+
+
+
+
+What's important to her
+	communication
+		deliver + balance worklife
+		highlight issues early on
+	bootstrap teams
+	light process
+
+	when do you double down on a projcet
+
+
+
+
+
+
+hiring manager
+day to day, technologies
+wants to know my background
+	engineering values
+		mine:
+			iterative: walk --> run; improve
+			team:
+				grow, mentored and mentoring
+			simplicity
+
+
+- Questions: 
+	can you help me map the doordash product to this team?
+
+	which team/product do work with
+
+	what are some challenges
+
+	team process
+		agile/scrum
+		technolgies
+		map initiative to tasks
+
+	Culture
+		What types of the engineers do you value the most?
+
+		Are there common trends in the the people who got promote in the last promotion cycle?
+
+
+radhika.wadegaonkar@doordash.com
+
+
+
+// ---------------------------------
+// 1:00PM (PST) - 2:00PM (PST): Yixin Tang (Domain Knowledge - SW - Exper) ML
+// ---------------------------------
+- Challenge: Generalize a last mile delivery across products and countires
+
+
+## Start typing here# 
+# Demand | week, by city, by hour
+
+# KPIs: 
+#   as accurate
+
+# ML MOodels
+
+#   regression
+#       MSE, MAE
+
+
+
+# ----------------------------
+# (1) Metrics
+# ----------------------------
+# - Online
+#   supply demand meeting:  proxy metric: time delivery, $ incentive
+    
+# - Offline
+#   MSE, MAE
+ 
+
+# ----------------------------
+# Data Collection
+# ----------------------------
+# supervised vs unsupervised
+# supervised
+
+# historical data:
+#   OTHER CNADIDATE
+#       CUSTOMER, DRIVER, LOCATION: COUNTRY, CITY, STATE, ITEMS
+
+#   V0
+#       COUNTRY,  CITY,  TIME_HOUR   DATE_OF_WEEK  MONTH  PRODUCT  WEATHER  HISTORICAL_DEMAND_1WK  HISTORICAL_DEMAND_1MTH  DEMAND_ORDER=Y
+#       AVG; MEDIAN, 75TH AGGREGATD 1D, 7D, 1MONTH, PROMOSTION_TO_USER
+
+# ----------------------------
+# MODEL
+# ----------------------------
+# LINEAR -  SVM -   MART      - NN/DL
+
+# NUMBERS
+    - NORMALIZTION
+    - DISTRAIBTUION TRANSOFMR: LOG TRANSFORM
+
+# CATEGORICY
+    - ONE-HOT, BINNING
+
+# NONLINEAR: FEATURE CROSSING
+
+# TEXT --> VECTOR
+#       NEWS, RESTUARANT
+
+#Y      F0      F1_PROMOTION    F1      F2
+#100             [0-3]
+
+#150                3+
+
+# ----------------------------
+# Deployment# 
+----------------------------
+- OFFLINE
+    * SPARK, E
+- ONLINe
+
+
+
+* 1 or 2 technical recent work
+	tradeoff made
+
+* Deep technical discussion and high level guidance
+	search ranking, NLP
+
+* how I contributed, technology, result
+
+
+Trust Classification 
+	Embeddings
+		Create e-commerce embeddings
+		CBOW vs Skipgram
+			Pro/Cons
+		Sentence Embeddings
+			conncategnation | parse trees
+	
+	Classification
+		multi-class single label logistic regression
+			softmax: P(b|a) = exp(x_a * w_b) /  for b' in V exp(x_a * w_b' )
+				a = x_a * w_b = [0..1]; sum(all classes) = 1
+			loss function: cross entropy (categorical)
+				H(y, p) = [- y_i * p(y_i) for i in samples ]
+					y_i = supervised label
+					p(y_i) = from softmax of the most likely class
+						to make softmax more efficient, apply NCE negative sampling
+
+	softmax vs entropy vs logistic regression
+		softmax: normalizaiton layer uses softmax fn 
+			P(b|a) = exp(x_a * w_b) /  for b' in V exp(x_a * w_b' )
+			a = x_a * w_b = [0..1]; sum(all classes) = 1
+
+		entropy : loss function
+			H(y, p) = [- y_i * p(y_i) for i in samples ]
+			y_i = supervised label
+			p(y_i) = from softmax of the most likely class
+
+		logistic regression: linear model uses signoimd fn to learn decision plane
+			p(y=1| x; theta) = 1/ (1 + e^-t)
+			theta = parameter we are learning
+			t = theta_0 + theta_1 * x; where x = input 
+
+
+
+
+
+
+// ---------------------------------
+// 2:00PM (PST) - 3:00PM (PST): Saba Khalilnaji (Systems Design)
+// https://hr.gs/3a575ae
+// ---------------------------------
+Saba
+	Tech stack
+		kotlin, 
+		monitoring:prometheus
+		k8s
+		cockroachdb, spanner, 
+
+	Interesting and thoughtful discussion
+
+
+
+* ability to architect at a high level ML systesm
+	tradeoffs 
+* where to store
+* how, where, to store
+	https://www.tecton.ai/blog/what-is-a-feature-store/
+* how client store to server
+
+
+
+
+3-Day Charity Event
+
+Form:
+-Name
+-Email
+-CC Info
+-Charity (v)
+-$$
+
+DONATE
+
+1. Charge their credit card
+-   3rd party
+2. Track donations
+-   at end of 3 days, send 1 check to each charity
+-   dashboards [ FUTURE ]
+3. Send Thank you email [instantneously after confirmation credit card charged]
+
+- Performace
+    latency, throughput
+        3rd party: latnecy: p90->20s
+            assume it went through: 
+                online or offline? online (V0)        
+    
+    hardware useage
+        AWS/Google Cloud    
+        
+    load: 100,000 donations/second at peak
+        ACID: atomic, consistent, 
+        
+
+// ---------------------
+// Data Flow
+// ---------------------
+FORM: DONATE
+    0 Create JOB_ID
+
+    write_kafka start_donate(charity, custtomer, creditcard, $)
+    1. Charge their credit card
+            sol1: retry( 3rd part RESTALL CALL ) with backoff
+            sol2: 3rd party to a (kafka queue) --> process offline 
+                unique_id = fnc(user, charity, time)
+        --crash?
+        
+    2. Track donations
+        UPDATE DATASTORE in ROBUST WAY (CONSISTENT & ATOMIC)
+                    
+    3 Send Thank you email [instantneously after confirmation credit card charged]
+        UPDATE email to a email queue 
+        
+        
+        
+// ---------------------
+// Web App: 100k donations/sec
+// ---------------------
+- web app: efficient with your resources
+    async
+    caching
+    memory consumption
+    back pressure control : 3rd party 
+        faioure handling
+
+- horizontal scale (k8)
+    pod scaling: adqueute
+        bw, rps
+
+    DC, FIREWALL, LB, SERVICES,
+        LB: round robin
+        
+    DATASTORE: SQL (CHECK)
+    
+- scalability, robustnest
+
+
+// ---------------------
+// CLOUD
+// ---------------------
+- US or DC r
+- fire walls
+- security
+        
+
+
+// ---------------------
+// DataStore
+// ---------------------
+2. Track donations
+    - SQL or NO-SQL: documen, key value
+        transaction_id    charity     user      time      $
+        
+
+
+
+
+3. Send Thank you email
+
+

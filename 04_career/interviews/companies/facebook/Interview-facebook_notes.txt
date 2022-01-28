@@ -1,0 +1,930 @@
+// ---------------------------------------
+// Source:
+// ---------------------------------------
+	/Users/chang/Documents/dev/git/opus/04_ml/interview/FaceBookInterviewMLPrep.pdf
+	Q&A session
+
+
+// ---------------------------------------
+// Coding (from Q&A seminar)
+// ---------------------------------------
+<--  Heathher's last minute
+	--> Communication  
+
+	--> Problem Solving  
+
+	--> Coding (Can you put your thoughts into code)  
+
+	--> Verification (testing, fixing bugs)  
+
+
+<-- Evaluation Criterias
+	(1) Can you convert abstract complicated question --> algo. What's your thought process?
+		Understand the Problem	
+			Ask clarifications
+			Are requirements clear? 
+			Ask for sample input and outputs
+			Work through example (Always?)
+			What are the states?  input --> states
+
+		Transform examples to implementation strategies: 
+			Algorithms: does the example traverse/flow in a familiar pattern. What's the pattern.
+				recursion (with memoization), 
+				graph traversal: inorder,preorder, BFS|DFS
+				sorting: quick_sort
+				divide&conquer
+				dp with memoization (will not be on 1st round)
+
+			Data structure: can we use some DS to help in the example. Some algorithms uses specific DS.
+				array, 
+				stack/queue, 
+				hashset/hashmap/hashtable/dictionary
+				tree/binary_tree/heap
+				graph
+				bloom filter
+
+		Keep a good balance between communication and time to code
+			Don't spend a ton of explain nitty gritty since they know the problem. Interviewers has seen this problem many many times. 
+
+			But also communicate enough. Think out loud.  I am thinking ""...  Wait, this does not work, because ...""" So interviewer can help.
+
+		Explain your approach to the interviewer and get their buy-in before coding.
+			Clarify the soluton is good enough?  
+				Include complexity analysis (time and storage) 
+			"Do you want me to code it"?
+
+		If stuck
+			Ask yourshelf what's the easierst way I can do it.  Communicate to the interviewer.  Interviewer's job is to help.
+
+
+	(2) Can you convert the process to code
+		Keep the code readable
+			helper functions
+			Have readable variables
+
+		If you find the solution getting ugly (lots of if elseifs many linse), step back. Most solutions are elegant.  
+
+		Test your code with input/output test cases and walk through you code. Go straight to the less trivial cases
+			input = [a,b,c] output=[a]
+			Go through your code, this variable will change, as you are the computer
+
+	(3) Improvement areas
+		- Read requiements carefully especially when the problem statement is long (Moveworks)
+		- Work through the problem. Act like a robot.
+			* For recurrence, once you have the states, walk through the happy case path with the states.  (Moveworks: Break 1sentence to multiple words https://docs.google.com/document/d/1d16JzPZzeTYDl0A4Vi_lrhsSnAPBzAhln9rxWi5PZ-A/edit#heading=h.hqp8bvjoavv1)
+
+<-- Questions type
+	1-2 questions.  
+	Mostly medium types. 
+	No DP.
+	DS and ML are testing on the same level in the 1st round
+
+<-- How to Prepare
+	Read books: Cracking Interview
+	Website: Hackrank, Leetcode
+
+<-- Coding environments
+		coder pad io
+	disable execute function
+
+	35-40 min coding
+	1-2 questions
+	
+	generic problem solving skill in algorithm and DS
+		best DS, time and space complexity
+
+	Since disable testing
+		design test cases inputs
+		verbal describe how the code runs
+
+	Syntax is important
+		Forgetting API;s OK, but should be able to decsribe the input parameter
+
+	Common DS
+		array and lists
+		binary tree
+		hash tables
+		stacks & queues
+		graph
+
+	Algorithim
+		search
+			with iterate
+
+		sort
+			quick sort
+
+		graph traversal *
+			in order
+			BFS DFS
+
+		recursion
+
+		NO Dynamic Programming
+
+
+// ---------------------------------------
+// ML Onsite Prep Seminar
+//	9-15 @ 9AM
+// ---------------------------------------
+<-- Presenter BIO
+	Look at ad and see if this appropriate (text, image)
+	Challenge and Why?
+		Scale across language, country
+			Nuance in different country
+		Impact
+			Scam, 
+		Collegues are 
+
+<-- Interview Day
+	2 coding
+	1 system
+	1 ML design or in domain
+	1 career
+	1 another rounder for more signals
+
+<-- Coding
+	Coderpad
+	2 questions (each around 20 min)
+		or 1 questions with follow ups
+	Find efficient and bug free code
+		how well you communicate
+		how well you test code
+
+	Tips
+		understand the probelme REALLY well
+			what's the format input /output
+		
+		DS, and algorithms
+		
+		Code will not be compiled, syntax will not be 
+
+		Time and Space Complexity of DS and Algorithms in different situation
+
+		Practice, practice, practice
+
+		Express your thoughts, since its evaluated
+
+<-- System Design
+	- Distributed systems
+		ex: what kind of system you need for url shortner
+	- Ask clarification question
+		you need to drive the conversation
+			scale
+			latency
+			cost
+	- Strategry
+		start with small scale
+		and scale up
+
+	- Use the virtual white board
+		focus on large design for 100 million of users
+	- Tradeoffs
+		storage: db or in memory and give good rationale. PROS and CONS.
+
+
+<-- ML Design
+	- Focus on ML aspects and solve problem at FB sclae
+
+	- Ex: Design a news ranking feed system
+
+	- What does ita
+		trainign data
+		
+		feature enginering
+
+		modeling appraoch
+			logistic, 
+		
+		how to evaluate the model
+
+		PRO/CONS
+
+	- ML Infra (given to people devops people, don't think I wol)
+		Scalability of scale ML design
+		You should know ahead if you will get this. Contact the recruiter!!
+
+	- How to prepare:
+		Take a product on FB and try to understand how to model, scale, db
+
+	- Start with a high level design
+		this is how data flows
+		this is how feature generated
+		how model will be trained
+		given a white board
+			give an virtual link, or just piece of paper
+
+
+<-- Career
+	- Retrospective on career
+		most succsssfule
+		where you failed
+			what you learned
+		what interst you
+		what are you looking for?
+			why moving from companyA to companyB
+		why you changed focus in domain?
+	- Know your resume !
+
+<-- Questions
+	- Example design problems: 
+		new ranking, look at FB product
+	
+	- In ML design, it may be beneficial to skim through the scale perspective, since it help guide your model appraoch. But focus is on the ML concepts, but use system perspective to help guide.
+
+	- Coding and design questions are going to be same regardless or role.
+
+	- Industry paper (*) on system design
+		company specific paper, blogs (FB)
+
+	- Coding level questions
+		on site coding is a tad bit harder, but mostly the same. Onsite, you may get 1 question with followup.  Would expect on higher performance.
+
+	- Importance of different 
+		The sum of all the interviews performance
+
+	- ML design (*)
+		be familiar with general theory: 
+			comon models (PRO/CONS)
+				regressions
+				trees
+
+		use paper to understand the problems
+			don't need to remember papers, but the probrm
+
+	- how do you evaluate
+		every problem has multiple solutions
+
+		evalute the tradeoffs
+			its back and forth: interviewer may go back and forth
+
+		evaluate whther it satisfies user requirement
+			100 million user , user satisfaction
+				how do you measure this, 
+					scale: QPS, 
+					offline/online metrics: 
+
+	- Junior and Sensior level
+		same questions, but senior (10+) can talk about 
+			tradoffs better 
+			identify edge cases  
+			in more details
+
+	- System design
+		will not be asked sql syntax, but expected to know DB.
+			How do you improve db performance
+
+	- Good to have back and forth (*)
+		reason: pro/cons --> level
+		they can help you guide you and prevent you from derailing
+
+	- Interview data is you day to shine	
+		all you have learned
+		make sure you understand
+		it's a potential conversation with future collegues
+
+	-  Red flags
+			don't just draw on virtual white board w/o explaining what you are doing
+
+			don't go on tangent
+				be open
+
+	- Successful candidate
+		do majority well on most of the slots
+			even if you have bad round, you have the other rounds
+
+		different segment have different focus, described earlier
+
+	- How to practice virtual keyboards
+		yes, recruiter need to give you a linkli
+
+
+
+// ---------------------------------------
+// ML Practical Design
+// ---------------------------------------
+<--  Heathher's last minute
+	--> Feature Engineering – Deep Dive, discuss as many features as you can think of  
+
+	--> Modeling- Loss Function, Optimizer, Etc  
+
+	--> Training Data   
+
+	--> Evaluation  
+
+	--> Lead the discussion   
+
+	--> Talk about tradeoffs of your decision, Common pitfalls, and how you would address them  
+
+	--> Pro-actively defend your design decisions  
+
+<--  Goal:
+	--> See how candidate use ML to real problems at Facebook
+		* Type of FB problems: 
+			ad ranking, news feed ranking, recomend places based on people, detect hatespeach, how to remove weapon sales
+
+		* General problems:
+			search, ranking, recommendation, classification
+
+		* Candidate should talk about 75%. I am the CTO providing advice to the CEO. 
+
+		* Breadth and Depth
+			First go over the strucutre of a ML problem
+			Then choose 1-2 areas to dig deep in
+
+		* Signals
+			Have good product and business sense
+			Have a good overview of the ML 
+			Justify your decisions (pros/cons)
+			Anticipate piftalls/risks and have remediation step in place
+
+
+
+<-- Step1: Formulate the problem / Define problem scope (Spend 3-5 minutes)
+	* Problems are purposely vague. Ask questions
+		- General
+			What does success look like
+				to product, to the user, to the business
+			What are you predicting?
+				{does/how} it tie to your success metrics
+			What are the ml metrics for success? (IMPORTANT)
+				offline
+				online
+			What is the ground truth?
+			What assumptions am I making?
+
+		- Domain specific: recommendation, search, etc..
+
+		- End product is the problem statement
+			Assuming ...
+			I would frame this as a { search, recommendation, classification}
+			with these metrics
+			
+
+<-- Step2: Data
+	What is the ground truth? 
+		for supervised problems
+	Cold Start
+
+<-- Step3: Features
+	* What are the features
+		Take a holistical approach
+		entities: item, users, queries
+		demand: clicks
+		categorical
+
+		representations: one hot, 
+
+	* Feature selection (TODO)
+
+<-- Step4: Models
+	* Talk about 3-4 models
+		Pros and Cons of each
+		trainings costs, constraints
+
+	* Loss functions
+
+<-- Step5: Deployments
+	* Online
+
+	* Offline
+
+
+<-- Step6: Closing the loop
+	* A/B tests
+	* when to retrain
+
+
+
+
+// ---------------------------------------
+// Systems: Large scale distributed systems
+// ---------------------------------------
+can be fb related; 
+	fb search engine; 
+	suggestions
+
+can be a broad
+	if redesign, how would you change?
+
+(A) Ask questions (3-5 min) (Problem exploration)
+	signal: product and business sense. What is business goal. What does user really want?
+
+(B) Draw diagram
+	5-6 boxes 
+	each component has a clear responsiblity
+	data flow between compoenents
+	Deal with Data
+
+(C) Pick 1 -2 component to deep dive
+	Pivot that you know better
+
+	Come up with alternatives; pro/cons; mitigate risk; longer term
+
+	large scale distributed: quantitive piece
+		storage
+		how mancy machines: back of envelop calculation: quantitive analysis (*)
+
+Buffer round: 15 minutes (maybe)
+	drawing tools
+
+TODO: learn to use coderpad.io diagramschang
+
+
+
+
+
+// ---------------------------------------
+// Behavorial
+// ---------------------------------------
+<--  Heathher's last minute
+	--> Your motivations   
+
+	--> Working in an unstructured and fast paced environment  
+
+	--> Communication & growth  
+
+	--> Conflict Resolution & Empathy  
+
+	--> Perseverance   
+
+	--> Project scope & impact on the business  
+
+	--> Mentorship/leadership 
+
+
+<-- STAR
+
+	Situation
+	Task: Describe your Responsibility in That Situation
+	Action
+	Result
+
+
+<-- Goal: Will candidate succeed and be happy at facebook?
+	--> What is Facebook like?
+		* flat and unstructures
+			- everyone is a sw engineer; very much a bottom up. need to work with everyone, up down the stack
+			- how can you build influence
+			- can you drive consensus
+			- how can you lead without hiearchical 
+		
+		* open: 
+			- facebook is in the business of building communities
+			- how do you work with people in team, across teams, across org
+			- how do you handle conflict? negative feedback
+			- are your response authentic?
+		
+		* move fast
+			- there are minimal process
+			- vague and unclear
+				make decisions and act without incomplete data, resources, directions
+					but be able to anticipate risk
+					and have mitigation paths in places
+				as senior IC, identify problems, build consensus, communicate 
+			
+	--> Good answers
+		* give signals that your RELEVANT work experience is compatible with facebook
+		* is authentic. if stuck, say that's a good question, and can take up to 1 minute to think
+
+<-- Sample questions
+	* "Tell me a recent work you are proud of. Why?" 
+		Pybay Framework To Bridge R&D and Model Deployment
+		What's the impact, what is challenging, 
+
+	* "Tell me a project that did not go well" : Ex: CPC Ads
+		IE: project took much longer; much more complex, design decision I regret
+
+		Highlight
+			peseverence
+			how I unblock myself
+			how proactive
+			what did I learn?
+				growth? how I do things differently
+
+	* "Tell me a problem where you do not have that much resources"
+
+	* "Tell me a project that was very vague"
+		how did you drive direction? how to measure progress; how to measure success
+
+	* "How do you work with tough worker. why are they tough to work with"
+		what kinds of co-worker do you like to work with
+
+	* What motivates you?  What is your goal in the career transition to FB
+		do you have a plan
+		do you know your strength; weakness
+
+
+<-- TODO:
+	Kind of like Amazon
+
+	(1) pick your stories
+		projects
+		peoples
+	(2) for each story, have a 2-3 poits (STAR)
+		situation
+			context
+		what you did
+		outcome/result
+
+		interviewer may ask more probing question
+
+
+// ---------------------------------------
+// Exeuctive Summary
+// ---------------------------------------
+<-- Passing coding is basic bar: 
+	can code; clean efficient code
+
+	passing the coding round is not sufficient
+
+	no brain teasers; no dp; very fundamental
+
+
+<-- Design (very important)
+	show case your experience
+
+	breadth/complete
+		think first; explore the problems
+
+	be able to justify solution
+
+	treat ML and system design equally important. not just purely data science. 
+
+<-- Behavioral: 
+	spend about a weekend to review your projects
+	hard to fail behavioral round, but impact signals the level discussion
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------
+// ML
+// ---------------------------------------
+<-- What they are looking for
+	--> Visualize entire problem and solution space
+
+	--> What are relevant ML features for your model
+
+	--> Can you detect flaws in ML systems and suggest improvements
+		global model is easy to deploy 
+			but may be hard to debug, iterate performance
+
+
+	--> Design CONSISTENT evaluation and deployment techniques
+		Goal: research != production
+
+		data collection
+			how is the data collected? what does each col mean? How robust? Freshness? License?
+			leakage
+			label: 
+				if manually labelled, check the instructions. Does it make sense?
+				if automatic, via clicks or views, how strongly correlated is it?  Is a sampling bias?
+
+		training
+			data leakage
+
+		evaluation
+			golden label dataset
+			seeds 
+			system + training compatibility: ie inference side is same as training side like tokenizer
+
+		deployment
+			containerization for online. 
+
+			offline:
+				we want to bring code to data.
+
+				containerization fails here computation nodes with image is memory expensive; each node is 
+
+				But with pyspark, you can run into library/hardware incompatibiliy (C++). If Spark, you miss some key python ml packages. JVM ML training is kind of weak.
+
+			visibility to 
+
+	--> Do you understand architecture requirements (storage, perf) of systems
+
+
+	--> Can you model product requirements into your ML systems
+		WTF does this mean?
+
+	--> Common ML issues
+		* overfitting
+			to fix bias
+				more m
+
+			to fix variance
+				ensembles
+
+		* cold start 
+		
+		* data collection
+		
+		* logging
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------
+// Coding INterview Day
+// -------------------------------
+# Sort Characters By Frequency
+
+# Given a string s, sort it in decreasing order based on the frequency of characters, 
+# and return the sorted string.
+
+# Example 1:
+# Input: s = "tree"
+# Output "eert" or "eetr"
+
+# Constraint: alphanumeric and no special charactesr (space, unicode)
+# ascii code
+
+# TC1: tree
+# TC2: ""
+
+from collections import Counter
+def sort_str(s):
+    
+    # create freq map --> O(N)
+    counts = Counter(s) # {t:1, r:1, e:2}
+    
+    # O(K)
+    freq_to_char = [ (cnt, char) for char, cnt in counts.items() ] ## 
+    
+    # K = unique characters; K * log(K)
+    freq_to_char.sort(key = lambda t: t[0], ascending=False) # [ (2,e), (t,1), (r,1) ]
+    
+    # O(K)
+    result = ''.join([cnt * char for cnt, char in freq_to_char.items()]) # [ee, t, r] --> "eetr"
+    
+    return result
+
+
+# Sparse Matrix Multiplication
+# Given two sparse matrices A and B, return the result of AB.
+# You may assume that A's column number is equal to B's row number.
+# Example:
+# A = [
+#   [ 1, 0, 0],
+#   [-1, 0, 3]
+# ]
+
+# B = [
+#   [ 7, 0, 0 ],
+#   [ 0, 0, 0 ],
+#   [ 0, 0, 1 ]
+# ]
+
+        NxM            MxO        NxO
+#      |  1 0 0 |   | 7 0 0 |   |  7 0 0 |
+# AB = | -1 0 3 | x | 0 0 0 | = | -7 0 3 |
+#                   | 0 0 1 |
+
+# 
+# 1* 7 + 0 + 0 = 7 , 0, 0
+
+# Time Complexity: NxOx (M_B)
+
+from collections import reduce
+def multiple_sparse(A, B)
+    n, m_a = len(A), len(A[0])
+    
+    m_b, o = len(B), len(B[0])
+    
+    # list of list of size n x o
+    out_result = [n * 0] * o
+    
+    for i in range(n): # N
+        # TODO: filter out 0 on row_b
+        
+        row_result = []
+        for j in range(o): # O
+            # Optimization
+            row_a = A[i]        # [1 0 0]
+            col_b = [ B[k][j] for k in range(m_b) ]  # M_B ; [7 0 0]
+
+            z = sum(reduce(x, y: x*y, row_a, col_b)) # 7
+
+            row_result.append(z) #[7]
+        
+        # [7 0 0]
+        out_result[i].append(row_result)
+
+
+
+
+	https://lei-d.gitbook.io/leetcode/matrix/311sparse-matrix-multiplication
+
+	https://medium.com/@glynnnnnnnnn/sparse-matrix-multiplication-c34ef43c16db
+
+
+# N x M
+
+# Method1:
+# Binary search
+# time: N * log(M)
+# space: O(M)
+
+# Method2:
+# Time:  O(N * M)
+# Space: O(M) --> overflow  
+int[][] matrix = {
+    {0, 0, 0, 1, 1, 1}, # log(M)
+    {0, 1, 1, 1, 1, 1},
+    {0, 0, 0, 0, 1, 1},
+    {0, 0, 1, 1, 1, 1},
+    {0, 0, 0, 1, 1, 1}
+}
+#   [0  1.  2. 4. 5. 5]
+# return    1
+# if all zero, return -1
+#
+# Assume
+#    (1) matrix perfect rectanlge
+#    (2) 0 and 1 --> 
+#    (3) can be large but fit into memory
+# Edge cases
+#     (1) all 0
+#.    (2) empty matrix
+#.    (3) 
+
+#// Goal: Leftmost 1
+#// Return leftmost col index
+#// Target: N <--   --> NxM
+#def sort(array):
+
+import math
+
+def find_left_most_index(matrix) -> int:
+    
+    def binary_search(arr):
+        # Handle edge cases
+        if set(arr)[0] == 0:
+            return -1
+            
+        i, j = 0, num_cols
+        left_most = num_cols-1
+        
+        # {0, 1, 1, 1, 1, 1}
+        while i < j:
+            mid = i + (j-i)//2 # 2, mid=2
+            
+            if arr[mid]:
+                left_most = min(left_most, mid) # 2
+                j = mid #i, j = 0,  --> , 1
+            else:
+                i = mid
+            
+        return left_most
+    
+    
+    num_rows, num_cols = len(matrix), len(matrix[0])
+    
+    min_index = math.inf
+    
+    for r in range(num_rows):
+        local_index = binary_search(matrix[r])
+        if local_index != -1:
+            min_index = min(min_index, local_index)
+            
+    return min_index
+
+
+
+
+Data
+	
+
+Model
+	
+
+Product
+	Multimodal : text and images
+
+	secret language: emoji based , special characters
+
+	P(selling illegal drugs)
+
+	assume one line
+
+	feature : fast model update
+Data:
+	No data as well
+
+	Online component
+		user reports --> dirty (millions)
+		label: binary label
+
+	User behavior?
+
+	Human label
+		$budget: 100 human labelers every day; 1 content per miute		
+				10k samples
+
+
+Metrics:
+	online metrics: 
+		# exposure:
+			drugs
+			no-drugs
+
+		$ ecngagment: 
+		$ revenue: sales_of_drugs
+	offline:
+		precision
+
+Features
+	Users:
+		age
+		demographic
+		user embedding
+
+	Text
+		tfidf
+		entity resolution
+		embeding
+
+	Image
+		CNN image
+
+
+
+Model
+	1 stage: 
+		NN
+		Tree/Ensembles
+
+	2 stage	
+		Logistic models
+
+
+
+// --------------------------------
+// Recruiter
+// --------------------------------
+- Management
+	System& Arhciture
+		General Systems
+
+	How to work across division
+
+
+- IC Roles
+	L4: understand systems, work automously
+
+	L5: own a piece of a system, 
+		owns the NLP model
+		
+		lead other indviduals across multiple cycles
+
+		promotion to L6
+			scope of your work; complexity of role
+			problem space + how much impact + how much yuo drive
+
+	L6: own the entire product
+		The most advance technical persion
+		But have a product
+		Work in details also work with outside
+		Multi-year view
+
+- Manager
+	M0 (Internal)
+		Grooming IC 
+		Mentoring people
+
+	M1:
+		manager people and grow others
+		manager 8-20 peple
+
+	M2: ~IC7
+		growing IC to managers
+		vision setting
+
+

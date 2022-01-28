@@ -1,0 +1,666 @@
+# ------------------------------------
+# 9.1 Intersection of 2 Lists
+# ------------------------------------
+# min( O(n, m) )
+def intersection(A, B):
+	set_a = set(A)
+	set_b = set(B)
+	if len(set_a) > len(set_b):
+		return [n for n in set_b if n in set_a ]
+	else:
+		return [n for n in set_a if n in set_b]
+
+
+# ------------------------------------
+# 9.2 Max Product
+# ------------------------------------
+import heapq
+from functools import reduce
+# Runtime: nlog(k)
+def max_product_v2(arr, k):	
+	largest = heapq.nlargest(k, arr) #nlog(k)
+	smallest = heapq.nsmallest(n-k+1, arr) # nlog(n-k)
+	return max( 
+		reduce(lambda x, y: x*y, largest), # n
+		reduce(lambda x, y: x*y, smallest + largest[0:n-k]) # n
+	)
+
+# Runtime: n!
+def max_product_v1(arr, k):
+	max_product = float('-inf')
+	def recurse(curr_product, i):
+		if i == k:
+			max_product = max(curr_product, max_product)
+			return
+		recurse(curr_product, i+1)
+		recurse(curr_product + arr[i], i+1)
+	return max_product
+
+
+
+# ------------------------------------
+# 9.3: K Closest Pts
+# ------------------------------------
+from collections import heapq
+import math
+pts = [ [2,-1], [3,2], [4,1], [-1, -1], [-2,2] ]
+def k_closest_points(pts, k):
+	dist_to_coord = [ -((x**2+y**2), [x, y] ) for x, y in pts]
+	max_heap = [] # keep min_distance
+	for i in range(0, k):
+		heapq.heappush(max_heap, dist_to_coord[i])
+	for j in range(k, len(pts)):
+		heapq.heappushpop(max_heap, dist_to_coord[j])
+	print(max_heap)
+	return [ pt for dist, pt in max_heap ]
+k_closest_points(pts, 3)
+
+
+# ------------------------------------
+# 9.4 Sorted Grid
+# ------------------------------------
+# Give a SORTED grid, return the k-th smallest element in matrix
+def k_smallest_in_grid_v2(grid, k):
+	num_rows, num_cols = len(grid), len(grid[0])
+	max_heap = []
+	for r in range( min(k, num_rows) ):
+		for c in range( min(k, num_cols) ):
+			heap_push(max_heap, grid[r][c])
+
+	result = None
+	for _ in range(k):
+		res = heapq.heappop(max_heap)
+	return result
+
+def k_smallest_in_grid_v1(grid, k):
+	num_rows, num_cols = len(grid), len(grid[0])
+	max_heap = []
+	for r in range(num_rows): #0,1,2,3
+		for c in range(num_cols): #0,1,2
+			cell_num = r*c + c
+			if cell_num < k:
+				heapq.heappush(max_heap, grid[r][c])
+			else:
+				heapq.heappushpop(max_heap, grid[r][c])
+	return max_heap[-1]
+
+
+# ------------------------------------
+# 9.5 Largest contiguous sum
+# ------------------------------------
+Given an array, find the sum of largest contiguous subarray
+[-1,-3,5,-5,3,-6,9, 2] --> return 11 because of [9,1]
+def max_contiguous_sum(arr):
+	max_sum = arr[0]
+	window_sum = 0
+	for i in range(1, len(arr)):
+		window_sum += arr[i]
+		max_sum = max(window_sum, arr[i])
+		if window_sum < 0: # reset
+			window_sum = 0
+	return max_sum
+
+
+# ------------------------------------
+# 9.6 mirror binary trees
+# ------------------------------------
+def check_tree_mirror(root1, root2):
+	if not root1 and not root2:
+		return True
+	elif not root1 or not root2:
+		return False
+	else:
+		return root1.value == root2.value and
+		check_tree_mirror(root1.left, root2.right) and 
+		check_tree_mirror(root1.right, root2.left)
+
+
+
+# ------------------------------------
+# 9.7 Peak Element
+# ------------------------------------
+* Return index of peak elements, defined by # which are greater
+* than both of its neigbors
+def find_peak_elements(arr):
+	n = len(arr)
+
+	for i, n in enumerate(arr):
+		b_greater_than_left = arr[i] > arr[i-1] if i>0 else True
+
+		b_greater_than_right = arr[i] > arr[i+1] if i<n else True
+
+		if b_greater_than_left and b_greater_than_right:
+			return i
+	return -1		
+
+# ------------------------------------
+# 9.8
+# ------------------------------------
+
+
+
+# ------------------------------------
+# 9.9 Max Diameter of a Binary Tree
+# 	Diameter = # nodes between root and leaf node
+# ------------------------------------
+# 	Diameter = # nodes between root and leaf node
+def max_diameter(root):
+	max_diameter = 0
+
+	def depth(node, distance):
+		if not node:
+			return 0		
+		diameter_l = depth(node.left, distance+1)
+		diameter_r = depth(node.right, distance+1)
+		max_diameter = max(max_diameter, diameter_l+ diameter_r)
+		return max(diameter_l, diameter_r)+1
+
+	return depth(root, 0)
+
+
+
+# ------------------------------------
+# 9.10
+# ------------------------------------
+
+
+
+
+# ------------------------------------
+# 9.11
+# ------------------------------------
+
+
+
+# ------------------------------------
+# 9.12
+# ------------------------------------
+Given:
+	2 strings A, B
+Return
+	array of start indices
+Constraints
+	A's index is start of an anagram of B
+Clarification
+	A always > len(B)
+	Fit into memory?
+
+# A="abcdcbac" B="abc"
+def return_index_of_anagram(A, B):
+	n_A, n_B = len(A), len(B)
+	solutions = []
+	if n_A > n_B:
+		for i in range(0, n_A - n_B): #0, 8
+			if set(S[i: i+n_B]) == set(B): #O(K)
+				solutions.append(i)
+	return solutions
+
+
+
+
+# ------------------------------------
+# 9.13
+# ------------------------------------
+Given
+	array of intervals
+Return 
+	# of "least" removals
+Constraints
+	min removal (?)
+	intervals touching is OK
+Clarification
+	how long is array
+	empty array
+	can I assume only numeric inputs
+Edge cases
+	[ [1,3], [3,5], [2,4], [6,8] ]
+
+1B Algo design
+	sorted list --> 2 pointers
+
+
+1C: work through
+	arr = [ [1,3], [3,5], [2,4], [6,8] ]
+	[ [1,3], [2,4],  [3,5],  [6,8] ]
+low     l0   		  l1_b	
+hi            h0      h1_a	 h2_a
+
+
+
+def remove_intervals(arr):
+	if len(arr) == 0:
+		return 0
+
+	lo, hi, cnt = 0, 0, 0
+
+	for hi in range(1, len(arr)):
+		# intersection
+		if arr[hi][0] < arr[lo][1]:
+			cnt += 1
+		# no intersection
+		if not arr[hi][0] < arr[low][1] < arr[hi][1]:
+			lo = hi
+
+
+# ------------------------------------
+# 9.14
+# ------------------------------------
+Given: 
+	a list of strings
+Return
+	a nested list of string
+Constraints
+	each element in return is an array of elements that are anagram of each other
+Clarification
+	fit in memory
+	what happens if no anagram in input
+
+
+
+[abc, abd, cab, bad, bca, acd]
+	{
+		abc: [abc, cab, bca]
+		abd: [abd, bad]
+		acd
+	}
+from collections import defaultdict
+def group_anagrams(inputs):
+	lookup = defaultdict[list]
+	for word in inputs:
+		key = word.sort()
+		lookup[key].append(word)
+
+	return lookup.values()
+
+
+# ------------------------------------
+# 9.15
+# ------------------------------------
+Given:
+	a grid of relationships
+	1 = direct friend
+Find:
+	# of clusters
+Such that:
+	friends = direct or indirect
+Clarification:
+	indriect : how many jumps?
+	how is grid given
+
+
+Traversal:
+	recurse through grid
+		capture recurrence
+		but stack 
+		visited grid
+
+Work through an example
+[	1 	1   0 ]
+[   1   0   0 ]
+
+(0,0)
+	r(0,1)
+	r(1,0)
+
+def find_clusters(grid):
+	n_rows = len(grid) #2
+	n_cols = len(grid[0]) #3
+	cnt = 0
+
+	def recurse(i, j):
+		if grid[i][j] == 0:
+			return 
+		
+		grid[i][j] = 0
+
+		for x, y in [ (i, j+1), (i+1, j) ]:
+			if i < n_rows and j<n_cols:
+				recurse(x, y)
+		cnt += 1
+
+	recurse(0, 0)
+	return cnt
+
+
+# ------------------------------------
+# 9.16
+# ------------------------------------
+
+
+# ------------------------------------
+# 9.17
+# ------------------------------------
+
+
+
+# ------------------------------------
+# 9.18: Balanced Strings
+# ------------------------------------
+Given
+	string of lower case letter and paranthesis
+Constraints
+	remove MIN number of paranthedid
+	valid string: () are balanced
+Return
+	valid string
+Clarification
+	what happens if s is not oringally balanced?
+	s =""
+
+constraint:
+	balanced --> stack | cnt
+greedy approach: no guarantee of global optimum
+	ONLY add pars to solution when see right )
+
+		) 	a 	(	 b 	( 	( 	c 	d 	) 	e 	( 	f 	) 	g 	)
+stack           2       4   5           2      10       2       1
+res         a        b          c   d       e       f       g
+	
+from collections import deque
+def is_balanced(s):
+	stack = deque()
+	result = [''] * len(s)
+	for i, v in enumerate(s):
+		if v == '(':
+			stack.append(i)
+		elif v = ')':
+			if stack:
+				latest_left_paranthesis_index = stack.pop()
+				res[latest_left_paranthesis_index] = s[latest_left_paranthesis_index]
+				res[i] = ')'
+		else:
+			res[index] = v
+
+	return ''.join(res)
+
+
+
+# ------------------------------------
+# 9.19: Generate Permutations
+# ------------------------------------
+Given:
+			[2,3,4]
+					[2]
+
+		[3,2]				[2,3]
+
+[4,3,2] [3,4,2]	[3,2,4] [4,2,3]	[2,4,3] [2,3,4]
+
+def create_permutation(arr):
+	permutations = deque( [] )
+	result = []
+	for i in range(len(arr)):
+		for j in range(len(permutations)):
+			one_permutation = permutations.pop()
+			for k in range(len(one_permutation)+1):
+				curr = list(one_permutation)
+				curr.insert(k, arr[i])
+				if len(curr) == len(arr):
+					result.append(curr)
+				else:
+					permcuations.append(curr)
+
+# ------------------------------------
+# 9.20
+# ------------------------------------
+
+
+
+
+
+
+# ------------------------------------
+# 9.21
+# ------------------------------------
+Give
+	2 unsorted arrays: [1,3,5,6,7] [2,4,3,5,6]
+Find
+	max contiguous match cnt, ie 3 for [3,5,6]
+Constraints
+	
+Clarification
+	if one of array is empty
+	repeat numbers 
+
+
+Branstorm
+	brute force --> 
+		generate subset --> exponential --> 2^n
+		2 array --> 4^n 
+		comparision --> kn 
+		total --> 5^n
+
+	Data structure
+
+	dp: sub-currence
+
+			'	2	4	3	5	6
+		'
+		1       0
+		3           1
+		5               2
+		6                
+		7
+
+	def max_contiguous_cnt(arr1, arr2):
+		n = len(arr1) 	# 5
+		m = len(arr2)	# 6
+
+		dp = [ [0] * (m+1) ] * (n+1)
+		max_cnt = 0
+
+		# offset the index for both arrays by one 
+		for i in range(1, n+1):
+			for j in range(1, m+1):
+				if arr1[i-1] == arr2[j-1]:
+					dp[i][j] = 1 + dp[i-1][j-1]
+					max_cnt = max(max_cnt, dp[i][j])
+
+		return max_cnt
+
+
+
+# ------------------------------------
+# 9.22: Max Increasing Sum Subsequence
+# ------------------------------------
+Given
+	an array of pos integeger
+Find
+	max sum
+Constraints
+	largest increasing subsequence 
+		non-contiguous
+		update sum ONLY if arr[i] > all prvious characters
+Clarificaiton
+	integer overflow
+	empyty string
+
+Brainstorm
+	what defines start of an sequence?
+
+	Bruteforce: n!
+		generate subset -> 2^n
+		compare -> n
+		total --> 3^n
+
+	Data Structure:
+		map, but lose order
+
+	DP: subproblems are dependent: dp[i] = dp[{0-i}] + arr[i]
+
+			3		2		5 			7		6				
+	i                       -
+	j
+	dp 		3   	2	max(dp[0-j], dp[i])
+
+	def max_noncontiguos_subsequence(arr):
+		n = len(arr)
+		dp = list(arr)
+		for i in range(n):
+			for j in range(i):
+				candidate = dp[j] + arr[i]
+				if arr[i] > arr[j]:
+					if dp[i] < candidate:
+						dp[i] = candidate
+		return max(dp)
+
+
+# ------------------------------------
+# 9.23
+# ------------------------------------
+Given 
+	a pos int n
+Find
+	# of perfect squares that sums to n
+
+Constraints
+	perfect squares = 1, 2, 4, 
+	min transaction
+
+
+	0	1	2	3	4	5	6	7	8	9	10	11 	12	13
+1	0	1   2   3   4   5   6   7   8   9   10  11  12  13
+4   0               1               2   3    4   5   6   7
+9   0                                   1    2   3   4   4           
+16  0
+25  0
+.
+.
+
+# 13
+def perfect_squares(n):
+	max_square = 1
+	while max_square**2 < n:
+		max_square+= 1
+
+	dp = [ [0] * (n+1) ] * max_square
+	for i in range(n)
+		dp[0][i] = i
+
+	for i in range(2, n+1):	#9
+		for j in range(1, int(i**0.5)+1): # [1,2,3]
+			squares = j**2
+			if i%square == 0:
+				offset = j - sqaure
+				dp[i][j] = dp[i][offset] + 1
+			else:
+				dp[i][j] = dp[0][j]
+
+	min( [dp[r][n+1] for r in range(max_squares) if dp[r][n+1] != 0 ] )
+
+
+def perfect_squares_v2(n):
+	res = [x for x in range(n+1)]
+	for i in range(2, n+1):
+		for j in range(1, int(i ** 0.5)  + 1):
+			res[i] = min(res[i], res[i-j] + 1)
+	return res[n]
+
+
+# ------------------------------------
+# 9.24
+# ------------------------------------
+Given
+	n = number
+	k 
+Output
+	array of num
+Constraints
+	n = 1 to n
+	k = size of array
+Clarification
+	n < 0?
+	k == 0; k==-1
+	order does not matter
+
+Algo Brainstorm
+	DS?
+	subset problem
+	recursion: backtracking?
+
+Work through example
+					(i=0, k=0)
+	 (i=1,k=1) 		(i=2,k=1)  	(i=3,k=1)  
+	(12,2) (12,2)
+(123,3)
+
+
+def combination(n, k):
+	subsets = []
+	for i in range(1, n):
+		start_inex = i
+		for j in range(start_index, len(subset)):
+			if len(subset) > k-1:
+				continue
+			copy = list(subsets[j])
+			subsets.append(copy.append(i))
+
+	return [for s in subsets if len(subset)== k]
+		
+def combination_with_backtrack(n, k):
+	subsets = []
+	def recurse(start_index, candidate):
+		if len(candidate) == k:
+			subset.copy(list(candidate))
+		if start_index > n or size>k:
+			return
+		for i in range(start_index, n+1):
+			candidate.append(i)
+			recurse(start_index+1, candidate, size+1)
+			candidate.pop()
+
+
+# ------------------------------------
+# 9.25
+# ------------------------------------
+
+
+
+
+
+# ------------------------------------
+# 9.26
+# ------------------------------------
+
+
+
+# ------------------------------------
+# 9.27
+# ------------------------------------
+
+
+
+
+# ------------------------------------
+# 9.28
+# ------------------------------------
+
+
+
+
+# ------------------------------------
+# 9.29
+# ------------------------------------
+
+
+
+# ------------------------------------
+# 9.30
+# ------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

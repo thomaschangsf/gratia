@@ -1,0 +1,438 @@
+Hi 
+
+// ----------------------------------------------------------
+// Confidence
+// ----------------------------------------------------------
+	- Be confident.  You are not making this up; you have done this. You need me.
+
+	- Summary: You will be hard pressed to find someone else dedicated and passion, focused etc..  I have a plan, My action shows it.
+
+	- Scenario: Where you disagree?
+		Context: State the facts..
+
+		Solution: Sit down, and understand&communicated the scenarios.  What are the facts? Where can we compromise. 
+
+	- Here's what I want to do. Here;s how I would do it. But don't give all your cards away.
+
+	- As a coach:
+		Describe the problem, goal: what we are trying the accomplish; ie success criterea. Let them figure it out.  Figuring out is important. And give feedback.
+
+
+
+
+// ----------------------------------------------------------
+// Questions
+// ----------------------------------------------------------
+Ex1: Find a median of a sequence
+	Given: a = [5, 2, 3, 11, 4] 
+	Return 4
+
+	def findMedian(arr: List[int]):
+    
+    # Sort the array  O(nlogn)
+    arr.sort()
+    
+    length = len(arr)
+    
+    # If length is odd
+    if length % 2 == 1:
+        return arr[length//2]
+    
+    # If the length is even
+    index1 = length//2
+    index2 = index1 - 1
+    return (arr[index1] + arr[index2])/2
+    
+
+# Ex2: Given a sequence of words, return the anagram with the highest count
+#     Given: words = ['abc', 'cab', 'acb',  'xyz', 'yxz']
+#     Return: 3 
+# Anagrams: bac  abc  cab
+Ex2: Given a sequence of words, return the anagram with the highest count
+	Given: words = ['debit card', 'bad credit', 'apple']
+	Return: 2 
+
+	- candidate codes first
+	- solution is not space nor run time efficient
+	
+	def calculate_freq_dict(word: str):
+	    """
+	    Return s the frequency dictionary (of characters) for any word
+	    Eg. Input: "apple", we return {'a':1,'p':2, 'l':1, 'e':1}
+	    """
+	    freq = defaultdict(int)    
+	    for ch in word:
+	        freq[ch] += 1
+	    return freq
+
+	def max_anagrams(words: List[str]) -> int:
+	    # (key, val) = (frequency_dict, occurence count)
+	    freq_meta_dict = {}
+	    
+	    for word in words:
+	        word_dict = calculate_freq_dict(word)
+	        if word_dict in freq_meta_dict:
+	            freq_meta_dict[word_dict] += 1
+	        else:
+	            freq_meta_dict[word_dict] = 1
+	    max_count = 1
+	    
+	    for key, val in freq_meta_dict.items():
+	        max_count = max(max_count, val)
+	    return max_count
+
+	Time: O(n*max_len(word))
+	Space: O(n*max_len(word))
+
+	def most_frequent_anagram(seq):
+    
+    freq = defaultdict()
+    
+    for word in seq:
+        encode = [0] * 26
+        for char in word:
+            encode[ord(char) - ord('a')] += 1
+        # [1, 1, 1, 0, ...,] for word = bca
+        sorted_chars = [] 
+        
+        for i in range(26):
+            for j in range(encode[i]): # [3,2,0, 0, ...,0 ] --> aaabb
+                sorted_char.append(chr(ord('a') + i) 
+
+        sorted_word = "".join(sorted_char)
+        freq[sorted_word] += 1
+    
+    return max(freq.values)
+
+
+Ex3: Return a powerset
+	Given S={0,1,2}
+	Return: [0], [1], [2], [0,1], [0,2], ... [0,1,2]
+
+Ex4: Gernate an n-gram of a sentence, removing all special characters
+	Given: San, Francisco!
+	Return:  [S, Sa, San, F, R, A, ... Fr, ra, ... Fra, ran, ani, ...]
+
+	def find_ngrams(sentence: str, n: int) -> List[str]:
+	    # Remove punctuation
+	    s = sentence.strip(['*', ',', '!']) # Extendable
+	    res = []
+	    for i in range(len(s)):
+	        for j in range(1, n):
+	            if i+j <= n:
+	                res.append(s[i:i+j])
+
+	    c = Counter(res)
+	    print(c.most_common(10))
+
+	    freq_dict = default_dict(int)
+	    for ngram in res:
+	        freq_dict[ngram] += 1
+	        
+	    n_gram_count = freq_dict.items()
+	    # n_gram_count : [("abs", 1), ("def", 2) ... ]
+	    
+	    n_gram_count.sort(key = lambda x: x[1], reverse=True)
+	    most_frequent = []
+	    for word, freq in n_gram_count:
+	        most_frequent.append(word)	        if len(most_frequent) == 10:
+	            break
+	            
+	    return res
+
+
+
+
+Exampl 5:
+  Find the top10 buyers with greatest customer satisfaction
+
+Given 
+  (1) sentiment model that predicts a score
+      classifier model  --> (label_pos | label_neg, prob)
+
+  (2) DW table:  buyer_id | review_text
+  
+  from sql.functions import col
+  
+  
+  class = udf (lambda x: classifier_model(x)[0])
+  score = udf (lambda x: classifier_model(x)[1])
+
+  DW = DW.withNewColumn('class', class('review_text')).withNewColumn('review_score', score('review_text'))
+  DW = DW.where(col('class') > 0)
+  
+  buyer_ids = DW.orderBY(col('review_score').desc()).select(col('buyer_id)).nrows(10).collect()
+  
+  buyer_ids_10 = [item.buyer_id for item in buyer_ids]
+  
+
+
+
+
+
+// --------------
+// 2021
+// --------------
+
+LRU cache:
+	double linked list and map
+
+	coding
+
+
+Broad
+	design a ML systems
+
+
+
+
+ML Quick 
+	https://www.educative.io/courses/machine-learning-system-design
+
+
+forums: 
+	https://www.1point3acres.com/bbs/thread-713903-1-1.html
+
+	Feature Engineering
+
+	Model training & test
+
+	A.V Tests'
+
+	Loop back
+
+
+
+	FB: 700k/4; 170k
+
+
+Review staff
+	5-6 rounds
+		6th round is a repetitino
+
+	5; each 45 minutess
+		2 coding
+		2 design
+		1 behavorial
+
+	Coding
+		goal to finsih 2 medium 
+
+		1 problem; expect to have 2 problems
+
+		medium difficult
+
+		practice: very basic and standard.  
+
+		if get 1 queston, it will be difficult. not likely
+
+		looking: 
+			problem sovling, verification
+			solid on fundametnals: algorithm, DS
+			run time complexity, hopfully an elegant solution
+			is code clean (coderpad), ie whiteboard.  
+				Think of common edge casse
+				Use example to walk through code
+				Don't let interviews ask you, be proactive
+
+	Design
+		(1) ML Practical design
+			How do you muse ml to design real problems, in fb
+				ie: ad ranking, news feed ranking, recommend places based on people, detec hate speach, how to remove weapon sales
+
+				generalize problem to sarch, recommendatoin, classification
+
+				problem: formulate the qustion
+					Purposely vauge (5 minutes)
+						what does success look
+						how does it impact bigger problem
+						what is the ground truth
+						what is the ml metrics (success) ****
+						They won't give you the direct; sometimes it's gray
+						if make assumption, call it out
+
+					Goal: " I am going to frame this a ranking"
+
+			Data
+				cold start
+
+			Features
+				hoslitcally, not just oone
+
+			Models
+				model archituecture: 4 models; pros and cons
+					training cost, constraints
+
+			Offline and Online 
+
+			Re-iterate design
+
+			First go over breadth, and deep dive. Some poeple focust on feature engineering or model. Deep dive. Purpose is to see if you can come with alternative. Pro con. How to mitigiate piftalls. Can you justify your decision.
+
+			Do you have a good picture
+
+			I need to drive the conversation; run with it.
+				Make sure interviewer is following your process; they will interrupt you if they want to probe more.  Assume I will be speaking 75% of time.  
+
+				They may seem semi-adverserial
+
+				I am offering my expertise. I am CTO; interviewer is the CEO
+
+			
+			Don't need to draw; but it may help to facillitate
+
+
+		(2) System design
+			Large scale distribution system
+
+			can be fb related; 
+				fb search engine; 
+				suggestions
+
+			can be a broad
+				if redesign, how would you change?
+
+			(A) Ask questions (3-5 min) (Problem exploration)
+				signal: product and business sense. What is business goal. What does user really want?
+
+			(B) Draw diagram
+				5-6 boxes 
+				each component has a clear responsiblity
+				data flow between compoenents
+				Deal with Data
+
+			(C) Pick 1 -2 component to deep dive
+				Pivot that you know better
+
+				Come up with alternatives; pro/cons; mitigate risk; longer term
+
+				large scale distributed: quantitive piece
+					storage
+					how mancy machines: back of envelop calculation: quantitive analysis
+
+			Buffer round: 15 minutes (maybe)
+				drawing tools
+
+
+	Behavorial
+		May ask 5 questions. Each question has about 5 minuts
+
+		give signal at which level ($)
+		
+		can i be succesfful
+
+		soft skills?
+
+		My experiences; people 
+
+		recent work, that you are proud of; why you are proud; your impact; what is challenging
+			show scope of work: 
+				collobaration with org
+				leading engineers
+
+		projects that did not do well
+			ie: much longer; much more complex; design decision that I regret
+			
+			want to see: if not going well, can I peserver and be proactive. How to unblock.
+
+			what did I learn? 
+				growth 
+				how do I do things differently
+
+		ability to work in unstrucuture material
+			bottom up; flat org; minimal process
+			senior enginer identify problems; bring poeple long; and 
+				vague; do not have all the data; still need to 
+				how to mitigate risk
+				how to communicate 
+				"Tell you me a problem where you do not have that much resources"
+				"Tell me a project a very vague problem; I need to drive direction; how to measutre progress; how to measure success"
+				"How to communicate with "
+			Work with partners
+				if people have different perspective; how to drive alignment even if disagreement
+
+		how do you resolve conflicht (will come up)
+			everyone is a SW.  You should be able to work with different levels.  Conflict with other poeple; deliver feedback; sit down with p
+
+			how to work with tough worker. why are they tough to work with
+				what kinds of co-worker do you like to work with
+
+		what is my motivation; what is my goal in this career transitin
+			do you have a plan?
+				do you know your strenth; weakness			
+				use fb to grow
+				"Tell me a recent feebdack; how do you use it grow"
+
+		TODO:
+			(1) pick your stories
+				projects
+				peoples
+			(2) for each story, have a 2-3 poits (STAR)
+				situation
+					context
+				what you did
+				outcome/result
+
+				interviewer may ask more probing question
+
+
+		What does a good answer
+			do not dodge any questions; ie never ran into any bad co-ower; be genuine
+				if needed, think for 1 minute
+				
+			did you have relevant experience
+				scope of work
+
+			unstuructures --> 
+				how do you approach; 
+				drive consnesus
+				show empathy: see different perspectives
+
+				culture: open, move fast, and 
+					build communities 
+					ex: are you open to Feedback, inputs? 
+					ex: impact: can you clearly state the impact to customer; business; across organization; how to measure sucess
+					ex: be bold, move fast:  in miniaml process, you need to make a deicsion without all the data and resources.  How do you know if you can mitigate.  Do you rather move fast, and measure along the way; or do you want to wait (-)
+
+					sginals tie to your cutuures
+						peserversance
+						dealint with active
+
+		what is your workstyle
+			will you be happy in FB?
+
+Resources
+	Webinar:
+		kind of like the interview
+
+	If you have specific quesiton, can talk with a ML engineer to share experience. what helped them to interview; what was must surprising. 
+		Expeically design: so vaugue; how deep to dig into 
+
+
+	References
+		ask their experiences; work culture; they can be a good resuorces
+
+
+
+FB
+	coding is basic bar: 
+		can code; clean efficient code
+
+		passing the coding round is not sufficient
+
+		no brain teasers; no dp; very fundamental
+
+
+	design (very important)
+		experience how do you use
+
+		breadth/complete
+			think first; explore the problems
+
+		be able to justify solution
+
+		treat ML and system design equally important. not just purely data science. 
+
+	behavioral: spend about a weekend
+		hard to fail behavioral round, but impact signals the level discussion
+

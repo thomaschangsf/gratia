@@ -1,0 +1,389 @@
+https://linkedin.zoom.us/j/98371011801?pwd=MDVZYnUxdHkwSk9sb2pScXF1VlRFdz09
+	983 7101 1801
+
+// --------------------------------
+// Data Structure + Algo: 9-10 [WEAK]
+//		Coderpad: https://coderpad.io/NHAKK4XT
+//		Rakesh + Aaron
+// --------------------------------
+# Multi-threads calls each of thes functions
+# Goal: Find average of a key for a specified window time
+
+# Assume enough storage
+
+// Messages are <key, value> pairs
+class Msg # high message cnt
+{
+  long m_key;  // unique
+  long m_val;
+};
+ 
+// This is the sliding window that needs to be implemented.
+class Window
+{
+  // Define a window of a certain size in microsecond granularity
+  Window(int nMicrosecs); # 5 min --> 6 months
+ 
+  // add a new incoming message
+  addMsg(Msg m); # insert 
+ 
+  // get a message given a key. If the message does not exist or message is older than the window size, return NULL
+  // it's *important* to be correct
+  Msg getMsg(long key); # get 
+ 
+  // get the average of message values in the window. Like getMsg, it's important to be correct.
+  Double getAvg(long key); # aggregation 
+};
+
+# get:
+#    map[key]: O(1)  
+
+# insert: O(1)
+
+# aggregation
+#        micro --> sequence: [5 min] [ ] ...   [6months] --> parallelize for speedup (maybe)
+#            history =[ [100]  [200] [100] [100] ]--> getMsg() 150? 
+#               t0.   t1 .  t2   t3    getMsg(t1) --> (t1 -- t3)  
+#            avg()
+# Option1:    1) find earlier bucket : binary search(t1) --> log(N) 
+#             2) sum[ earliest : current]
+
+# Option2: O(1)
+#            map() --> {t_x --> index of history array}
+                        {t1 --> 1}
+                        history[1]
+        
+# Cache efficiently: aggregate thread in background
+#    getMsg("MSFT", t1)  
+#       cache ( stock, time_bucket) --> 
+#    synchromziantion + thread safety concrns on state
+
+class Window
+{
+  // Define a window of a certain size in microsecond granularity
+  Window(int nMicrosecs); # 5 min --> 6 months
+ 
+  // add a new incoming message
+  addMsg(Msg m); # insert 
+ 
+  // get a message given a key. If the message does not exist or message is older than the window size, return NULL
+  // it's *important* to be correct
+  Msg getMsg(long key, time t1); # getMsg('MSFT') --> 
+ 
+  // get the average of message values in the window. Like getMsg, it's important to be correct.
+  Double getAvg(long key); # aggregation 
+};
+
+
+from collections defaultdict, namedtuples
+
+Msg = namedtuples('Msg', ('m_key', 'm_value') )
+class Window:
+    def __init(self, microseconds):
+        self.lookup = defaultdict[list]
+        self.granularity = microseconds
+        self.cache = defaultdict[Double]
+        pass
+    
+    def __hash_key(self, msg, time):
+        #TODO
+        # key = fnc(msg.key, time) --> bucket index
+        pass
+    
+    def addMsg(self, msg, time):
+        key =  self.__hash_key(msg, time)
+        self.lookup[key].append(msg.m_value)
+        return
+    
+    def getMsg(self, msg, time):
+        key =  self.__hash_key(msg)
+        if self.lookup[key]: 
+            return self.lookup[key]
+        else:
+            return None
+    
+    def getAvg(self, key, time):
+        return self.cache[key]
+        
+    
+    def update_cache(self):
+        for key, buckets in self.lookup:
+            cum_sum = 0
+            for i in range(buckets):
+                cum_sum += self.lookup[key][i]
+                cache[(key, i)] = cum_sum / (i+1)
+        
+
+
+
+
+// --------------------------------
+// Coding: 10-11 [WEAK]
+//		CoderPad: https://coderpad.io/76PWGXQG
+//		Sunitha Beeram
+// --------------------------------
+
+# Thread safety: LATER 
+protected class Location {
+ 
+    private final int index;
+ 
+    public Location (int index) {
+      this.index = index;
+    }
+ 
+    public int getLocation() {
+      return index;
+ 
+    }
+  }
+
+public abstract class pBuffer {
+ 
+  protected final int BLOCK_SIZE = 1024;
+  protected final int BLOCK_COUNT = 1024;
+ 
+  /*
+   * A sample 1mb buffer, to be allocated in 1k chunks.
+   * Other sizes are definitely possible.
+   */
+ protected byte[] buffer = new byte[BLOCK_COUNT * BLOCK_SIZE];
+ 
+  public pBuffer() {
+    /*
+     * Reads the buffer from file and dumps the contents into the array,
+     * restoring the state to what it was when onShutdown() was called
+     */
+    fillBufferFromFile();
+  }
+ 
+  // Location: fnc( virtual memory --> abastraction )
+  // Returns a Location for a free block of the buffer, suitable for passing to put, get, and free
+  public abstract Location create() throws NoAvailableSpaceException;
+ 
+  // Stores up to BLOCK_SIZE bytes of data in location loc. Data beyond BLOCK_SIZE bytes should be truncated
+  public abstract void put(Location loc, byte[] data);
+ 
+  // Returns the BLOCK_SIZE bytes of data stored at location loc, or null if loc is unallocated
+  public abstract byte[] get(Location loc);
+ 
+  // Indicates that an area of the buffer is no longer needed, and can be reused
+  public abstract void free(Location loc);
+ 
+  // Called on shutdown
+  private void onShutdown() {
+    /*
+     * writes the full contents of the buffer to disk,
+     * for reading when later invoked by the constructor
+     */
+    writeBufferToFile();
+  }
+}
+
+EMPTY_BUFFER = ''
+class BufferImpl(pBuffer):
+    def __init__(self):
+        self.buffer = fillBufferFromFile()
+        self.available_slots = self.__fetch_available_slots()
+        pass
+    
+    def __fetch_available_slots(self):
+        # write avaialbe slot to disk; what is the key/address?
+        return [index for index, content in enumerate(self.buffer) if content == EMPTY_BUFFER]
+        
+    def create(self):
+        if self.available_slots:
+            index = self.available_slots.pop()
+            return Location(index)
+        else:
+            throw NoAvailableSpaceException("ERROR")
+            
+    def put(self, location, data):
+        index = location.getlocation()
+        if 0<= index <=BLOCK_COUNT:
+            # Assume python copy library copies data into pBuffer byte by byte
+            self.buffer[index] = copy(data, BLOCK_SIZE)
+            writeBufferToFile()
+
+    # Returns the BLOCK_SIZE bytes of data stored at location loc, or null if l is unallocated
+    def get(self, location):
+        index = location.getlocation()
+        if 0<= index <=BLOCK_COUNT:
+            return self.buffer[index]    
+        else:
+            return NONE
+    
+    # Indicates that an area of the buffer is no longer needed, and can be reused
+    def free(self, location):
+        # clear buffer at index to ; sets to EMPTY_BUFFER
+        clear(self.buffer[location.index])
+        writeBufferToFile()
+        self.available_slots.append(location.index)
+        
+
+
+// --------------------------------
+// Craftmanship: 11-12 [STRONG]
+//		Vinay
+// --------------------------------
+
+debt
+	page load: twice as long
+
+
+
+new feature on this product: 
+	every one is working on new featuers
+
+
+Balance: 
+	Business deliverable with tehcnical 
+
+technical + leader
+	create a good direction
+	envrionment to create their own solutions
+	 	influence, give better , backs it up with paper and idea
+	 		let other engineer grow
+
+	 some: good technical: setting examples
+	 other: look at bigger picture, and metnor
+	 	compassionate leadership
+
+	 Staff enginner
+	 	sets good examples
+	 	enables/support growth in younger team memebrs
+	 	influence structrues to 
+	 	scope accurately, sets direction and gives context
+
+
+
+// --------------------------------
+// Concurrency: 1-2 [STRONG]
+/chang
+
+//		Hangfei
+// --------------------------------
+
+public class HelloWorld {
+
+  public static void main(String[] args){
+    //Prints "Hello, World" to the terminal
+    System.out.println("Hello, World");
+  }
+
+}
+
+
+
+// implement the following interface that executes a given task at a specified future time:
+
+public interface DelayedScheduler {
+    void delayedRun(long timeToRunFromNow, Runnable task);
+}
+public interface Runnable {
+    public void run();
+}
+  
+
+
+
+public class Server {
+  public void main(String[] arg) {
+    DelayedScheduler scheduler = new MyDelayedScheduler(???);
+     
+    
+    scheduler.delayedRun(1000 ms, task);
+    scheduler.delayedRun(??, ??);
+    scheduler.delayedRun(??, ??);
+    Thread.sleep(10000000);
+  }
+}
+
+
+
+public class MyDelayedScheduler implements DelayedScheduler {
+   // implement here
+   #  DS: [ ordered by time ]
+   
+    #   map: { 
+    #        100 : [ task1, task2 ] 
+    #        300 : [ task1, task2 ] 
+    #        200 : [ task1, task2 ] 
+    #    }.
+
+    #    time: [ 100, 200, 300] 
+
+    # Edge cases
+    #        150 : task100  current_time=149 ***  --> wake event loop (notify)
+    #        empty map --> event_thread.wait()
+
+    
+    # event loop: worker thread
+    #        t1=250 --> keys that I need to operate
+    #        given current time = 250 --> binary search on time_array --> return 100, 200
+    #        java: conditional lock on time
+    
+    def delayedRun(time, task):
+     
+}
+
+from collections import defaultdict
+import threading import Condition, Thread
+class MyDelayedScheduler(DelayedScheduler):
+    def __init__(self):        
+        self.lookupmap = defaultdict[list]
+        self.times = PrirotyQueue()
+        
+        self.next_time = time.get_time
+        self.condition_var = Condition() # condition variable
+        self.mutex = Semaphore(0)
+        
+        pass
+    
+    def delayedRun(time_offset_ms, task):
+        mutex.acquire():
+        absolute_time = time.get_current_time() + time_oofset_ms
+
+        self.lookupmap[absolute_time].append(task)
+        # TODO: update time            
+
+        condition_var.signal()
+        mutex.release()
+        
+        
+    def event_loop():
+        
+        while time.get_time() < self.next_time:
+            self.condition_var.wait()
+                
+        # access lookupmap
+        mutex.acquire()
+        for task in self.lookupmap[next_time]:
+            task.run() # MAYBE Future
+        del self.lookupmap[next_time]
+        mutex.release()
+
+
+
+
+
+// --------------------------------
+// Software Design + Architecture: 2-3 [WEAK]
+//		Tao Cai
+// --------------------------------
+
+
+
+
+// --------------------------------
+// Host Leader: 3-4
+//		Scott Banachowski
+// --------------------------------
+
+
+		1		->		22		-> 	33
+
+prev	cur 
+			
+					   nxt
+
