@@ -1,0 +1,11 @@
+Pyspark model inferencing is 2nd class citizen
+	- model serialized to worker, in another process called py4j
+	- due to python, and many of its implementations in c, it is hardware dependent. SO, if the ecosystem is not flexible to allow user to set their own virtual env, it is really hard and fragile to support model inferencing
+	- In comparison, scala/Spark which runs with JVM has easier job sending the code to the driver program in master node. From there, spark uses closure to decide which class to serialize to worker node.
+	- Python serialization also has a computation overhead, from serializing from worker node to py4j process. To overcome this, pyarrow storage format is shared between jvm and python, so we can do 1 less serialization.
+
+
+My notebook shows how to use model discovery as part of the model inferencing flow.
+	
+
+
