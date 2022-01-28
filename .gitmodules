@@ -22,3 +22,7 @@
 	path = 02_ml/code/transformers
 	url = git@github.com:thomaswchang/transformers.git
 	branch = master
+[submodule "02_ml/tools_code/gcloud_data_science/ml-design-patterns"]
+	path = 02_ml/tools_code/gcloud_data_science/ml-design-patterns
+	url = git@github.com:thomaswchang/ml-design-patterns.git
+	branch = master
