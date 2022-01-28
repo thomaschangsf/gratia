@@ -1,0 +1,162 @@
+
+Reference:
+    https://www.mlflow.org/docs/latest/tutorials-and-examples/tutorial.html
+    https://www.mlflow.org/docs/latest/quickstart.html
+    https://developer.ibm.com/technologies/data-science/articles/first-impressions-mlflow/
+
+Theory
+    MLFlow has 3 components:
+        Tracking: Record and query experiments; code, data, config, results. This is really annotatiing results.
+            Tracking is shown on a Flask|gunicorn webserver with React UI
+        Projects: Package format compatible on any platform (like Java). This is really training.
+            Defines how to run a training session: configuration, dependencies, data
+        Models: Serialize format to deploy across multiple platforms. This is really DEPLOYMENT.
+            Defines how model can be deployed to MULTIPLE platforms/means (ie python function, sklearn)
+
+
+
+// ------------------------------------------------
+// Example/sklearn_elasticnet_wine
+// ------------------------------------------------
+Running through mlflow examples: ./examples/mlflow/quickstart/mlflow_tracking.py
+    pushd /Users/thchang/Documents/dev/git/ml-tools/examples/mlflow/mlflow/examples/sklearn_elasticnet_wine
+
+    - Run a training locally
+        Training requires setting up the environment.  For project defintion, look at ./examples/mlflow/mlflow/examples/sklearn_elasticnet_wine
+        Notice there is conda.  If we want to use our local environment, add --no-conda environment.
+
+        # Exp1: run with default params. Will put the result in mlruns, which resides in the direcotry you exectued the training command.
+        python train.py
+
+        # Exp2: run with my own params
+        python train.py 0.01 0.2
+
+        Model saved in mlruns/0/ in peer directory where we ran the command
+    - start and see training ui
+        cd to directory containing the mlrruns
+        mlflow ui -p 1000 &
+        localhost:5000
+
+    - Package/test training code with conda; create the artifact
+        Even though the local training, via python, will create an artifact, it is best to test out with mlrun in final step
+
+        An artifact allows re-creation of a model, such as serving. Artifact consists of
+            - model serialized: ie model.pkl
+            - MLmodel
+            - conda.yaml
+
+        This steps creates the artifact, model serialized, so we can serve it later
+
+        define
+            MLProject file      # specify hyperparameter, entry point
+            conda.yaml          # for library dependencies
+
+        create artifact
+            pushd /Users/thchang/Documents/dev/git/ml-tools/tools/mlflow/mlflow/examples/sklearn_elasticnet_wine
+            mlflow run  . -P alpha=0.42 # Does not work
+
+            In some cases, use local environment. Will have issue when I serve
+            mlflow run  --no-conda . -P alpha=0.42
+
+    - Serve the model using the artifact generated
+        Find run-id
+            a) sgrep "RUN-ID-FROM-RUN"
+            b) look into the mlruns folder
+        find the full path to model subdirectory located in the artificats.  Can view from ui or direcotyr
+
+        mlflow models serve --no-conda -m /Users/thchang/Documents/dev/git/ml-tools/tools/mlflow/mlflow/examples/sklearn_elasticnet_wine/mlruns/0/7f5406d16daa4137b746e098683771ad/artifacts/model -p 1234
+
+        curl -X POST -H "Content-Type:application/json; format=pandas-split" --data '{"columns":["alcohol", "chlorides", "citric acid", "density", "fixed acidity", "free sulfur dioxide", "pH", "residual sugar", "sulphates", "total sulfur dioxide", "volatile acidity"],"data":[[12.8, 0.029, 0.48, 0.98, 6.2, 29, 3.33, 1.2, 0.39, 75, 0.66]]}' http://127.0.0.1:1234/invocations
+
+
+// ------------------------------------------------
+// Examples/LightGBM
+// ------------------------------------------------
+    cd /Users/thchang/Documents/dev/git/ml-tools/tools/mlflow/mlflow/examples/lightgbm
+
+    - Train locally
+        python train.py --colsample-bytree 0.8 --subsample 0.9
+        python train.py --learning-rate 0.4 --colsample-bytree 0.7 --subsample 0.8
+
+    - Package/test training code with conda; create the artifact
+        mlflow run  --no-conda . --param-list learning-rate=0.4
+
+        mlflow run --no-conda /Users/thchang/Documents/dev/git/ml-tools#tools/mlflow/mlflow/examples/lightgbm -P colsample_bytree=1.0 -P learning_rate=0.1 -P subsample=1.0
+
+        lightgbm has lots of other parameters to control: https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.train.html
+            Even though lightgbm has all these knobs, train.py only exposes learning-rate, colsample-bytree, --subsample
+
+            -P colsample_bytree=1.0
+            -P learning_rate=0.1
+            -P subsample=1.0
+
+            -P categorical_feature=auto
+            -P early_stopping_rounds=None
+            -P feature_name=auto
+            -P keep_training_booster=False
+            -P metric=multi_logloss
+            -P num_boost_round=10
+            -P num_class=3
+            -P objective=multiclass
+            -P seed=42
+            -P verbose_eval=True
+
+    - start ui on port 5001; specify artifact directory
+       mlflow ui --default-artifact-root /Users/thchang/Documents/dev/git/ml-tools/tools/mlflow/mlflow/examples/lightgbm/mlruns --port 5001 &
+
+    - Serve model
+        mlflow models serve --no-conda -m /Users/thchang/Documents/dev/git/ml-tools/tools/mlflow/mlflow/examples/lightgbm/mlruns/0/d15f7291280b4a62bd62b1e1579d47e4/artifacts/model -p 1234
+
+     - Request
+        How to find columns? look at train.py.
+
+        python3
+        import sklearn
+        import pandas
+        from sklearn import datasets
+        data: sklearn.utils.Bunch = datasets.load_iris(as_frame=True) # return as panda, instead of nd_array
+        data_panda: pandas.core.frame.DataFrame = data.data
+        data_panda.head(5)
+        #        sepal length (cm)  sepal width (cm)  petal length (cm)  petal width (cm)
+        #        0                5.1               3.5                1.4               0.2
+
+        data.target
+        data.target_names
+            array(['setosa', 'versicolor', 'virginica'], dtype='<U10')
+
+        curl -X POST -H "Content-Type:application/json; format=pandas-split" --data '{"columns":["sepal length (cm)", "sepal width (cm)", "petal length (cm)", "petal width (cm)"],"data":[[6.2, 3.4, 5.4, 2.3]]}' http://127.0.0.1:1234/invocations
+            Response = [0.09901781005513131, 0.11653168823704504, 0.7844505017078237]
+            reponse maps to one of the 3 classes; take the highest probability, ie virginica
+
+
+
+// ------------------------------------------------
+// Examples/LightGBM: Python code
+// ------------------------------------------------
+from sklearn.metrics import accuracy_score, log_loss
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, log_loss
+import lightgbm as lgb
+import matplotlib as mpl
+import mlflow
+import mlflow.lightgbm
+
+with mlflow.start_run() as run:
+    params = {
+        "objective": "multiclass",
+        "num_class": 3,
+        "learning_rate": 0.1,
+        "metric": "multi_logloss",
+        "colsample_bytree": 1.0,
+        "subsample": 1.0,
+        "seed": 42,
+    }
+    model = lgb.train( params, train_set, num_boost_round=10, valid_sets=[train_set], valid_names=["train"])
+    y_proba = model.predict(X_test)
+    y_pred = y_proba.argmax(axis=1)
+    loss = log_loss(y_test, y_proba)
+    acc = accuracy_score(y_test, y_pred)
+    model_uri = "runs:/{}/sklearn-model".format(run.info.run_id)
+    print(f'model_uri={model_uri}')
+
