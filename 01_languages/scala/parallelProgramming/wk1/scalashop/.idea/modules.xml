@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$MAVEN_REPOSITORY$/search-explorer/modules/saas-response-parser/src/main/main.iml" filepath="$MAVEN_REPOSITORY$/search-explorer/modules/saas-response-parser/src/main/main.iml" />
+      <module fileurl="file://$MAVEN_REPOSITORY$/search-explorer/modules/element-calculator/src/main/java/main1.iml" filepath="$MAVEN_REPOSITORY$/search-explorer/modules/element-calculator/src/main/java/main1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/root.iml" filepath="$PROJECT_DIR$/.idea/modules/root.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/root-build.iml" filepath="$PROJECT_DIR$/.idea/modules/root-build.iml" />
+      <module fileurl="file://$MAVEN_REPOSITORY$/search-explorer/search-explorer.iml" filepath="$MAVEN_REPOSITORY$/search-explorer/search-explorer.iml" />
+    </modules>
+  </component>
+</project>
