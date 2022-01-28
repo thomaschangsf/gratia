@@ -1,0 +1,59 @@
+// ------------------------------
+// Bullet point:  
+// ------------------------------
+	* -
+
+// ------------------------------
+// Put content in a box
+// ------------------------------
+	* raw:
+		'''
+			Hi Tom
+		'''
+
+	* yaml
+		Apply yaml formatting
+		``` yaml
+		[yaml-content]
+		'''
+
+	* table
+		```      
+		| Tag           | Type | Description |  
+		|----------------|---------------|---------------|  
+		|service-name | String | `app onboarded to NLPService same as 'app-name' defined in 'app'`| 
+		|processor | String | `Type of the Processor Service`|  
+		|app-service-name | String | `app-service-name could be a PyNLP/ML model name or microservice name`|  
+		------------------
+		```      
+		
+// ------------------------------
+// Images
+// ------------------------------
+<p align="center">
+  <img src="gitImages/release1.jpg" alt=""/>
+</p>
+Notice: gitImge is in the same directory as 
+
+
+// ------------------------------
+// Table of content:
+// ------------------------------
+	Table of Contents
+	=================
+	[past content generated at https://ecotrust-canada.github.io/markdown-toc/ ]
+
+
+
+// ------------------------------
+// Links & References
+// ------------------------------
+[here](./README_2.md)
+
+
+
+// ------------------------------
+// Word Emphasis
+// ------------------------------
+** BOLD TEXT **
+* Italic Text *

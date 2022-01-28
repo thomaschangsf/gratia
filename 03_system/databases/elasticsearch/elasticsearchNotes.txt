@@ -1,0 +1,647 @@
+gcloud beta pubsub topics publish projects/ebay-n/topics/search-nrt-pull-errors-prod-us-c1-b-elastic-7 "NRT_EBAY_ITEMS;2017-02-20T19:09:32Z;152551814173,252943119989,292118422292;UUAE,D,UWAE,UUAE,UQAE"
+
+
+--------------------------------
+High Level Summary
+--------------------------------
+	esStartLocal
+	esKibanaStart
+	http://localhost:5601
+	http://localhost:5601/app/sense
+
+	Clean up es
+		esGetIndexInfo
+		esDeleteIndex ebay-n
+		esCreateIndexEbayN
+
+--------------------------------
+Batch update
+--------------------------------
+	siPortForwardToCatalog
+	
+	cdsi
+	sbt clean assembly
+
+	Temporary code change:
+		ReadBTV2.scala: does a delta read.  I will disable that.
+			- saveItem2Title
+				It's doing delta read; 
+				val prevItem2title = sc.emptyRDD[(Long, String)]
+		
+		JoinForwardIndex.scala : previous NER is hardcoded. I will stash my change.
+			- def checkIfRunInLocalMode(args: Array[String], inputDir : String) : Unit = {
+		    if ((args.length >= 3) && args(1).equals("local")) {
+		      System.setProperty("catalog-dds.host", "localhost")
+		      prevNerDir = args(2)
+		    }
+		  }
+
+		 SearchIndexEsUpload.git build.sbt
+		 	val esVersion = "2.4.2" -> "2.4.4"
+		
+	upload binary to gs://thchang
+		gsutil -m cp /Users/thchang/Documents/dev/git/SearchIndex/target/scala-2.10/SearchIndexBuild-assembly-2.1.11-SNAPSHOT.jar
+		gs://thchang/
+
+	Put up local mac/id --> gs://thchang/index/staging-local
+		 
+		I should probably keep id
+		NO: gsutil -m rm gs://thchang/index/staging-local/*
+
+		gsutil -m cp /Users/thchang/Documents/dev/git/SearchIndex/data/thchang/index/staging-n/id/* gs://thchang/index/staging-local/id
+
+
+	Clone READBTV2 job [~7min]
+		https://console.cloud.google.com/dataproc/jobs/e2b4168b-702c-4daa-9d65-0f359e5db577?project=ebay-n&tab=configuration
+
+		point parameter to: thchang/index/staging-local
+
+		Expect directories in gs://thchnag/index/staging-local to be produced
+			btdata
+			item2title
+			forwardindex
+
+			copy these directories back down to /Users/thchang/Documents/dev/git/SearchIndex/data/thchang/index/staging-n	
+
+	Clone Ner Spark Job [~7min]
+		https://console.cloud.google.com/dataproc/jobs/ce23b588-46e6-4961-9149-0db225202991?project=ebay-n&graph=GCE_CPU&duration=PT1H&tab=configuration
+
+		Note: I need 2 local directories
+
+		Produces /ner
+
+	Clone Semantic Vector Job
+		
+		# the vector service script assumes evertyhing is under gs://search-index/
+		gsutil -m rm -r gs://search-index/staging-local/*
+		gsutil -m cp -r gs://thchang/index/staging-local gs://search-index
+
+		gcloud compute ssh thchang@item-vector-linux-proxy --zone us-central1-b --command="/Apps/spark-scripts/spark_pipeline.sh staging-local/item2title staging-local/item2vector 960 6 192 spark://10.240.0.28:7077"
+
+		produces /item2Vector in gs://search-index/staging-local
+
+		gsutil -m cp -r gs://search-index/staging-local/item2vector gs://thchang/index/staging-local/item2vector
+
+		Side: to kill job
+			log into vm
+				gcloud compute ssh cchen@item-vector-linux-proxy --zone us-central1-b
+
+			ps -ef | grep spark
+			kill -15 pid 18248
+			pkill spark
+
+			sshslave1
+
+			Once log into slave vm
+				  501  cd /cygdrive/c/Title2Vector/output/
+				  502  ls
+				  503  cd ../data
+				  504  ls -lt
+				  505  vi all_file_list.txt
+				  506  cd /usr/bin/
+				  507  ls
+				  508  find . -name *.sh
+				  509  ls *.sh
+				  510  cat compile_item2title_fi
+				  511  cat compile_item2title_file_list.sh
+
+
+
+	Copy gs://search-index/staging-local to my computer
+		rm -rf /Users/thchang/Documents/dev/git/SearchIndex/data/thchang/index/staging-local/*
+
+		gsutil -m cp -r gs://search-index/staging-local/* /Users/thchang/Documents/dev/git/SearchIndex/data/thchang/index/staging-local
+
+		At this point, mac:staging-local is a golden copy. Copy this file to staging-n
+			cd /Users/thchang/Documents/dev/git/SearchIndex/data/thchang/index
+			rm -rf ./staging-n/*
+			cp -rf ./staging-local/* ./staging-n
+			mkdir ./staging-n/titleNerVector
+
+	Run JoinForwardIndex --> creates titleNerVector
+		(A) siRunBatchUploadLocalJoinForwardIndex
+
+		(B) Clone https://console.cloud.google.com/dataproc/jobs/2544206f-8941-4c69-bb1e-e93e06bdbb70?project=ebay-n&graph=GCE_CPU&duration=PT1H&tab=configuration
+
+
+	Use SearchESUpload.git : Uses the forwardNerVector generated above
+		- Summary
+			siRunBatchUploadLocalEsUpload
+
+		- Data Proc Example
+			https://console.cloud.google.com/dataproc/jobs/6913df7f-0580-4442-9a71-6cd35a455efe?project=ebay-n&tab=configuration
+
+			* Parameters
+				search-index/staging7
+				10.128.1.113:9300;10.128.0.254:9300;10.128.0.165:9300;10.128.1.111:9300;10.128.0.157:9300;10.128.0.26:9300;10.128.1.112:9300;10.128.0.234:9300;10.128.1.110:9300;10.128.1.109:9300
+				elasticsearch-prod-nchant-us-c1-bg
+				forwardindex
+				ebay-n
+				listing
+				false
+
+		- My Local Setup
+			* Parameters
+				thchang/index/staging-n
+				127.0.0.1:9300
+				elasticsearch_thchang
+				forwardindex
+				ebay-n
+				listing
+				false
+
+		- Workflow  
+			cdg
+			cd SearchIndexEsUpload
+			create/update application-tom.conf
+			
+			Update build.sbt
+				Only local
+					val esVersion = "2.4.4"
+				Upgrade search-index-common dependency
+
+			sbt clean assembly
+			
+			/Users/thchang/Documents/dev/git/SearchIndexEsUpload/target/scala-2.10/SearchIndexEsUploader-assembly-1.0.8-SNAPSHOT.jar
+
+			spark-submit --class com.ebay.n.search.ReadBtV2 --driver-java-options "-Dconfig.file=$devGitSearchEsUploadLocalJar" --master local[2] $devGitSearchEsUploadLocalJar "thchang/index/staging-n" "local" "debug"
+
+
+--------------------------------
+NRT update
+--------------------------------
+	esStartLocal
+	esKibanaStart
+	esDeleteIndex ebay-n
+	esCreateEbayIndex
+
+	gProxyInitCentral & 
+
+	Code changes - v2
+		- pom.xml
+			ebay-n-search-index-common_2.10 needs a version that has es version set to 2.4.4
+				0.1.78-Dev-SNAPSHOT
+		- Nrt.java
+			Need to use proxy DDS service
+			System.setProperty("catalog-dds.host", "http://localhost:8001/api/v1/proxy/namespaces/prod/services/catalog-dds-svc");
+
+			No code change: EsSore should not be mocked when instantiating since now I have a ES.
+
+		- tom-us-entra1-b-search-nrt-c1b-1
+			es_data_type=master
+			elasticsearch=127.0.0.1:9300
+			esCluster=elasticsearch_thchang
+
+			l1server=localhost:8001/api/v1/proxy/namespaces/prod/services/search-haproxy-l1-svc:http
+			ner=searchsvc-prod.nchant.us/remote/nerProcess
+
+			subscription=projects/ebay-n/subscriptions/tom-dds-subscription-2
+			topic=projects/ebay-n/topics/tomErrorTopic
+			errorSubscription=projects/ebay-n/subscriptions/tom-error-subscription
+			replicaTopic=projects/ebay-n/topics/tomReplicaTopic
+
+		- SIDE
+			NRT uses ESStore in SearchIndexCommon.git
+				If adding schema, 
+					(1) add a new field at top of the file
+					(2) update function indexDocToMap
+
+			Batch uses MyEsStore SearchEsUpload.git
+				Similar/identical to SearchIndexCommon.git
+
+	Trigger
+		Publish to projects/ebay-n/topics/tomDDSTopic
+	
+		NRT_EBAY_ITEMS;2017-02-20T19:09:32Z;281938808034,271983281605,351811291854,191711291094,160668811491,351558121606,370987571320,391499098292,381856798302
+
+		NRT_EBAY_ITEMS;2017-02-20T19:09:32Z;221572725087
+		
+	Use IDE to step through code
+
+	Code Flow:
+		Look at notebook for details
+			NrtPull -->  PullMessageHandler
+	PubSub setup
+		Look at tom-us-centra1-b-search-nrt-c1b-1.properties
+			Set by the environment variables: AZ, ENV, APP in sNrtEv
+
+		Require tom-dds-subscription under tomDDSTopic
+			tomDDSTopic
+				https://console.cloud.google.com/cloudpubsub/topics/tomDDSTopic?project=ebay-n
+
+			tom-dds-subscription
+				https://console.cloud.google.com/cloudpubsub/subscriptions/tom-dds-subscription?project=ebay-n
+
+	Deploying changes
+		kprod get deployment | grep nrt
+			search-nrt-c1a-1-svc
+			search-nrt-c1b-2-svc [Real one]
+
+		kprod get pods -l app=search-nrt-c1a-1-svc
+		kprod get pods -l app=search-nrt-c1b-2-svc
+
+		Push change to production
+			http://n-jenkins.slc.ebay.com/job/Prod%20search-nrt-c1b-2%20start/
+
+
+
+--------------------------------
+Install ElasticSearch
+--------------------------------
+	https://chartio.com/resources/tutorials/how-to-install-elasticsearch-on-mac-os-x/
+		- install a specific version
+			http://stackoverflow.com/questions/3987683/homebrew-install-specific-version-of-formula/4158763#4158763
+
+			brew info elasticsearch
+				if have multiple versions, can switch: 
+
+			brew search elasticsearch
+				elasticsearch ✔      elasticsearch@1.7    elasticsearch@2.3    elasticsearch@2.4
+
+			brew uninstall elasticsearch
+
+			brew install elasticsearch@2.4
+				Data:    /usr/local/var/elasticsearch/elasticsearch_thchang/
+				Logs:    /usr/local/var/log/elasticsearch/elasticsearch_thchang.log
+				Plugins: /usr/local/opt/elasticsearch@2.4/libexec/plugins/
+				Config:  /usr/local/etc/elasticsearch/
+				plugin script: /usr/local/opt/elasticsearch@2.4/libexec/bin/plugin
+
+
+
+
+		- To start
+			esStartLocal
+
+			To Test: curl -X GET http://localhost:9200/
+
+			//elasticsearch
+			//	127.0.0.1:9300
+
+		- config: /usr/local/etc/elasticsearch/elasticsearch.yml
+
+
+--------------------------------
+Installing Kibana: 
+based on http://codingexplained.com/operating-systems/mac/installing-kibana-for-elasticsearch-on-os-x
+--------------------------------
+	cd /usr/local/etc/elasticsearch/kibana
+
+	curl -L -O https://download.elastic.co/kibana/kibana/kibana-4.3.0-darwin-x64.tar.gz
+
+	tar vxf *.gz
+
+	start kibana
+		esKibanaStart
+		Test: http://localhost:5601/app/kibana
+
+	Install sense - For 5.4, sense is built into kibana. No need for the step below.
+		cdesKibanaHome
+		cd bin
+		./kibana plugin --install elastic/sense
+		Test: http://localhost:5601/app/sense
+
+		Note: First time through, you will need to restart kibana
+
+	create an index
+		curl -H "Content-Type: application/json" http://localhost:9200/test_idx/ -X POST -d '{}' 
+
+		curl -X GET http://localhost:9200/_cat/indices?v
+		
+	curl -H "Content-Type: application/json" http://localhost:9200/ebay-n/ -X POST -d '{
+  "settings": {
+    "number_of_shards": 40,
+    "number_of_replicas": 1,
+    "refresh_interval": "-1",
+    "similarity": {
+      "my_bm25": {
+        "type": "BM25",
+        "k1": 0.2,
+        "b": 0.2
+      }
+    }
+  },
+  "mappings": {
+    "listing": {
+      "include_in_all": false,
+      "properties": {
+        "item_id": {
+          "type": "long"
+        },
+        "title": {
+          "type": "string",
+          "analyzer": "english",
+          "similarity": "my_bm25",
+          "index_options": "docs"
+        },
+        "sub_title": {
+          "type": "string",
+          "index": "no"
+        },
+        "desc": {
+          "type": "string",
+          "index": "no"
+        },
+        "leaf_categ_id": {
+          "type": "long"
+        },
+        "semantic_v": {
+          "type": "double",
+          "index": "no"
+        },
+        "price": {
+          "type": "double"
+        },
+        "original_price": {
+          "type": "double"
+        },
+        "slr_id": {
+          "type": "long"
+        },
+        "images": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_ner_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_ner": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_seller_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_seller": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_cls_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_cls": {
+          "type": "string",
+          "index": "no"
+        },
+        "condition": {
+          "type": "integer"
+        },
+        "demote": {
+          "type": "double"
+        },
+        "demote_v2": {
+          "type": "double"
+        },
+        "deal_score": {
+          "type": "double"
+        },
+        "item_loc": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ship": {
+          "type": "string",
+          "index": "no"
+        },
+        "return": {
+          "type": "string",
+          "index": "no"
+        },
+        "raw_version": {
+          "type": "long"
+        },
+        "nrt_timestamp": {
+          "type": "long"
+        },
+        "trend_score": {
+          "type": "double"
+        },
+        "start_ts": {
+          "type": "long"
+        },
+        "end_ts": {
+          "type": "long"
+        },
+        "data_flag": {
+          "type": "integer"
+        },
+        "seller_detail": {
+          "type": "string",
+          "index": "no"
+        },
+        "visit_count": {
+          "type": "integer"
+        },
+        "watch_count": {
+          "type": "integer",
+          "index": "no"
+        },
+        "quantity_sold": {
+          "type": "integer",
+          "index": "no"
+        },
+        "quantity": {
+          "type": "integer",
+          "index": "no"
+        },
+        "msku": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_msku": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_msku_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "iso_start_ts": {
+          "type": "date"
+        },
+        "iso_end_ts": {
+          "type": "date"
+        },
+        "meta_categ_id": {
+          "type": "long"
+        },
+        "seller_name": {
+          "type": "string"
+        },
+        "fast_and_free_shipping": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}'
+	delete an index
+		curl -X "DELETE" http://localhost:9200/test_index_2
+
+
+
+
+
+
+
+
+
+---------------------------------
+Elasticsearch.yml in production
+---------------------------------
+gcloud compute ssh --zone "us-central1-a" elasticsearch-prod-nchant-us-c1-ah-1
+
+Everything below is /etc/elasticsearch/elasticsearch.yml
+
+
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please see the documentation for further information on configuration options:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html>
+#
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your cluster:
+#
+cluster.name: elasticsearch-prod-nchant-us-c1-ah
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+#
+node.name: ${HOSTNAME}
+#
+# Add custom attributes to the node:
+#
+# node.rack: r1
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+#
+path.data: /var/lib/elasticsearch/data-0,/var/lib/elasticsearch/data-1,/var/lib/elasticsearch/data-2,/var/lib/elasticsearch/data-3
+#
+# Path to log files:
+#
+# path.logs: /path/to/logs
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup:
+#
+bootstrap.mlockall: true
+#
+# Make sure that the `ES_HEAP_SIZE` environment variable is set to about half the memory
+# available on the system and that the owner of the process is allowed to use this limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# Set the bind address to a specific IP (IPv4 or IPv6):
+#
+network.host: 0.0.0.0
+#
+# Set a custom port for HTTP:
+#
+# http.port: 9200
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html>
+#
+marvel.agent.exporters:
+  id1:
+    type: http
+    host: ["http://esmon-prod-nchant-us-c1-b-1:9200"]
+
+# --------------------------------- Discovery ----------------------------------
+#
+# Pass an initial list of hosts to perform discovery when new node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#
+#discovery.zen.ping.unicast.hosts: ["10.240.0.16", "10.240.0.55", "10.240.0.85", "10.240.0.29", "10.240.0.24", "10.240.0.49", "10.240.0.27", "10.240.0.34", "10.240.0.26", "10.240.0.20", "10.240.0.25", "10.240.0.23"]
+discovery.zen.ping.unicast.hosts: ["elasticsearch-prod-nchant-us-c1-ah-1", "elasticsearch-prod-nchant-us-c1-ah-2", "elasticsearch-prod-nchant-us-c1-ah-3"]
+
+#
+# Prevent the "split brain" by configuring the majority of nodes (total number of nodes / 2 + 1):
+#
+discovery.zen.minimum_master_nodes: 6
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery.html>
+#
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#
+gateway.recover_after_nodes: 8
+gateway.expected_nodes: 10
+gateway.recover_after_time: 5m
+
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html>
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Disable starting multiple nodes on a single system:
+#
+# node.max_local_storage_nodes: 1
+#
+# Require explicit names when deleting indices:
+#
+# action.destructive_requires_name: true
+
+script.engine.groovy.file.search: true
+script.engine.groovy.file.update: true
+script.engine.groovy.file.plugin: true
+
+script.engine.groovy.indexed.search: true
+script.engine.groovy.indexed.update: true
+script.engine.groovy.indexed.plugin: true
+
+script.engine.groovy.inline.search: true
+script.engine.groovy.inline.update: true
+script.engine.groovy.inline.plugin: true
+
+# JVM GC settings
+monitor.jvm.gc.young.warn: 800ms
+monitor.jvm.gc.young.info: 500ms
+monitor.jvm.gc.young.debug: 400ms
+
+monitor.jvm.gc.old.warn: 5000ms
+monitor.jvm.gc.old.info: 2500ms
+monitor.jvm.gc.old.debug: 1000ms
+# Slowlog settings for Indexing and Search
+#
+# For more information, see the documentation at:
+# <https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html>
+index.indexing.slowlog.level: debug
+index.search.slowlog.level: debug
+index.indexing.slowlog.source: 1000  # log up to 1000 characters
+
+index.search.slowlog.threshold.query.warn: 500ms
+index.search.slowlog.threshold.query.info: 300ms
+index.search.slowlog.threshold.query.debug: 120ms
+index.search.slowlog.threshold.query.trace: 100ms
+
+index.search.slowlog.threshold.fetch.warn: 500ms
+index.search.slowlog.threshold.fetch.info: 300ms
+index.search.slowlog.threshold.fetch.debug: 100ms
+index.search.slowlog.threshold.fetch.trace: 60ms
+
+index.indexing.slowlog.threshold.index.warn: 5s
+index.indexing.slowlog.threshold.index.info: 3s
+index.indexing.slowlog.threshold.index.debug: 2s
+index.indexing.slowlog.threshold.index.trace: 500ms
+

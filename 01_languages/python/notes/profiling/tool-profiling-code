@@ -1,0 +1,21 @@
+<-- Cross References
+	* code: 
+		cd /Users/chang/Documents/dev/git/coding/high_performance_python_2e
+			This is based on the book High Performance Python
+		source .venv/bin/activate
+		jupyter notebook &
+
+		Chapter2-Profling.ipynb
+
+<-- Gist
+	timit: gives high level black box on the time of a function
+
+	cProfile: gives a nested stack of each method in a call stack
+		use snakevis to visualize
+
+	lineProfiler: analyze a function at line level; does not go down the call stack
+	memory profiler: analyze a function at line level
+
+	py-spy: analyze a process
+
+

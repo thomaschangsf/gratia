@@ -1,0 +1,172 @@
+# ------------------------------------
+# Chapter 2: Automating Files and FileSystem
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 3: Working with Command line
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 4: Useful Linux Utilities
+# ------------------------------------
+
+# ------------------------------------
+# Chapter 5: Package Mangement
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 6: CICD
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 7: Monitoring and Logging
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 8: Pytest for DevOps
+# ------------------------------------
+
+# ------------------------------------
+# Chapter 9: Cloud Computing
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 10: Infrastructure as Code
+# ------------------------------------
+
+
+
+# ------------------------------------
+# Chapter 11: Container Technologies: Docker
+# ------------------------------------
+<-- Hello World Flask
+    cd /Users/chang/Documents/dev/git/coding/python_devops_book/src/chap11-Docker/flask-hello-world
+
+    --> Run in local environment
+        python -m pip install -r requirements.txt
+        python app.py
+        Thoughts: Dockerfile sets up for production instance; requirements.txt for local instance.  Need venv on local instance, like venv or poetry
+
+    --> Build Docker file
+        docker build -t hello-world-docker .
+        docker images
+
+    --> Run docker image
+        We will tie the local mac app.py to the docker image, so we don't have to constaintly rebuild image and redeploy
+
+        docker run --rm -d -v 'pwd':/app -p 5001:5000 hello-world-docker
+            --rm
+                delete container once it stops running. Awesome, so I don't have to delete myself
+            -d
+                run container in the background
+            -v
+                map current (mac) directory to the app directory, specifined in the Dockerfile WORKDIR.
+                If I change my mac app.py, the docker image will reload. AWESOME!!! Don't need to rebuild docker image
+
+            -p 5001:5000
+                5000 = port flask is running inside docker
+                5001 = port I am interacting with from my may
+
+        docker ps
+            Grab the CONTAINER_ID or ID
+
+        docker logs [CONTAINER_ID]
+
+        curl http://127.0.0.1:5001
+
+        docker stop
+
+        docker rmi hello-world-docker
+
+    --> Publish Image to Docker Registry
+        IMAGE_NAME=hello-world-docker
+        IMAGE_VERSION=v1
+        docker tag $IMAGE_NAME $IMAGE_NAME:$IMAGE_VERSION
+
+        docker login .. # TO YOUR REGISTRY
+        docker push thchang/$IMAGE_NAME:$IMAGE_VERSION
+
+<-- Run Multiple Docker Containers with Docker Compose
+    See flask app definition
+        /Users/chang/Documents/dev/git/coding/python_devops_book/src/chap11-Docker/flask-by-example/docker-compose.yaml
+        This section
+    Flask app depends on other containers:
+        (1) db: Postgress database
+        (2) redis
+
+    Postgress DB
+        - start:
+            docker-compose up -d db
+        - see volume mapping:
+            docker volume ls | grep dbdata
+            dbdata -> /var/lib/postgresql/data
+            which one is on mac?
+        - Create DB
+            docker-compose exec db psql -U postgres
+
+
+
+# ------------------------------------
+# Chapter 12: Container Orchestration: Kubernetes
+# ------------------------------------
+<-- Minikube
+    one time setup
+        https://minikube.sigs.k8s.io/docs/start/
+        minikube config set driver docker
+        Start docker; I have preview for m1 chip
+
+    minikube start &
+
+    point to a certain context
+        minikube config use-context minikube
+
+    use docker kompose to convert docker-compose.yaml to kubernetes resouces
+        Install kompose from github: https://github.com/kubernetes/kompose
+            curl -L https://github.com/kubernetes/kompose/releases/download/v1.22.0/kompose-darwin-amd64 -o kompose
+            chmod +x kompose
+            sudo mv ./kompose /usr/local/bin/kompose
+
+        cd /Users/chang/Documents/dev/git/coding/python_devops_book/src/chap12-Kubernetes/flask_by_example_manifests/tom
+
+        kompose convert
+            Generated (manifest) files was moved to tom/k8s
+
+    Create k8s resources
+        We will first create db deployment, and then flask app
+
+        kubectl apply -f k8s/dbdata-persistentvolumeclaim.yaml
+        kubectl get pvc
+
+        kubectl apply -f k8s/db-deployment.yaml
+        kubectl get deployments
+        kubectl get pods
+
+        STOPPED ON PAGE 305. Chapter goes offer createing each of the manifest file
+
+
+<-- Helm: Installing Prometheus and Graphana Charts
+
+
+
+# ------------------------------------
+# Chapter 13: Serverless Technologies
+# ------------------------------------
+
+
+
+# ------------------------------------
+# Chapter 14: MLOps and ML Engineering
+# ------------------------------------
+
+
+# ------------------------------------
+# Chapter 15: Data Engineering
+# ------------------------------------
+
+

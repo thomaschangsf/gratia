@@ -1,0 +1,426 @@
+-----------------
+Observations
+-----------------
+- As an IC, how have you improved the system?  Do people really care about how you fight a fire? Just a bad day?
+- Reduce your time fighting fires by design, tools, etc..
+
+- CRE: distill SRE priciples to customers 
+	common language
+	common process
+
+-----------------
+High level
+-----------------
+	- Principle 1: Most important feature of a system is reliability
+		Every product is driven by customers; customers will not tolerate an unreliable item.
+
+	- Principle 2: Monitoring does not descied reliability; users do. 
+
+	- Principle 3: 
+		Well engineered software - 99.9 --> 30 day, fail for 43.2 min
+		
+		Well engineeringe operation - 99.99 --> 4.32 min  
+			(first contact with CRE will already exceed this; need to integrate with CRE)
+			One idea: common monitoring tools.  Whose side of the issue is it?  Ebay or Google? 
+				MTTBF: Mean time between failure
+				MTTD: Mean time to detect
+				MTTR: Mean time to repair
+
+				Long tails cannot be measured in MTTBF 
+
+				Driving MTTD to MTTR to 0 will drive MTTBF lower ..
+
+				Deciding if an issue is a platform is 90% of issue ...
+
+		Integrated SRE
+			disaster stress testing & recovery
+			Google cloud CRE understands the services
+
+		Well engineered business - 99.999 --> 26 seconds
+			Google uses algo-driven recovery
+
+		goo.gl/3DmWdR : Youtube video
+
+-----------------
+SLO, SLI, Error budgets
+-----------------
+	- SLO: Service Level Objective
+		* Measurement that tells you if the application is working 
+
+	- SLI: Service Level Indicator
+
+	- Can one ever say the problem is because of 1 component/team (Google, Ebay).  The other components have a responsibility to reduce the blast radius.  Design recovery by zone;
+
+
+	- Request: Dynamic discovery of infrastrture:
+
+	- One cause of SLO degradation
+		* reduce change rate
+
+	- How reliable should a service should be? What is good enough?
+		* Success rate: no 500s, <30 sec
+		* Different features has has different criteras
+
+	- How do you measure the SLO & reliability?
+		* Movie smoothness: If measure at the server, the buffering at the client side may hide it.
+		
+		* Related: Service Leading indicators: (SLI)
+			SLOs is the foundation. Tackle the SLO before tackling SLIs.
+
+	- How much reliable? (Ex: SLO: 90% of latency is 500ms)
+		* Almost never 100%; Cost goes up non-linearly; Goes back to how happy do you need to make your customer happy.
+		* Target should be achievable ... 
+		* How reliable your service is depends on how reliable one's dependency services are ...
+			+ If NRT = 99.99 --> sum(dependencyServices 99.99%)
+
+	- Tradeoff: SLO should be just good enough
+		* feature rollout; cost; redudancy
+
+	- Communicating with Google:
+		* Share the SLO's
+
+	- Google cloud (or platforms) need to communicate SLOs to customer:
+		* Otherwise, customer will expect performance what they observe, and may design their solution to depend on it.
+		* Need to get Trust --> Transparency 
+
+	- SLO granularity:
+		If a system support multiple APIs, but different APIs will provide/require granularity.  May want to split system into low 99.9 system and higher 99.999 system.
+
+	- Error budget: 99.9% --> 0.1%. Can use 0.1% to do various tasks such as:
+		Rolling out new software versions
+		Release new features
+		Inevitable failures in hw, network
+		planned Downtime
+
+		May need to have different zones of release ..
+
+		Once your error budget gets filled, spend the time on reliability system
+
+		Need to manage your error budget ...
+
+	- Sampling nyquist sampling rate depends on the SLOs.
+
+	- Revisit the SLO every quarter
+
+	- Error budgets <-- --> features | releases | cause of errors
+		It is hard to correlate how much risk a feature is.  Oftentime, SRE just gate all feature deployment once error budget is exhausted.
+
+		Some people observe that a release depleted 6% of error budget. So that tells one how many release one can release.
+
+	- If SLA is an aggregate number across regions, how can I design my system?
+		Answer: If my application is relegated to 1 region, ask for the SLA in that region.
+
+	- SLA: is 3AM the same as 10AM?  Do we include health check as part of the SLA|SLO?  If number is focused on user experience, perhaps disregard the health checks.  
+
+	- How do you make services more reliable?
+		* Measurement related:
+			Understand what you are measuring; aggregation & average of time
+			are you missing any measurement of user experience
+
+		* Improve reliability: 
+			fewer failures, lower impact, less change & deployments
+
+		* Mean time to diagnose:
+			If have rollback, this would be 0.
+
+		* Mean time to detect: catch outages faster
+
+		* Improve mean time to recover
+			rollback button
+			auto-healing
+
+		* Canaries: 
+
+		* Retries:
+			In a microservice with lots of underneath dependencies, how long before you bail out?
+				If latency is 200 ms, try before 
+				Is a function of how lickely retry is to succeed
+				Depends on what service it is
+
+			Watch out retry explosions;
+
+			If with one retry can still satisfy the SLO, then we can keep with just 1 retry.
+
+			Start from the user experience point of view ..
+				Retry can be risky; retry explosion
+				Standardize retry logic; retry only once, only if it required, with exponential try off
+				Server side should throttle noisy customers
+				Server side will drop retry requests first
+				
+				Client is aware of multiple backends; so if one channel is bad, it will send directly to another backend.
+
+				Server knows when it is unhealthy, and trigger a remediation.
+
+		* Operational view
+			Build monitoring systems
+			Work with dev
+				- write a unit test that streess one code flow multiple times to trigger an error. This will help dev know the problem.
+				- phase rollouts * load balancing
+				- rollback
+				- standardize infrastructure
+					Especially in a micro-service teams;
+				- post-mortem
+				- Devs need to care about SLO; SREs dictates if we can release more features..
+				- Have an SRE read over the design doc
+
+			SRE manages the pager; this is their leverage; if doesn't meet SRE requirements, SRE gives back to the developer to manage...
+
+
+-----------------
+CRE Matrix
+-----------------
+	- SLO definition & dashboards:
+		Having a published SLO that represent user requirements of a service.
+	
+	- Dashboards & Visualizations:
+		clear representation of data to support service mgmt
+
+	- User focus: 
+		Service collects data that accurately reflect user expereinces with product. If server is up, but users still can't use product, that's bad
+
+	- Capacity planning:
+
+
+	- Consult: Design and launch
+
+	- Release process: flag data and bin
+
+	- Post-mortem
+		Data driven:
+			time and what happened
+
+			when we get lucky; when we get unlucky
+
+			List all the action items, even if you can't fix it.
+				Action item because future feature releases
+
+		Looking forward; so not defensive
+
+	
+
+-----------------
+Risk Analysis: Quantification...
+-----------------
+	- How do you quantify the risk?  Where do you find the risky component of the system?
+
+	- Is error budget realistic?
+		Given an error budget
+		Questions:
+			* Given an appliation architecture, is it realistic
+			* What's most likely to spend the budget
+
+	- Steps
+		Come up with a list of risks
+		How will it break, theoretically
+		Past history: deployments
+
+		To get mean time btween falure? As a function of severity
+
+	- Characterizing risk
+		Likelhood: 
+			MTBF in days; cahcne of this thing occuring
+		Impact:
+			Percent of faiulres
+			If push to 1 zone of 3 zone, impact is 33% impact
+
+		Likelhood * Impact = cost metric of risk
+
+		Works best on a 1 year timeframe; numebrs don't have to be perfect
+
+		Quantificying amount of time service is down
+			MTTD: to notice & detect
+			MTTR: To fix
+			Impact %: 
+				Sometimes it is not completely up or down ...
+				Data: what if you lose a picture ...
+
+		If NRT goes down because of DDS, should NRT SLO be penalized?  Perhaps, because there are some things NRT can do to mitigate.
+
+	- Spreadshhet
+		goo.gl/bnsPj7
+		Over time, the numbers will become more accurate ..
+
+	- With a SLO point of view, fixing a problem is not necessarily fixing the problem in the code. Reducing the MTTD and MTTR can be a fix as well.
+
+
+
+-----------------
+Defining Good SLIs
+-----------------
+	- A good SLO:
+		Focus on user experience; pay attention to tail latencies
+
+		Attainable goals; don't over-promise
+
+		Use historical data
+
+		Be precise:
+			Condition: normal load vs peak load
+				For example, we may shed test requests.
+
+			Document decisions
+				Ratinonale why SLO is defined this way
+
+			Detail the cast that matter to your cases
+
+	- SLI : Service level indicator
+		SLID is a quantative measure of a attribute of service
+		
+		An attribute is a dimension user of service care about
+
+		Examples:
+			service: 
+				throughput 
+				latency:
+					May need to be granular on kind of failures (505, db connection etc..) . This will get you a more accurate reading.
+
+			data pipeline : mbp process per second
+
+			Availability : succes requests / total requests
+				Error Types
+					Explicit: 500
+					Implicit: a response with 0B response 
+					If my service takes longer than what I committed to, this is an error
+
+			Correctness
+
+		4 Golden monitoring sginals
+			Latencies
+				A indicator of resource saturation ..
+			Traffic
+				QPS, request per second
+				May want to measure the queue backlog ...
+				Usually it's based in %
+
+			Errors
+			Resource saturations (resource usage)
+				Measure what this service is most constrained; 
+					CPU costs is better than CPU utilization
+					Memory
+				Sometimes this is not correlated to user experience
+
+				For LB, since it is really high performance, may want to measture throughput.
+
+
+		SLI is used to trigger alerts
+
+		Issue with SLI:
+			false positive: SLI is not well correlated to SLO's
+			false negatives:
+
+			How good / reliable is SLI?  Shoot for 1-2 pager duty per 
+
+		Google has a metric of cost / query...
+			Use this as a basis for capacity planning
+
+		What shouldn't be SLI:
+			CPU/memory
+			Internal error rate not visible to errors. Example: Retry logic
+			Task failures (ie db connection, since an app may have logic to connect to other servers ...)
+
+			Why?
+				Erode confidence in SLO
+
+				Erod error budget 
+
+		SLI: What happens about resource utilization ?  It is not really user facing.
+			SRE care about reliability; resource efficiency is not always on the list.  Do we user pager to do this
+
+		Signs of weak singals
+			Ops quiet/disable the signals
+
+		IN a micro-service where A --> B
+			B's error, A's sli should be used.
+
+		Refining signals: what we measure
+			Property dimension:
+				Ex1: all latency vs HTTP Get latency
+				Ex2: read operations vs write operation
+
+			Aggregations scope
+				Ex1: all front ends vs all cached front-ends
+				Ex2: at task level, region level, at globa level, so we can drill down
+
+			location in service architectures:
+				Ex1: latency at client versus at server
+				Try to measure as close to customer as possible
+
+			Tyoe of measurement
+				Ex: white box vs black box
+
+		How we measure
+			types: average vs distribution
+			resolution: sampling rate/ polling/recording/aggregation levels
+			units
+
+		Since monitoring can be expensive, tune the sampling rate higher ONLY for critical SLI systems.. An alternative is to look at logs instead.  Sampling rate is also related what we want to protect.  Task health does not require as stringent sampling rate versus latency and QPS.
+
+		Example of good SLI:
+			Original: latency
+			Better: (see slides)
+
+
+-----------------
+Summary
+-----------------
+	TO GET best google response, need to SLO is affected by Google platform ..
+
+	Tomorrow: go through an hands-on example ...
+
+
+-----------------
+Hands on
+-----------------
+	SLO allows us to define what is meaningful pager duty, so google CRE can work with us
+
+	Ex:
+		http code is used to break down what's an error
+
+		api may have different slos
+
+		write and read have different slos
+
+	When coming up with the numbers, explain how one got to it. Also why we use it..
+
+	Pages:
+		spurious pages is a faiulre
+		A page is  a bug? auto-heal is not always an option ..
+
+	SLO accuracy is important, but even if it is only 90% accurate, there are still values.  SLO provide a common goal/language for team (dev, PM, SRE, customers).  It's a basis for continous improviment. It can serve as a source of feature releases.
+
+
+	EX: SLO for search may be quality of search returned;  SLI may be the percent of workers returned results ..
+		SLI : measure it initially and understand how good of a signal it is, before it becomes a decisoin making process
+
+	SLO should lean toward capturing system variation errors and NOT business logic errors
+
+	In a microservice, where 
+
+	Example:
+		SLO: Page loads < 100 ms
+		SLI: 
+			cached vs cold
+			time to glass / interact with page
+			% of critical elements that become visible
+			95% time
+			region
+			Android, IOS, Desktop
+
+			Insight: walk through the system flow and understand what we can measure ...
+			Insight: SLI value needs to be actionable. But its value is also give visibility to the problem.
+
+			Google takes most of the measurement at the load balancer ... Getting signals from client can be noisy.
+
+	Tools to caputre the 9s.
+		Datadog
+		Stackdriver is working on the burn graph
+
+	SLO is the first step. But we need to know if the issue is on the Google cloud or NPD.  We need to know the failure mechanisms of the tools we use, ie region. Need to capture/measure it.
+
+	5 9s assumes a global deployment
+		If you use your google storage, it will take care of multiple region and zones.
+
+	Pubusub and most services are have 3 9s.
+
+	Google provides a AAR (application architecture review), what is a realistic of 9 ?
+

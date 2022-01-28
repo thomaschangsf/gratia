@@ -1,0 +1,231 @@
+[
+  {
+    "_id": "data-quality",
+    "_type": "dashboard",
+    "_source": {
+      "title": "data quality",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"col\":1,\"id\":\"demotion\",\"panelIndex\":1,\"row\":7,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"has-item-id\",\"panelIndex\":2,\"row\":1,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":10,\"id\":\"valid-price\",\"panelIndex\":4,\"row\":1,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"has-deal_score\",\"panelIndex\":5,\"row\":5,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":4,\"id\":\"has-title\",\"panelIndex\":6,\"row\":1,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":4,\"id\":\"has-trend_score\",\"panelIndex\":7,\"row\":5,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"has-attr_cls_keys\",\"panelIndex\":8,\"row\":3,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"has-attr_seller_keys\",\"panelIndex\":9,\"row\":3,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"has-leaf_categ_id\",\"panelIndex\":10,\"row\":1,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":4,\"id\":\"has-attr_ner_keys\",\"panelIndex\":11,\"row\":3,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":4,\"id\":\"has-data_flag\",\"panelIndex\":12,\"row\":7,\"size_x\":3,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"condition\",\"panelIndex\":13,\"row\":5,\"size_x\":3,\"size_y\":3,\"type\":\"visualization\"},{\"id\":\"has-attr_msku_keys\",\"type\":\"visualization\",\"panelIndex\":14,\"size_x\":3,\"size_y\":2,\"col\":10,\"row\":3}]",
+      "optionsJSON": "{\"darkTheme\":false}",
+      "uiStateJSON": "{\"P-7\":{\"spy\":{\"mode\":{\"fill\":false,\"name\":null}}}}",
+      "version": 1,
+      "timeRestore": true,
+      "timeTo": "now",
+      "timeFrom": "now-15m",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}]}"
+      }
+    }
+  },
+  {
+    "_id": "demotion",
+    "_type": "visualization",
+    "_source": {
+      "title": "demotion",
+      "visState": "{\"title\":\"demotion\",\"type\":\"pie\",\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"shareYAxis\":true},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has demotion\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"demote\"}}]}}}},\"label\":\"has demotion\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"demote\"}}]}}}},\"label\":\"missing demotion\"}]}},{\"id\":\"3\",\"type\":\"range\",\"schema\":\"segment\",\"params\":{\"field\":\"demote\",\"ranges\":[{\"from\":0,\"to\":1},{\"from\":1,\"to\":1.000000000001},{\"to\":0},{\"from\":1.000000000001}],\"customLabel\":\"demotion score\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"0 to +∞\":\"#7EB26D\",\"0 to 1\":\"#EAB839\",\"1 to +∞\":\"#3F6833\",\"1 to 2\":\"#629E51\",\"has demotion\":\"#7EB26D\",\"1 to 1\":\"#6ED0E0\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-item-id",
+    "_type": "visualization",
+    "_source": {
+      "title": "has item id",
+      "visState": "{\"title\":\"has item id\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has item id\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"item_id\"}}]}}}},\"label\":\"has item id\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"item_id\"}}]}}}},\"label\":\"missing item id\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has item id\":\"#7EB26D\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-deal_score",
+    "_type": "visualization",
+    "_source": {
+      "title": "has deal_score",
+      "visState": "{\"title\":\"has deal_score\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has deal trend\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"deal_score\"}}]}}}},\"label\":\"has deal_score\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"deal_score\"}}]}}}},\"label\":\"missing deal_score\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has deal_score\":\"#7EB26D\",\"missing deal_score\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-title",
+    "_type": "visualization",
+    "_source": {
+      "title": "has title",
+      "visState": "{\"title\":\"has title\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has title\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"title\"}}]}}}},\"label\":\"has title\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"title\"}}]}}}},\"label\":\"missing title\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has title\":\"#7EB26D\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "valid-price",
+    "_type": "visualization",
+    "_source": {
+      "title": "valid price",
+      "visState": "{\"title\":\"valid price\",\"type\":\"pie\",\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"shareYAxis\":true},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"valid price\"}},{\"id\":\"2\",\"type\":\"range\",\"schema\":\"segment\",\"params\":{\"field\":\"price\",\"ranges\":[{\"from\":0,\"to\":null},{\"to\":0}],\"customLabel\":\"price larger then zero\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"0 to +∞\":\"#7EB26D\"}}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "condition",
+    "_type": "visualization",
+    "_source": {
+      "title": "condition",
+      "visState": "{\"title\":\"condition\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"condition\",\"size\":50,\"order\":\"desc\",\"orderBy\":\"_term\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"0\":\"#E24D42\",\"0 to 0.9\":\"#7EB26D\",\"has attr_cls_keys\":\"#7EB26D\",\"has data_flag\":\"#7EB26D\",\"has deal_score\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing attr_cls_keys\":\"#EAB839\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"1,000\":\"#7EB26D\",\"1,500\":\"#629E51\",\"1,750\":\"#508642\",\"2,000\":\"#EAB839\",\"2,500\":\"#E5AC0E\",\"2,750\":\"#CCA300\",\"3,000\":\"#EF843C\",\"4,000\":\"#E0752D\",\"5,000\":\"#C15C17\",\"6,000\":\"#99440A\",\"7,000\":\"#F29191\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-vector",
+    "_type": "visualization",
+    "_source": {
+      "title": "has vector",
+      "visState": "{\"title\":\"has vector\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has vector\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"filtered\":{\"filter\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"semantic_v\"}}]}}}}}},\"label\":\"has vector\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-attr_seller_keys",
+    "_type": "visualization",
+    "_source": {
+      "title": "has attr_seller_keys",
+      "visState": "{\"title\":\"has attr_seller_keys\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has attr_seller_keys\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"attr_seller_keys\"}}]}}}},\"label\":\"has attr_seller_keys\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"attr_seller_keys\"}}]}}}},\"label\":\"missing attr_seller_keys\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has deal_score\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\",\"has attr_cls_keys\":\"#7EB26D\",\"missing attr_cls_keys\":\"#EAB839\",\"has attr_seller_keys\":\"#7EB26D\",\"missing attr_seller_keys\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-attr_cls_keys",
+    "_type": "visualization",
+    "_source": {
+      "title": "has attr_cls_keys",
+      "visState": "{\"title\":\"has attr_cls_keys\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has attr_cls_keys\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"attr_cls_keys\"}}]}}}},\"label\":\"has attr_cls_keys\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"attr_cls_keys\"}}]}}}},\"label\":\"missing attr_cls_keys\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has deal_score\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\",\"has attr_cls_keys\":\"#7EB26D\",\"missing attr_cls_keys\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-trend_score",
+    "_type": "visualization",
+    "_source": {
+      "title": "has trend_score",
+      "visState": "{\"title\":\"has trend_score\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has trend score\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"trend_score\"}}]}}}},\"label\":\"has trend_score\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"trend_score\"}}]}}}},\"label\":\"missing trend_score\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has deal_score\":\"#7EB26D\",\"missing deal_score\":\"#EAB839\",\"has trend_score\":\"#7EB26D\",\"missing trend_score\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-leaf_categ_id",
+    "_type": "visualization",
+    "_source": {
+      "title": "has leaf_categ_id",
+      "visState": "{\"title\":\"has leaf_categ_id\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has leaf_categ_id\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"leaf_categ_id\"}}]}}}},\"label\":\"has leaf_categ_id\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"leaf_categ_id\"}}]}}}},\"label\":\"missing leaf_categ_id\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has deal_score\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-attr_ner_keys",
+    "_type": "visualization",
+    "_source": {
+      "title": "has attr_ner_keys",
+      "visState": "{\"title\":\"has attr_ner_keys\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has attr_ner_keys\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"attr_ner_keys\"}}]}}}},\"label\":\"has attr_ner_keys\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"attr_ner_keys\"}}]}}}},\"label\":\"missing attr_ner_keys\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#EAB839\",\"with ner\":\"#7EB26D\",\"has attr_ner_keys\":\"#7EB26D\",\"missing attr_ner_keys\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-ner",
+    "_type": "visualization",
+    "_source": {
+      "title": "has ner",
+      "visState": "{\"title\":\"has ner\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has ner\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"attr_ner_keys\"}}]}}}},\"label\":\"with ner\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"attr_ner_keys\"}}]}}}},\"label\":\"no ner\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has vector\":\"#9AC48A\",\"no ner\":\"#EAB839\",\"with ner\":\"#7EB26D\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-data_flag",
+    "_type": "visualization",
+    "_source": {
+      "title": "has data_flag",
+      "visState": "{\"title\":\"has data_flag\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has data_flag\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"data_flag\"}}]}}}},\"label\":\"has data_flag\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"data_flag\"}}]}}}},\"label\":\"missing data_flag\"}],\"json\":\"\"}},{\"id\":\"3\",\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"data_flag\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"0\":\"#7EB26D\",\"has deal_score\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\",\"has attr_cls_keys\":\"#7EB26D\",\"missing attr_cls_keys\":\"#EAB839\",\"0 to 0.9\":\"#7EB26D\",\"has data_flag\":\"#7EB26D\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "has-attr_msku_keys",
+    "_type": "visualization",
+    "_source": {
+      "title": "has attr_msku_keys",
+      "visState": "{\"title\":\"has attr_cls_keys\",\"type\":\"pie\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"isDonut\":false},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"has attr_msku_keys\"}},{\"id\":\"2\",\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query\":{\"bool\":{\"filter\":[{\"exists\":{\"field\":\"attr_msku_keys\"}}]}}}},\"label\":\"has attr_msku_keys\"},{\"input\":{\"query\":{\"query\":{\"bool\":{\"must_not\":[{\"exists\":{\"field\":\"attr_msku_keys\"}}]}}}},\"label\":\"missing attr_msku_keys\"}],\"json\":\"\"}}],\"listeners\":{}}",
+      "uiStateJSON": "{\"vis\":{\"colors\":{\"has deal_score\":\"#7EB26D\",\"has title\":\"#7EB26D\",\"has trend_score\":\"#7EB26D\",\"has vector\":\"#9AC48A\",\"missing deal_score\":\"#EAB839\",\"missing trend_score\":\"#EAB839\",\"no ner\":\"#E24D42\",\"with ner\":\"#7EB26D\",\"has leaf_categ_id\":\"#7EB26D\",\"has attr_cls_keys\":\"#7EB26D\",\"missing attr_cls_keys\":\"#EAB839\",\"has attr_msku_keys\":\"#7EB26D\",\"missing attr_msku_keys\":\"#EAB839\"},\"legendOpen\":true}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"ebay-n\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  }
+]

@@ -1,0 +1,358 @@
+I----------------------------
+Local Redis
+----------------------------
+redis-start
+redis-cli
+host = 127.0.0.1
+port = 6379
+telnet 127.0.0.1 6379
+
+
+
+https://104.198.164.252:8443/#/login
+	thchang@ebay.com
+	yeti35n$
+
+----------------------------
+JIRA
+----------------------------
+	https://docs.google.com/spreadsheets/d/17VxyHrHPzZ3vWRsIHYpc-zZDynLpTR7HklYSYVg6F7Q/edit#gid=1274847071
+
+----------------------------
+Spark-Shell remote WIP
+----------------------------
+	spark-shell --jars SearchIndexBuild-assembly-2.1.11-SNAPSHOT.jar,jedis-2.7.2.jar  --master=local[8]
+
+	spark-shell --jars SearchIndexBuild-assembly-2.1.11-SNAPSHOT.jar,jedis-2.7.2.jar  --conf "redis.host=10.128.0.136", "redis.port=15820"   --master=local[8]
+
+	val port = 6379 
+	val port = 15820 //redis-3
+	val port = 16455 //redis-4
+	
+	Using Spark Redis
+		import com.redislabs.provider.redis._
+		val runFromLocal = false
+		val ip = if (runFromLocal) "104.198.164.252" else "10.128.0.136"
+		val port = 15820 
+		val password = ""
+
+		val redisDb = (ip, port, password)
+		val listRdd = sc.parallelize(Array("One", "Two"))
+		sc.toRedisLIST(listRdd, "TestList", 0)
+
+	Using jedis
+
+
+----------------------------
+Concurrency control
+----------------------------
+	Redis is single threaded, and each event is processed in an event loop; when multiple programs write to redis, redis server blocks until the transaction finishes.  It, however, still has to deal with the out-of-order operaions of stream processing ...
+
+
+----------------------------
+Learning Redis datatypes
+----------------------------
+	Keys
+		Most operations follows this format: COMMAND KEY VALUE
+		Key is hashed, find balance between readability and size
+		
+		Look for keys with regular expression!!
+			keys "13|idToQ|*"
+			keys "13|qToItem|"
+
+	Strings - binary safe strings
+		set user:1000 "Tom Chang" EX 3
+		get user:1000
+
+		set options
+			set fails if key exists
+				set user:1000 "Thomas Chang" nx
+
+			set succeed only if key exists
+				set user:1000 "Thomas Chang" xx
+
+		INCR, incrBy, decr, decrby
+			set counter 100
+			incr counter 
+			get counter  (returns 101)
+
+		Keys expires in 5 seconds
+			set user:1001 "Bye Bye American Pie" ex 1
+			get user:1001
+
+	Lists - aka Link Lists
+
+		Does not seem to have expiry
+
+		Unlike array, linked list is fast to insert at the head and tail.  Hard to look up by index, unlike array.
+
+		Add element to the list at the head (left)
+			lpush mylist A
+
+		Add element to the list at tail
+			lpush myList B
+
+		Get all elements
+			lrange mylist 0 -1
+
+		del 12:rings|relevance|
+		del 12:122596410551
+
+	Hashes: maps composed of multiple fields and value of type string.  Think JSON object
+		hmset user:1002 username "Tom Chang" birthyear "1977" verified "1"
+			If I use 1000, it goes to my previous structures.
+
+		hget user:1002 username
+
+		hgetall user:1000
+
+	sets : Collection of unique unsorted string elements
+		FLUSHALL
+		sadd myset 1 2 3
+		smembers myset
+		sismember myset 3
+
+
+
+	sorted sets: every string element has a score
+		A set where is element has a score
+
+		zadd hackers 1940 "Alan Kay"
+		zadd hackers 1912 "Alan Turing"
+
+		zrange hackers 0 -1
+		zrange hackers 0 -1 withscores
+
+
+	Bit arrays: Handle string like an array of bits
+
+	Hyperlogs: probabilistic data structure used to estimate the cardinality of a set
+
+	redis-benchmark -q -n 10000 --csv -c 1 -t HSET,HGET,SET,GET,SADD,SPOP
+	redis-benchmark -q -n 100000 --csv -c 1 -t HSET,HGET,SET,GET,SADD,SPOP
+
+----------------------------
+Sanity check
+----------------------------
+	gLogIntoSearchIndexVM
+		ping internalIp
+
+		telnet 10.128.0.136 15820
+		set a b
+		get a
+
+	SparkShell
+		val jedis = new redis.clients.jedis.Jedis(ip, port)
+		jedis.set("a", "b")
+		val result = jedis.get("a")
+
+
+
+----------------------------
+Redis VM
+----------------------------
+	gLogIntoRedisVM
+		  gcloud compute ssh redislec-dev-nchant-us-c1-i3 --zone us-central1-b
+
+	redis-server --version
+		Redis server v=3.2.6 sha=128ce4a2:1 malloc=jemalloc-4.0.4 bits=64 build=4aefc439e2d04303
+
+	redis-cli --version
+		redis-cli 3.2.6 (git:128ce4a2-dirty)
+
+	redis-cli -h 10.128.0.136 -p 15820
+		Port is found on rediscli ui: 
+			https://104.198.164.252:8443/#/bdb/tabs/conf/1
+
+	DBSIZE
+
+
+
+
+----------------------------
+VM IP Address
+----------------------------
+	Redis cluster IP
+		redislec-dev-nchant-us-c1-i3	us-central1-b
+			10.128.0.136
+			104.198.164.252
+			port 15820
+
+		redislec-dev-nchant-us-c1-i4	us-central1-b
+			10.128.0.154
+			104.155.145.171
+			16455
+
+	Search Index M
+		10.128.0.8
+		104.197.63.20
+
+	Search Work 0
+		10.128.0.3
+		104.155.167.75
+
+
+----------------------------
+Connector
+----------------------------
+	git clone https://github.com/RedisLabs/spark-redis.git
+	sbt clean publish
+		Set up project directory to match SearchIndexCommon
+		Update build.sbt with publishTo and resolvers
+
+	In SearchIndex build.sbt
+		Pull the dependencies spark-index, built above
+			"com.redislabs" % "spark-redis_2.10" % "0.3.2-SNAPSHOT"
+
+
+
+
+
+----------------------------
+Install local redis
+----------------------------
+	redisStartLocal
+
+	redis
+
+
+
+
+----------------------------
+Installing on a google vm instance
+----------------------------
+gcloud compute ssh --zone "us-central1-b" "redislec-dev-nchant-us-c1-i2"
+REdis binary 
+	https://redislabs.com/redis-enterprise-downloads?UserName=Tom+Chang&UserEmail=thchang%40ebay.com&CompanyName=Ebay&UpdateNotification=on&RLEC_Download__c=YES
+
+Google Cloud Installation
+	Images --> Look for image ubuntu-1604-scsi-mq2
+		Create instance called redislec-dev-nchant-us-c1-i1
+
+	gcloud compute --project "ebay-n" ssh --zone "us-central1-b" "redislec-dev-nchant-us-c1-i2"
+
+	mkdir redisInstallation
+	cd redisInstallation
+
+	gsutil -m cp gs://thchang/redislabs-4.4.2-30-xenial-amd64.tar .
+
+	tar vxf redislabs-4.4.2-30-xenial-amd64.tar
+
+	.install.sh -y
+
+
+	Web browser can be accessible at https://104.198.164.252:8443
+		
+		https://104.198.164.252:8443
+			where 104.164.252 is the external ip
+		
+		If did not create tag at vm creation time, 
+			gcloud compute instances add-tags redislec-dev-nchant-us-c1-i1 --tags=redislec --zone=us-central1-b
+
+		Create a firewall rule redislec-nchant-rule
+			https://console.cloud.google.com/networking/firewalls/list?project=ebay-n
+
+			Using elasticsearch-nchant rule as an example
+				network
+					nchant-m
+
+				source ip range: 
+					192.168.1.1/32
+					216.113.160.0/24
+					216.113.170.0/24
+					216.113.160.67
+					216.113.160.71
+					66.135.192.0/19
+					66.211.160.0/19
+					216.113.176.0/20
+					66.211.160.0/21
+					66.211.172.0/22
+					66.211.176.0/20
+
+				ports: tcp:8443
+
+			Apply to tag: redislec
+
+		Use this endpoint to set up a cluster
+			Can't access this endpoint.
+
+	Disabling Linux Memory Swap
+		sudo sysctl vm.swappiness=0
+		
+		# Set the value for the running system
+		sudo sh -c 'echo 0 > /proc/sys/vm/swappiness'
+		# Backup the existing sysctl.conf
+		sudo cp -p /etc/sysctl.conf /etc/sysctl.conf.`date +%Y%m%d-%H:%M`
+		# Set the value in /etc/sysctl.conf so it stays after reboot.
+		sudo sh -c 'echo "" >> /etc/sysctl.conf'
+		sudo sh -c 'echo "# Set swappiness to 0 so the OS avoids swapping" >> /etc/sysctl.conf'
+		sudo sh -c 'echo "vm.swappiness = 0" >> /etc/sysctl.conf'
+
+
+	Web page setup: https://146.148.76.207:8443/#/nodes
+		Instruction:
+			https://redislabs.com/blog/getting-started-with-rlec-how-to-install-and-setup#.WHa1pLYrLUI
+
+		Setup FQDN : unique cluster id used by client to connect different components.
+				
+			FQDN is just the cluster name
+				evalcluster.redislabs.com
+
+			How can we do this programatically?
+			3 options
+				DNS
+				Zeroe-configuration using mDNS
+				No DNS
+
+		Cluster Name: evalcluster.redislabs.com
+
+		Credentials
+			thchang@ebay.com
+			yeti35n$
+
+			password: to login with connector? test
+
+		Tools
+			rladmin
+				On cluster, 
+					type sudo su -
+					rladmin
+					? for help
+			rlcheck
+
+
+// --------------------------------------------
+Create rRedis on GCloud
+// -------------------------------------------
+Create Redis cluster in n2 and n1 (Done)
+	n1-prod (10.100.0.22  104.197.31.124)
+
+		Create firewall
+			gcloud beta compute --project=ebay-n1-prod firewall-rules create redis-nsearch-monitoring --direction=INGRESS --priority=1000 --network=n1-prod-m --action=ALLOW --rules=tcp:6379 --source-ranges=0.0.0.0/0,216.113.160.71/32,192.168.1.1/32,216.113.160.0/24,216.113.170.0/24,216.113.160.67,216.113.160.71,66.135.192.0/19,66.211.160.0/19,216.113.176.0/20,66.211.160.0/21,66.211.172.0/22,66.211.176.0/20,10.0.0.0/8 --target-tags=redis-nsearch-monitoring
+		
+		Create VM or use "n1-standard-8" instead of n1-standard-2?
+			gcloud compute --project "ebay-n1-prod" instances create "redis-index-monitor-2" --zone "us-central1-b" --machine-type "n1-standard-8" --subnet "us-central1-m" --maintenance-policy "MIGRATE" --service-account "152106791374-compute@developer.gserviceaccount.com" --scopes "https://www.googleapis.com/auth/cloud-platform" --tags "redis-nsearch-monitoring","http-server","http-servers","https-server" --image "debian-8-jessie-v20170918" --image-project "debian-cloud" --boot-disk-size "200" --boot-disk-type "pd-standard" --boot-disk-device-name "redis-index-monitor-2"
+
+
+
+		gcloud compute --project "ebay-n1-prod" ssh --zone "us-central1-b" "redis-index-monitor-1"
+
+		Install redis server on vm
+			Look at Task-Pipeline-OfflineRedis Line  430
+
+		kSetEnvN1ShopBotProd
+		gcloud config set compute/zone us-central1-b
+
+		gcloud compute --project "ebay-n1-prod" ssh --ssh-flag=-L6379:localhost:6379 redis-index-monitor-2
+
+		redisCli
+
+		sanity check: 
+			telnet localhost 6379
+
+	n2: (10.123.0.62  35.200.41.178)
+		Firewall
+			gcloud beta compute --project=ebay-n2-prod firewall-rules create redis-nsearch-monitoring --direction=INGRESS --priority=1000 --network=n2-prod-m --action=ALLOW --rules=tcp:6379 --source-ranges=0.0.0.0/0,216.113.160.71/32,192.168.1.1/32,216.113.160.0/24,216.113.170.0/24,216.113.160.67,216.113.160.71,66.135.192.0/19,66.211.160.0/19,216.113.176.0/20,66.211.160.0/21,66.211.172.0/22,66.211.176.0/20,10.0.0.0/8 --target-tags=redis-nsearch-monitoring
+
+		VM
+			gcloud compute --project "ebay-n2-prod" instances create "redis-index-monitor-2" --zone "asia-northeast1-b" --machine-type "n1-standard-8" --subnet "asia-northeast1-m" --maintenance-policy "MIGRATE" --service-account "171639290373-compute@developer.gserviceaccount.com" --scopes "https://www.googleapis.com/auth/cloud-platform" --tags "redis-nsearch-monitoring","http-server","http-servers","https-server" --image "debian-8-jessie-v20170918" --image-project "debian-cloud" --boot-disk-size "200" --boot-disk-type "pd-standard" --boot-disk-device-name "redis-index-monitor-2"			

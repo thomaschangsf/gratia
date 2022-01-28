@@ -1,0 +1,53 @@
+{
+  "fields": [
+    "item_id",
+    "title",
+    "price",
+    "leaf_categ_id",
+    "attr_seler_keys",
+    "attr_ner_keys",
+    "attr_cls_keys"
+  ],
+  "size": 5,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "shoe running",
+            "fields": [
+              "title"
+            ],
+            "type": "cross_fields"
+          }
+        }
+      ],
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "term": {
+                "attr_cls_keys": {
+                  "value": "brand:nike"
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": [
+                  "size:10",
+                  "size:11"
+                ],
+                "fields": [
+                  "attr_cls_keys",
+                  "attr_seler_keys",
+                  "attr_ner_keys"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

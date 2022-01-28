@@ -1,0 +1,35 @@
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-sampler-aggregation.html
+// GET /ebay-n/listing/_search
+{
+  "fields": [
+    "title",
+    "attr_cls_keys"
+  ],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": "messi jersey"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "sample": {
+      "sampler": {
+        "shard_size": 100,
+        "field": "item_id"
+      },
+      "aggs": {
+        "attr_cls_stats": {
+          "terms": {
+            "field": "attr_cls_keys",
+            "size": 10
+          }
+        }
+      }
+    }
+  }
+}

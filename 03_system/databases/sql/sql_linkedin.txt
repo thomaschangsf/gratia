@@ -1,0 +1,348 @@
+// ---------------------------------------
+// Setup
+// ---------------------------------------
+- Course link @ https://www.linkedin.com/learning/sql-essential-training-3/how-to-use-the-exercise-files?u=2101921
+- Notes @ /Users/chang/Documents/dev/git/opus/06_database/sql
+- Lab excercises code @ /Users/chang/Documents/dev/git/coding/sql_linkedin
+
+- Tool: SqlLiteStudio , downloaded onto mac
+
+
+
+// ---------------------------------------
+// Installation
+// ---------------------------------------
+<-- MAC
+
+
+
+// ---------------------------------------
+// Chime interview
+// ---------------------------------------
+
+
+<-- Summary and computation
+	- Supports arithmetic operations to create new columns and summarize
+
+		select MAX(height) from kids 
+			WHERE age BETWEEN 10 AND 11 and race = 1;
+
+		select sex, race, count(*) as N, AVG(weight/height*height) as bmi 
+			FROM kids
+			GROUP BY sex, race; 
+
+	- select based on summaries
+		select * from kids
+			GROUP BY id having COUNT(*) > 10 # COUNT(*) is a summary statement
+
+<-- Subqueries: Query against subresult
+	- By putting a select statement in parenthesis, you can chain another select statemetn as if it were another table
+
+		select COUNT(*), SUM(SUBQUERY.amount) from (
+	        select * 
+	        from USERS as u
+	        INNER JOIN TRANSACTIONS as t ON u.id=t.id
+	        ORDER BY t.id, t.trans_ts ASC
+	    ) as SUBQUERY
+	    
+	    select * from kinds 
+	    	where id in 
+	    	( select id from kids 
+	    		group by id
+	    		having count(*) > 10 );
+
+
+<-- Select with multiple tables
+	# INNER JOIN
+	select a.title, r.name
+		FROM album As a, artist AS r
+		WHERE a.aid = r.aid
+
+<-- JOIN
+	select * 
+	    from USERS as u
+	    INNER JOIN TRANSACTIONS as t ON u.id=t.id
+	    WHERE 
+	        (t.trans_ts BETWEEN 1000 AND 2000) 
+	        AND (u.enrollment_date BETWEEN '1977-03-01' AND '2011-09-03')
+    ORDER BY t.id, t.trans_ts ASC
+
+
+
+<-- Make Tables from Queries
+	CREATE TABLE young like kids
+	INSERT into young slect * from kids WHERE age < 15;
+
+
+<-- Windows
+	- Example
+		select 
+	        id,
+	        type,
+	        SUM(amount) 
+	        OVER (PARTITION BY id, type, amount ORDER BY trans_ts ASC) as x
+	    	FROM TRANSACTIONS
+
+    - syntax
+    	window_func OVER (PARTITION BY a, b c)
+
+    	window_func = {sum, aggregate_func}
+    	OVER signifies a window
+    	PARTITION BY chunks the rows, each chunk is applied the window_func
+
+
+// ---------------------------------------
+// 02 | SQL Overview - 
+// ---------------------------------------
+<-- Database organization
+
+<-- Selecting Rows
+	select name, continent 
+    from Country 
+    where continent = 'Asia' 
+    order by name 
+    limit 5 offset 5
+
+    select COLUMN_NAME
+    from TABLE
+
+<-- Selecting Columns
+	SELECT Name AS Country, Region, Continent from Country;
+
+<-- Inserting Rows
+	INSERT INTO customer (name, address, city, state, zip) 
+  VALUES ('Fred Flintstone', '123 Cobblestone Way', 'Bedrock', 'CA', '91234');
+
+<-- Counting Rows
+	SELECT COUNT(*) FROM Country WHERE Population > 100000000 AND Continent = 'Europe' ;
+
+<-- Inserting data
+	INSERT INTO customer (name, address, city, state, zip) 
+  VALUES ('Fred Flintstone', '123 Cobblestone Way', 'Bedrock', 'CA', '91234');
+
+<-- Updating data
+	UPDATE customer SET address = '123 Music Avenue', zip = '98056' WHERE id = 5;
+
+<-- Delete Data
+	DELETE FROM customer WHERE id = 5;
+
+
+
+
+
+// ---------------------------------------
+// 03 | Fundamental Concepts
+// ---------------------------------------
+<-- Creating a Table
+
+
+<-- Delete a Table
+
+
+<-- Insert Rows
+
+
+<-- Delete Rows
+
+
+<-- The NULL value
+	SELECT * FROM test WHERE c IS NULL;
+
+
+<-- Constraining Columns
+
+
+<-- Changing a Schema
+	LTER TABLE test ADD d TEXT;
+
+<-- ID columns
+	CREATE TABLE test (
+	  id INTEGER PRIMARY KEY,
+	  a INTEGER,
+	  b TEXT
+	);
+	INSERT INTO test (a, b) VALUES ( 10, 'a' );
+
+<-- Filtering Data
+	SELECT Name, Continent, Population FROM Country 
+  		WHERE Population < 100000 OR Population IS NULL ORDER BY Population DESC;
+
+
+<-- Removing Duplicates
+
+
+<-- Ordering Output
+	SELECT Name, Continent FROM Country ORDER BY Continent, Name ASC;
+
+<-- CASE statement; Conditional Expressions
+	A way to create a new column based on the value of other columns
+	CREATE TABLE booltest (a INTEGER, b INTEGER);
+	INSERT INTO booltest VALUES (1, 0);
+	SELECT
+	    CASE WHEN a THEN 'true' ELSE 'false' END as boolA,
+	    CASE WHEN b THEN 'true' ELSE 'false' END as boolB
+	    FROM booltest;
+
+<-- Distinct values
+	SELECT DISTINCT Continent FROM Country;
+
+
+
+// ---------------------------------------
+// 04 | Relationships
+// ---------------------------------------
+<-- Understanding JOIN
+
+
+<-- Accessing Related Tables
+	
+
+<-- Relating Multiple Tables
+	SELECT c.name AS Cust, c.zip, i.name AS Item, i.description, s.quantity AS Quan, s.price AS Price
+	  FROM customer AS c
+	  LEFT JOIN sale AS s ON s.customer_id = c.id
+	  LEFT JOIN item AS i ON s.item_id = i.id
+	  ORDER BY Cust, Item
+	;
+
+
+
+
+
+// ---------------------------------------
+// 05 | Strings
+// ---------------------------------------
+<-- About SQL strings
+
+
+<-- Funding Length of a String
+
+<-- Selecting Part of a String
+
+
+<-- Remove Spaces
+
+
+<-- Folding Case
+
+
+
+
+
+// ---------------------------------------
+// 06 | Numbers
+// ---------------------------------------
+<-- Numeric Types
+
+<-- What Type is that Value
+
+
+<-- Integer Division
+
+
+<-- Rounding Numbers
+
+
+
+
+
+// ---------------------------------------
+// 07 | Dates and Times
+// ---------------------------------------
+<-- Dates and Times
+
+
+
+<-- Date and Time Related Function
+
+
+// ---------------------------------------
+// 08 | Aggregates
+// ---------------------------------------
+<-- What are Aggregates
+
+
+<-- Using Aggregate Functions
+	SELECT AVG(Population) FROM Country;
+	SELECT Region, AVG(Population) FROM Country GROUP BY Region;
+	SELECT Region, MIN(Population), MAX(Population) FROM Country GROUP BY Region;
+	SELECT Region, SUM(Population) FROM Country GROUP BY Region;
+
+
+<-- Aggregating Distinct Values
+	SELECT COUNT(DISTINCT HeadOfState) FROM Country;
+
+
+
+// ---------------------------------------
+// 09 | Transactions
+// ---------------------------------------
+<-- What are Transactions
+
+
+<-- Data Integrity
+
+
+<-- Performance
+
+
+
+
+// ---------------------------------------
+// 10 | Triggers
+// ---------------------------------------
+<-- Automating Data With Triggers
+
+
+<-- Preventing Updaes
+
+
+<-- Example: Timestamps
+
+
+
+// ---------------------------------------
+// 11 | Views and Subselects
+//		View is a result set of a stored query. Kind of like a virtual table where the content is determibed by a query.
+// ---------------------------------------
+<-- Createing a sub-select
+
+<-- Searching withing a result set
+	# EX1
+	SELECT * FROM album
+	  WHERE id IN (SELECT DISTINCT album_id FROM track WHERE duration <= 90)
+	;
+
+	# EX2
+	SELECT a.title AS album, a.artist, t.track_number AS seq, t.title, t.duration AS secs
+	  FROM album AS a
+	  JOIN track AS t
+	    ON t.album_id = a.id
+	  WHERE a.id IN (SELECT DISTINCT album_id FROM track WHERE duration <= 90)
+	  ORDER BY a.title, t.track_number
+	;
+
+<-- Creating a view
+
+
+<-- Creating a joined view
+
+
+
+
+// ---------------------------------------
+// Simple Crud Applications
+// ---------------------------------------
+<-- Embedding SQL
+
+<-- The Select Function
+
+
+<-- The Insert, Update, and Delete Function
+
+
+
+
+// ---------------------------------------
+//
+// ---------------------------------------

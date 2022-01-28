@@ -1,0 +1,341 @@
+
+
+
+// -------------------------------------------
+//	Lab3
+// -------------------------------------------
+	To iterate faster, sample the df
+		* .sample(false, fraction=0.10, seed=42)
+		* limit
+		* cache
+
+	To compare
+
+		val (df3, total2014Cnt, duration14Fast) = m.benchmarkCount(() => df1)
+
+		val (df4, total2017Cnt, duration17Fast) = SUtil.benchmarkCount(() => df2)
+		val improvementTs = (duration17Slow-duration17Fast)/duration17Fast
+
+	My Example
+		val plSearchRawDF = session.sql(sqlCmd)
+		val (df, searchRawCnt, durationExp1) = m.benchmarkCount(() => plSearchRawDF)
+
+
+
+
+// -------------------------------------------
+//	Lab4 Common Functions
+// -------------------------------------------
+	* Use column renamed on sum(amount)
+	* cache to disk ersus memory
+		val byMonth2014DF = fast2014DF
+		  .groupBy("year", "month")
+		  .sum("amount")
+		  .withColumnRenamed("sum(amount)", "amount")
+		  .orderBy("year", "month")
+		  .persist(StorageLevel.DISK_ONLY)
+
+	* Append DF1 to another DF2 using 				unionByName
+
+	* select one element of dataframe
+		df.select(sum($"amount").cast("decimal(20,2)").cast("string").as("total")).as[String].first
+
+
+
+// -------------------------------------------
+//	Lab5&6 Reusability
+// -------------------------------------------
+	* Use functions to refactor common logic
+	def sumByDayOfYear(sourceDF:DataFrame):DataFrame = {
+	  return sourceDF.withColumn("month", month($"transacted_at"))
+	                 .withColumn("year", year($"transacted_at"))
+	                 .filter($"year" === 2017 && $"month" >= 11)
+	                 .withColumn("day", dayofyear($"transacted_at"))
+	                 .groupBy("year", "day").sum("amount")
+	                 .withColumnRenamed("sum(amount)", "amount")
+	                 .orderBy("day")
+	                 .persist()		
+	
+	* Interesting way to handle if logic of handling diffrent new column
+	def sumByDayOfYear(sourceDF:DataFrame):DataFrame = {
+	  var df = sourceDF
+	  
+	  if (sourceDF.columns.contains("year") == false) {
+	    df = df.withColumn("year", year($"transacted_at"))
+	  }
+	  
+	  if (sourceDF.columns.contains("month") == false) {
+	    df = df.withColumn("month", month($"transacted_at"))
+	  }
+	  
+	  df.filter($"month" >= 11)
+	    .withColumn("day", dayofyear($"transacted_at"))
+	    .groupBy("year", "day").sum("amount")
+	    .withColumnRenamed("sum(amount)", "amount")
+	    .orderBy("day")
+	    .persist()
+	}
+
+
+// -------------------------------------------
+//	Lab7
+// -------------------------------------------
+	* Validate schema
+		def validateSchema(df:DataFrame):Unit = {
+		  assert(df.columns.size == 3, "Expected three and only three columns")
+
+		  val schema = df.schema.mkString
+		  assert(schema.contains("year,IntegerType"), "Missing the year column")
+		  assert(schema.contains("day,IntegerType"), "Missing the day column")
+		  assert(schema.contains("amount,DecimalType"), "Missing the amount column")
+		  
+		  val expected = 61
+		  val total = df.count()
+
+		  assert(total == expected, "Expected %s records, found %s".format(expected, total))
+		}
+	
+	* Partition
+		We should strive for EACH partition to have 10-50GB
+
+	* Output Files 
+		Parquet > ORC > CSV > JSON
+		1 GB per partition is ideal
+			However, we still want to numPartitions to be at least equal to the num vCores.
+
+	* Cause of performance problems
+		spill to disk
+		shuffle
+		skew
+		small files
+
+
+
+// -------------------------------------------
+//	Lab8:
+// ------------------------------------------- 
+	Finding stats of DF [INCREDIBLE]
+	val partitions =  List("year", "month")
+
+	val statFile14DF = statFileWithPartitions(path2014, partitions, "parquet")
+	  .withColumn("series", lit("2014"))
+	  .withColumn("month", lpad(substring_index($"partition", "_", -1), 2, "0"))
+	  .orderBy("month")
+	  .persist()
+
+	https://community.cloud.databricks.com/?o=3082942778259518#notebook/1589534883810056/command/1589534883810067
+
+
+
+
+// -------------------------------------------
+//	Lab9: 9x to 300x times faster
+// -------------------------------------------
+	Uses Tracker to learn the optimal partition size, and set it programatically
+
+	Goal:
+		Partition
+			We should strive for EACH partition to have 10-50GB
+		
+			We also want the number partition to be at least equal to numCores.  To find numCores, use tools/sparnNumCores.sh
+
+		Output Files 
+			1 GB per output file is ideal
+
+	val fixedPath17 = "%s/fixed-2017.parquet".format(userhome)
+	val tempPath = "%s/temp.parquet".format(userhome)
+
+	Pseudo code of tuning partitions
+		(1) Find number of bytes of parquet
+			val (tempFileCount, tempBytes) = computeFileStats(tempPath)
+
+		(2) Find number of records
+			val total2017 = spark.read.parquet(tempPath).count
+
+		(3) What is target size of each partition?
+			val targetFileSize = 165M; usually it's 10-50G.
+
+		(4) Calculate numPartitions
+			val bytesPerRecord = tempBytes / total2017
+			val recordsPerPartition = targetFileSize / bytesPerRecord
+			val numPartitions = Math.round(total2017 / recordsPerPartition)
+
+
+	get num cpu cores per executor
+		grep "^processor" /proc/cpuinfo |wc -l
+
+		also have tools/sparkNumCores.sh
+
+	Sample code of using tracker, subcliass of SparkListener
+	val result = m.tracker.track(() => {
+		  spark.sql("""
+		  select source_page_id, placement_id, algorithm_id
+		  from bpe.plmerch_data
+		  where SITE_ID in (0)
+		  and dt = '20190901'
+		  and PLACEMENT_ID in (101018, 101006)
+		  group by source_page_id, placement_id, algorithm_id
+		  limit 100
+		  """).show(200, false)
+	})
+	result.printTime()
+
+
+// -------------------------------------------
+//	Lab10: Join Optimizations
+// -------------------------------------------
+- By default, enabling Spark cost estimation
+
+- Create table
+	val dbName = username.substring(0, username.indexOf("@")).replace(".","_").replace("-","_")
+
+	val query = "CREATE DATABASE %s".format(dbName)
+
+	try {
+	  spark.sql(query) 
+	  println("Created the database %s".format(dbName))
+	} catch { case e:org.apache.spark.sql.AnalysisException => 
+	  println("The database %s already exists".format(dbName))
+	}
+
+	spark.conf.set("spark.sql.shuffle.partitions", 8)
+
+	// Create a table for the "fast" version of our 2017 data
+	val salesPath = "/mnt/training/global-sales/solutions/2017-fast.parquet"
+	
+	val salesDF = spark.read.parquet(salesPath)
+	
+	salesDF.write.saveAsTable(sales)
+
+
+- Analyze statistics of table
+	spark.conf.set("spark.sql.cbo.enabled", true)
+	spark.conf.set("spark.sql.cbo.joinReorder.enabled", true)
+
+	val madCDL = "bpe.plmerch_data"
+	val queryA = "ANALYZE TABLE %s COMPUTE STATISTICS".format(madCDL)
+	spark.sql(queryA)
+
+	Go to the Spark SQL UI, and you can see the estimate vs actual.
+
+	Telling spark to collect statistics may help it perform better
+		val query = "ANALYZE TABLE %s COMPUTE STATISTICS FOR COLUMNS city_id, state".format(cities)
+		
+		spark.sql(query)
+
+		spark.table(sales)
+	     .join( spark.table(cities).filter($"state".isNotNull), "city_id")
+	     .join( spark.table(stores), "retailer_id")
+	     .foreach( x => () )
+
+
+- Autobroadcast join
+	val cacheName = "temp_cities"
+	
+	// Cache and materialize with the name "temp_cities"
+	cacheAs(spark.table(cities), cacheName, StorageLevel.MEMORY_ONLY).count() 
+	
+	val rddName = "In-memory table %s".format(cacheName)
+	val fullSize = sc.getRDDStorageInfo.filter(_.name == rddName).map(_.memSize).head
+
+	println("Cached Size: %,.1f MB".format(fullSize/1024.0/1024.0))
+
+	val threshold = spark.conf.get("spark.sql.autoBroadcastJoinThreshold").toLong
+
+	val broadcastable = fullSize < threshold
+
+	Give a hint to spark that we want to broadcast join
+		spark.table(sales).join( broadcast(spark.table(cities).filter($"state".isNotNull)), "city_id")
+
+
+// -------------------------------------------
+//	Lab 11 : Overhead of Caching
+// -------------------------------------------
+	- Caching increases OOM and garbage collection activities
+
+	- Specify schema to improve loading of df (few seconds)
+	  val schema = "transacted_at timestamp, trx_id integer, retailer_id integer, description string, amount decimal(38,2), city_id integer"
+
+	  val fixedPath17 = "/mnt/training/global-sales/solutions/2017-fixed.parquet"
+	  val df = spark.read.schema(schema).parquet(fixedPath17)
+
+	 - MEMORY_AND_DISK
+	 	The data will be written directly to memory and then spilled to disk once the RAM cache fills up
+
+	 	Look at the Spark Storage tab
+
+	 - DISK_ONLY
+	 	The data will be written directly to disk*
+
+	 - MEMORY_ONLY
+	 	The data will be written directly to memory and then expunged once it runs out of space
+
+	 - MEMORY_ONLY_SER
+	 	The data will be serialized, written directly to memory and then expunged once it runs out of space
+
+	 - MEMORY_AND_DISK_SER
+	 	The data will be serialized, written directly to memory and then spilled to disk once the RAM cache fills up
+
+	 - Code to benchmark
+		for (i <- 1 until MULTIPLIER) 
+			df = df.unionByName(load(i))
+
+		m.cacheAs(df, "experiment_6", StorageLevel.MEMORY_AND_DISK_SER).count()
+
+
+// -------------------------------------------
+//	Lab 12 : Extracting more Information
+//		Module shows how to extract information via regular expression, and making a utility function out of it.
+// -------------------------------------------
+- Key point: regexp_extract is powerful; learn to use it
+	
+
+- Raw form
+	* Pull out postedOn from descrition field
+		val postedOnPattern = """(.*\S)(\s*)(\d\d-\d\d)"""
+
+		val postedOnTempDF = fast2017DF.withColumn("postedOn", when(regexp_extract($"description", postedOnPattern, 3) =!= "", regexp_extract($"description", postedOnPattern, 3)).otherwise(lit(null)))
+
+	* replace posted on from description
+		val condition = when($"postedOn".isNotNull, regexp_extract($"description", postedOnPattern, 1)).
+                otherwise($"description")
+
+		val postedOnDF = postedOnTempDF.withColumn("description", condition)
+	
+
+- Refactored form to extract value
+	def extractValue(df:DataFrame, columnName:String, pattern:String, group:Int):DataFrame = {
+	  return df.withColumn(columnName, when(regexp_extract($"description", pattern, group) =!= "", regexp_extract($"description", pattern, group)).otherwise(lit(null)))
+	}
+
+	val postedOnTempDF = extractValue(df=fast2017DF, columnName="posted_on", pattern=postedOnPattern, group=3)
+
+- Refactored form to update column
+	def updateDescription(df:DataFrame, columnName:String, pattern:String):DataFrame = {
+	  return df.withColumn("description", when(col(columnName).isNotNull, regexp_extract($"description", pattern, 1)).otherwise($"description"))
+	}
+
+	val postedOnDF = updateDescription(df=postedOnTempDF, columnName="posted_on", pattern=postedOnPattern)
+
+
+// -------------------------------------------
+//	Lab13 : Cache Differentiation
+// -------------------------------------------
+- To know which cache is yours on SparkUI, use the utility function cacheAs, which is part of my MyUtil class
+
+	def cacheAs(df: org.apache.spark.sql.DataFrame, name: String, level: org.apache.spark.storage.StorageLevel): org.apache.spark.sql.DataFrame = {
+        try session.catalog.uncacheTable(name)
+        catch {
+          case _: org.apache.spark.sql.AnalysisException => ()
+        }
+
+        df.createOrReplaceTempView(name)
+        session.catalog.cacheTable(name, level)
+        return df
+      }
+
+    Where do I see this on the SparkUI ?
+
+// -------------------------------------------
+//	Lab14 : Datatypes and Structures
+// -------------------------------------------

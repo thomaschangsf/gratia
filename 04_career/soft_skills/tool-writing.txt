@@ -1,0 +1,98 @@
+//----------------------------------------
+References
+//----------------------------------------
+	https://medium.com/@fergusb/clear-writing-clear-thinking-better-decisions-great-outcomes-31a65b4965dd
+
+
+
+
+//----------------------------------------
+// Writing
+//----------------------------------------
+- Use fewer than 30 words per sentence
+	Lacked the ability to --> could not
+
+- Replace adjective with data
+	We mad the on-time delivery rate much higher --> We increased the on-time delivery by 15 bps, from 97.1% to 97.5%
+
+- Eliminate weasel words
+	Nearly all custoers --> 86% of AWS accounts globally
+
+- If you delete the paragraph, would the reader miss i? How does this enrich the reader's understanding? What are the implications of your claims?
+
+- If you are asked a question, start your response by DIRECTLY answering the quesiton
+	How many postings are open for your team?  --> 6 posstings are open today; I expect 3 requisitions to be approved by Friday
+
+
+//----------------------------------------
+// Smart Goals
+//----------------------------------------
+- Story planning
+	Task order (Upper bound)
+	
+	Dependencies
+
+- The control we have as an IC is the cost estimate
+L1
+	L2
+
+
+How to Write Goals
+	- Put in sufficient details.
+		* Bad examples: 
+			[5/15] We are YELLOW for the date 6/30 because we discovered a critical logging error in which all click events are not logged. The $@#! logging team needs to complete the logging, and I talked to 👉 PersonX about it. Path to Green: If we don’t get the logging working by 5/25, we are going to be RED, 😟.
+
+			Actually follow up with the team, get a JIRA. 
+			If you could not follow up in time, give a Date for a Date when when you will follow up.
+			Say “working closely with team X” because they are your partners
+			In path to green, say what you are going to do, not what others need to do
+
+
+
+Enforce high standards on written goal updates
+	- PM ensures that updates
+		Capture the color, date, work performed
+		Have links for drill-downs, but we will not drill down during the meeting
+		Include docs or JIRAs for major decisions and dates
+		Includes enough information so that assignee rarely has to answer questions
+	
+	- Test the path to green
+		Is team really able to meet the path. Is there enough buffer
+		Does team have a good sense for the timeline
+	
+	- Why?
+		Helps drive the process forward because everyone follows the rules
+		Transparency is rewarded
+		Fewer shorter meetings
+
+
+
+Goals are SMART
+	- Specific
+		Narrows the focus to a specific, high-level work area
+
+	- Measurable
+		There is a metric that you can change, detect, and attribute to the successful completion of the work
+
+		Even if it is only measured in an A/B test, but it should be non-trivial 
+
+	- Assignable
+		There is a SINGLE owner for the goal, i.e., for updating and tracking the updates but many may complete it
+
+	- Realistic
+		It is plausible within the time frame given resources
+
+	- Time-bound
+		Goal must be completed by a specific date, within the metrics bound
+
+	- Avoid
+		Acronyms, abbreviations. Spell them out or define them
+	
+		Capitalized Noun Phrases other than product names
+		
+		Useless goal language: “Improve” -- how does it change, “Launch” -- who cares if there is no impact, “Investigate” -- deliverable is a doc, so say that
+
+
+Types of Goals (pg 69)
+	- 
+	

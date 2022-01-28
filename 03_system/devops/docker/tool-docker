@@ -1,0 +1,81 @@
+tool-docker
+
+// -----------------------------
+// Install docker on linux
+// -----------------------------
+sudo apt install docker.io
+
+
+
+// -----------------------------
+// Docker Tutorial
+// -----------------------------
+docker images
+
+docker run hello-world
+	runs a container/cmd in a container
+
+	container are proceses, that share the common docker os.
+
+	once we run this command/container, it exits
+
+docker ps --all
+	all tells all procees, even if it has already exited
+
+
+How to build and test 
+	cd /home/thchang/git/node-bulletin-board/bulletin-board-app
+
+	build images
+		docker build --tag bulletinboard:1.0 .
+
+		docker build --tag bulletinboard:1.0 /home/thchang/git/node-bulletin-board/bulletin-board-app -f /home/thchang/git/node-bulletin-board/bulletin-board-app/Dockerfile
+
+	run container basd on image
+		docker run --publish 8000:8080 --detach --name bb bulletinboard:1.0
+
+		--publish asks Docker to forward traffic incoming on the host’s port 8000 to the container’s port 8080. Containers have their own private set of ports, so if you want to reach one from the network, you have to forward traffic to it in this way. Otherwise, firewall rules will prevent all network traffic from reaching your container, as a default security posture.
+
+		--detach asks Docker to run this container in the background.
+
+		--name specifies a name with which you can refer to your container in subsequent commands, in this case bb.
+
+		8080 was defied in the dockerFile EXPOSE
+
+		
+
+	Remove the container
+		docker rm --force bb
+
+
+
+// ------------------------------------------
+// Applied to a project
+// -------------------------------------------
+// --------------------------
+// Update build image
+// --------------------------
+cd /home/thchang/git/svc-perf-lnp
+sudo su
+docker build . --tag svclnp:1.8
+
+test local docker images
+	docker run --name aa svclnp:1.8
+	docker exec -it aa bash
+	check files are where it's supose to be
+
+Push to repo
+	sudo su
+		C3Pasword, which uses CORP-NT
+
+	svc-perf-lnp
+		docker tag svclnp:1.8 ecr.vip.ebayc3.com/thchang/svclnp:1.8
+		sudo docker login ecr.vip.ebayc3.com
+			1st password is CORP NT
+			2nd password: pint+yubi
+		docker push ecr.vip.ebayc3.com/thchang/svclnp:1.8
+
+	tess-helm
+		sudo docker login hub.tess.io
+		sudo docker tag svclnp:1.8 hub.tess.io/pybay/lnp:1.8
+		sudo docker push hub.tess.io/pybay/lnp:1.8 

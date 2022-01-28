@@ -1,0 +1,152 @@
+Tiffany Nguyen
+
+
+Cluster Snapsot
+	RENO:  299 TB, 43k vCores, 914 nodes
+
+Executor Meory
+	queue = 2.4% --> 
+
+	yarn.executor_moery between 1G and 64G
+
+	yarn.scheduler	.min-allocaion-mb: 1GB
+					.max	: 64G
+	yarn.reousrce.memoery-mb : 327G; 
+
+		Executor=container = 1JVM
+		All the executors can take 327 GB
+
+	How to set vCore seeting
+		grep "^processor" /proc/cpuinfo |wc -l ==> 48
+
+		vCores = 48
+		usable executor = 47
+		47/5 = 9 ; 5 can go up to 8
+
+		Memoery per executor: executor per memory = 327G/9 = 36G
+
+		ME on sparkShell
+			grep "^processor" /proc/cpuinfo |wc -l ==> usable executors = 12
+
+
+	spark.yarn.executor.memoryOverhead
+		memoryOVerhead: literal strings
+
+		Cuause: executorLostFaliure (executor 33 cased .. Reason: Container killed)
+		
+		2 solutions:
+			increase over memory
+			increase paritition num count
+
+			increae memoryOverHead or increae shuffle partition count
+		384M or 10% of executor per memory ==> 
+
+		Why would shuffle count size help? Out of memory may be cause the partition count is too small; increas the partiiton count, and decrease the amount of 
+
+
+	driver memory
+		"Job abored due t stage failure: Total sizeo of results of task si bigger than spark.driver.maxReusltSize"
+
+		spark.driver.memory = 20G
+		spark.driver.maxResultSize: 1G; > autoBroadCastJob, iedefault 10M
+
+
+	Num executors
+		--num-executors = execuotrs/node * node in queue
+			9 * 22
+
+			node in queue = totoal memory in queue/ total nodes in queue = 22
+
+
+		-- Be more dynamic
+			spark.dynarmicAloocation.executorIdleTimeout
+			spark.dynamicAllocation.maxExecutors / minExecutors, initialExecutors
+
+
+Paritionaing Size
+	1 partitions = 1 task
+
+	Few paritions: not enough parallizatino, undertilized resoures, OOM
+		Spill to disk too opten, can see form UI
+	too many partions: I/O overpead
+			If task duration is too low, than too many partitions. Can find SPark UI.
+
+	partion = numExecutors * numCores/executor (2 or 3 time number of cores)
+
+	Ex
+		2 * 198 executors * (9 core/executor) = 3564
+
+
+	shuffle partitions shoudl be multipe of cores: 
+		want to have multiple runs across the cores; waves.  So when one wave of task is done, we can go to the next round.
+
+	Side:
+		one reasone we cannot have balance multiple waves, is skew job. To address skew job, add keys so it will distribute the data more evenly.
+
+Optimal COnfig
+	spark.task.maxFailures = 4 (in case we hit bad nodes, so we can have more retries)
+	spark.serializer = org.apache.spark.serializerKroSerializer
+	eventLog.enabled = true
+	spark.sql.autoBroadcastJoinThreshold = 104857600
+
+	Job is slow, if UI task view shows lots of speculation, whch can be due to 
+		spark.speculation = true
+		spark.speculation.interval = 5000ms
+		spark.speculation.multiplier = 2
+
+Debug/Trouble shooting
+	wiki: SPARK SQL Job Analyzer: 
+		https://wiki.vip.corp.ebay.com/display/GDI/Spark+SQL+Job+Analyzer+--+JPM+Enhancements
+
+
+	errors:
+		how to debug slow/no error:
+			Causes:
+				wait for reno resources to bre ready
+				can't access HDFS
+					How to check: go to prometheus, and look at 
+				From UI, dump the the thread dump of the driver of 10 instances, and wee where it fol is waiting.
+
+			Look for the ative stage, and lok at the tasks. Tasks which task are running, stopped.  Sometimes the task keeps spawning.
+
+	If job have too many stages, then there are shuffling.  Look at the sql.
+
+
+
+// ---------------------------------------
+// Turning GenerateUserItemJob.scala
+// ---------------------------------------
+- numCPUS= 24-1
+	grep "^processor" /proc/cpuinfo | wc -l 
+
+- numCores = 24
+	less /proc/cpuinfo
+	Each cpu has 1 core
+
+- Memory set in submitJob
+	 --executor-memory 32G 
+	 --driver-memory 48G 
+
+
+- Executor/Node
+	We typically want each executor to have 5-9 cores
+
+		numCPUs/5 => 23/5 = ~4 core/executor
+
+	 
+	Memory/Executor = 32G/4 => 8G/executor
+
+
+- What's the ideal partition size
+	1 partition = 1 task = 1 cpu 
+
+	Ideal partitions size 
+		= scale * numExecutors * numCores/executor
+		= 2 * (100) * (4 core/executor)
+		= 800 partitions
+
+		num-executors is set in config submit job; For me, it's set to 100
+
+
+
+

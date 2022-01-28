@@ -1,0 +1,170 @@
+Good notes
+	review questions: good for spark interviews preparation 
+		https://community.cloud.databricks.com/?o=3082942778259518#notebook/1589534883811292/command/1589534883811293
+
+
+--------------------------------
+Getting started
+--------------------------------
+
+
+
+--------------------------------
+Utitlity Function
+--------------------------------
+	- How do I know I have as skew probelm?
+	Use printRecordsPerPartition() to see the number of records per partition. If I have skew, one partition will have more records than the other.
+
+
+
+--------------------------------
+Developer Productivity
+--------------------------------
+
+
+--------------------------------
+Comparing 2014 vs 2017
+--------------------------------
+
+
+
+
+
+--------------------------------
+Reusability 
+--------------------------------
+
+
+--------------------------------
+Comparing 2014 vs 2018
+--------------------------------
+
+
+--------------------------------
+Statfile
+--------------------------------
+
+
+--------------------------------
+From 9x to 300x faster
+--------------------------------
+
+
+--------------------------------
+Join Optimizations
+--------------------------------
+
+
+--------------------------------
+Overhead of Caching
+--------------------------------
+
+
+
+--------------------------------
+Extracting more information
+--------------------------------
+
+
+
+--------------------------------
+Cache Differentiation
+--------------------------------
+
+
+
+--------------------------------
+DataTypes and Structures
+--------------------------------
+
+
+--------------------------------
+TTE 01: File Formats
+--------------------------------
+Type	Inference Type	Inference 		Speed	Reason	Should Supply Schema?
+CSV		Full-Data-Read	Slow			File size	Yes
+Parquet	Metadata-Read	Fast/Medium		Number of Partitions	No (most cases)
+Tables	n/a	n/a	Predefined	n/a
+JSON	Full-Read-Data	Slow	File size	Yes
+Text	Dictated	Zero	Only 1 Column	Never
+JDBC	DB-Read	Fast	DB Schema	No
+
+
+
+--------------------------------
+TTE 02: Partitioning and File Layout
+--------------------------------
+	-  Look at the physical plans
+	df_by_year.where("birthYear between 1970 and 1980").explain()
+
+
+	- Small read per partition, so we repartition
+	df_by_year.repartition($"birthYear")
+	  .write.partitionBy("birthYear")
+	  .format("parquet")
+	  .mode("overwrite")
+	  .option("path", userhome + "/tuning-s/people_by_year.parquet")
+	  .saveAsTable(tableName)
+
+
+
+
+--------------------------------
+TTE 03 - Corrupt Record Handling
+--------------------------------
+- controlled by the options: mode and columnNameOfCorruptRecord
+val corruptDF = spark.read
+  .option("mode", "PERMISSIVE")
+  .option("columnNameOfCorruptRecord", "_corrupt_record")
+  .json(sc.parallelize(data))
+
+- badRecordPath option save the bad record to a different directory
+val SMSCorruptDF2 = spark.read
+  .option("badRecordsPath", userhome + "/tuning-s/corruptSMS")
+  .json("/mnt/training/UbiqLog4UCI/14_F/log*")
+
+
+--------------------------------
+TTE 04: Caching
+--------------------------------
+- Goal
+	Analyze the performance of caching RDDs to DataFrames
+	Compare and contrast the various storage level options
+
+- Sometimes cahcing a df is actally more than storing to disk
+	To see disk size: 
+		%fs ls /mnt/training/dataframes/people-with-header-10m.txt
+
+	Sol1: use inferSchema option
+	val df2 = spark
+         .read
+         .option("header", "true")
+         .option("sep", ":")
+         .option("inferSchema", "true")
+         .csv("/mnt/training/dataframes/people-with-header-10m.txt")
+
+  Sol2: serialize to serdes
+  	df3.persist(StorageLevel.MEMORY_AND_DISK_SER).count
+
+  Sol3: persist as rdd
+  	val myRDD = df3.rdd
+		myRDD.setName("myRDD").cache().count
+
+--------------------------------
+TTE 05: User Defined function
+--------------------------------
+- If using python udf try the vectorize udf, which is more performant
+
+- Jupyter has a magic command !!!
+	%timeit -n1 -r1 (df.groupby('id').agg(collect_list(struct(df['id'], df['v'])).alias('rows')).withColumn('new_rows', substract_mean(col('rows'))).withColumn('new_row', explode(col('new_rows'))).withColumn('id', col('new_row.id')).withColumn('v', col('new_row.v')).agg(count(col('v'))).show())
+
+
+--------------------------------
+
+--------------------------------
+
+
+
+--------------------------------
+
+--------------------------------

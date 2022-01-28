@@ -1,0 +1,383 @@
+GoogleCloudAppEngine 
+
+Commands
+	gcloud config set project ebay-n
+	gcloud components install kubectl
+	gcloud config set compute/zone us-central1-b
+	gcloud compute instances list  grep | grep search
+
+	Log in to a machine
+		gcloud compute --project "ebay-n" ssh --zone "us-central1-b" "aerospike-b-test-1"
+
+	 kubectl get rc
+	 kubectl get pod
+	 kubectl get service
+	 kubectl describe service psearchsvc-uc1b-dev-svc
+
+Url
+	https://console.cloud.google.com/compute/instances?project=ebay-n&graph=GCE_CPU&duration=PT1H
+		look for aerospike-b-test-1 [external ip = 104.197.252.80] AND [internal ip=10.240.0.71]
+
+
+----------------------------------------------------
+Google Cloud Engine
+----------------------------------------------------
+(D1) application.conf
+	create a dev section
+	set to dev
+
+(D2) Create google resources
+	gcloud container clusters create psearchsvc-uc1b-dev-cluster --num-nodes 1 --machine-type n1-standard-2
+
+	Create cluster
+		gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster --zone us-central1-b
+			gGetClusterCredentialsDev
+		cd backend-search-service/searchservice-web/kubernetes
+
+	Create Service
+		gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster --zone us-central1-b
+			gGetClusterCredentialsDev
+		
+		cd /Users/thchang/Documents/dev/git/backend-search-service-play/conf
+		
+		cat k8s-service.yaml | sed 's/${appInstance}/psearchsvc-uc1b-dev/g' | kubectl create -f -
+	
+	Create Controller
+		gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster --zone us-central1-b
+			gGetClusterCredentialsDev
+		
+		cd /Users/thchang/Documents/dev/git/backend-search-service-play/conf
+		
+		cat k8s-controller.yaml | sed 's/${appInstance}/psearchsvc-uc1b-dev/g' | kubectl create -f -
+
+		cat k8s-controller.yaml | sed 's/${appInstance}/psearchsvc-uc1b-dev/g' | sed 's/${replicas}/2/g' |kubectl create -f -
+
+
+		# Optional Not really sure if this is necessary
+		kubectl expose rc psearchsvc-uc1b-dev-ctl --type="LoadBalancer"
+
+
+(D3) deploy
+	set deployutil.sh env to dev
+
+	./deployutil.sh build
+		mvn compile war:exploded -f pom.xml
+		docker build -f Dockerfile -t gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490 .
+
+	./deployutil.sh publish
+		gcloud docker push gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+	./deployutil.sh deploy	
+		kubectl rolling-update psearchsvc-uc1b-dev-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+		N_DEPLOY_ENV ties it to a google resource [dev in this case]
+
+	Update Google DNS to point to service
+		kubectl get services --> external IP
+		https://console.cloud.google.com/networking/dns/zones/ebay-n?project=ebay-n&authuser=0
+
+(C1) Tear down: Remove resources
+	Delete service
+		kubectl get services OR gServiceList
+		kubectl delete services
+	Delete pod
+		kubectl get rc OR gReplicationControllerList
+		!! NOTE: There may be multipe rc
+		kubectl delete rc psearchsvc-uc1b-dev-ctl
+		psearchsvc-uc1b-dev-ctl-ac2672cc05e6821643fdb9759061455c
+	Delete cluster
+		gcloud container clusters list | grep search OR gClusterList
+
+		gcloud container clusters delete psearchsvc-uc1b-dev-cluster
+
+ (DEBUG)
+	kubectl get rc
+		The replication controller has the image.  Sometimes one can get multipel rc, so the image might be messed up. Just delte all the rc, and start over.
+
+
+	kubectl get pods
+		kubectl logs psearchsvc-uc1b-prod-ctl-3d0fd8626850db928ca0d33d0efbd478-6eu25 -f
+
+		kubectl exec psearchsvc-uc1b-prod-ctl-3d0fd8626850db928ca0d33d0efbd478-6eu25 -ti -- bash
+
+		gLogPods psearchsvc-uc1b-prod-ctl-3d0fd8626850db928ca0d33d0efbd478-6eu25
+
+	kubectl get services
+
+	curl --request GET 'http://130.211.142.206'
+
+------------------------------------------
+Docker notes
+------------------------------------------
+dBuildImage
+	mvn compile war:exploded -f pom.xml
+  	docker build -f Dockerfile -t gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490 .
+docker images
+
+dRun IMAGE_ID
+	docker run -tid --name psearch-dev -p 80  ${1}
+
+docker ps
+
+dLog CONTAINER_ID
+	docker logs -f psearch-dev
+
+dLogin CONTAINER_ID
+	docker exec -t -i ${1}  /bin/bash
+
+Clean up
+	docker ps 
+	docker rm -f CONTAINER_ID
+	docker images
+	docker rmi IMAGE_ID
+
+
+
+docker run -tid --name psearch-dev -p 80  ${1}
+
+docker logs -f psearch-dev
+
+docker exec -t -i ${1}  /bin/bash
+
+docker top psearch-dev
+
+
+
+di: docker images
+dc: docker container
+
+docker run -p 8080:8080 --rm -v $PWD/logs:/logs -v $PWD/notebook:/notebook -e ZEPPELIN_LOG_DIR='/logs' -e ZEPPELIN_NOTEBOOK_DIR='/Users/thchang/Documents/dev/personal/ml/zeppelin' --name zeppelin apache/zeppelin:0.8.0
+
+Remove container
+	docker rm `docker ps --no-trunc -aq`
+
+
+
+------------------------------------------------------
+gcloud container clusters get-credentials n-standard-us-central1-c-dev --zone us-central1-c
+kubectl create -f conf/k8s-controller.yaml
+kubectl create -f conf/k8s-service.yaml
+kubectl rolling-update zeusbff-dev-rc --image=gcr.io/ebay-n/zeusbff:latest
+
+
+
+-------------------------------------------------------
+WORKS!!!
+-------------------------------------------------------
+gcloud container clusters create psearchsvc-uc1b-dev-cluster --num-nodes 1 --machine-type n1-standard-2
+
+deployutil.sh build
+deployutil.sh publish
+
+pushd /Users/thchang/Documents/dev/git/backend-search-service/searchservice-web/kubernetes/tom
+kubectl create -f controller.yaml
+kubectl create -f service.yaml
+kubectl rolling-update psearchsvc-uc1b-dev-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-14a5120
+	Method 1
+		docker images:
+			tag = 0.0.17-SNAPSHOT-14a5120
+	Method 2
+		0.0.17 comes from pom snapshot version
+		a8b0006 comes from first 7 digits of git log
+
+
+DEBUG: 
+	gGetClusterCredentials [Cluster Name]
+	kubectl describe service psearchsvc-uc1b-dev-svc
+
+	curl --request GET 'http://searchsvc.ebay-n.com'
+	curl --request GET 'http://104.154.35.252'
+
+
+Clean up
+
+
+
+???
+kubectl expose rc psearchsvc-uc1b-dev-ctl --type="LoadBalancer"
+
+curl --request GET 'http://searchsvc.ebay-n.com'
+curl --request GET 'http://104.154.103.217'
+
+Note: kubectl runs on credential cluster
+	kubectl get services will get different result based whether you type
+		- gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster
+		- gcloud container clusters get-credentials psearchsvc-uc1b-prod-cluster
+
+
+-------------------------------------------------------
+RECOVERY of PROD
+-------------------------------------------------------
+	git checkout master
+	deployutil.sh --> prod
+	
+	cat service.yaml | sed 's/${appInstance}/psearchsvc-uc1b-prod/g' | kubectl create -f -
+
+	cat controller.yaml | sed 's/${replicas}/2/g;s/${appInstance}/psearchsvc-uc1b-prod/g;s/${N_DEPLOY_ENV}/prod/g' | kubectl create -f -
+
+	kubectl rolling-update psearchsvc-uc1b-prod-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+
+-------------------------------------------------------
+WIP
+-------------------------------------------------------
+change deployutil.sh --> dev
+./deployutil.sh build
+./deployutil.sh publish
+
+Build docker image
+	mvn compile war:exploded -f pom.xml
+	docker build -f Dockerfile -t gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490 .
+
+Publish image to google cloud
+	gcloud docker push gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+Create cluster
+	gcloud container clusters create psearchsvc-uc1b-prod-cluster --num-nodes 1 --machine-type n1-standard-2
+
+	get credentials
+
+Create service
+	kubectl create -f service.yaml	
+
+Create replication controller && pods
+	kubectl create -f controller.yaml
+
+Deploy
+	kubectl rolling-update psearchsvc-uc1b-prod-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+
+
+
+Create service
+	cd /Users/thchang/Documents/dev/git/backend-search-service/searchservice-web/kubernetes
+	
+	gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster
+	gcloud container clusters get-credentials psearchsvc-uc1b-prod-cluster
+
+	cat service.yaml | sed 's/${appInstance}/psearchsvc-uc1b-dev/g' | kubectl create -f -
+	
+Create replication controller (will also create pod)
+	cd /Users/thchang/Documents/dev/git/backend-search-service/searchservice-web/kubernetes
+	
+	gcloud container clusters get-credentials psearchsvc-uc1b-dev-cluster --zone us-central1-b
+	
+	cat controller.yaml | sed 's/${replicas}/2/g;s/${appInstance}/psearchsvc-uc1b-dev/g;s/${N_DEPLOY_ENV}/dev/g' | kubectl create -f -
+
+	kubectl get rc
+
+
+
+	
+
+Deploy
+	Is this necessary?
+		./deployutil.sh deploy
+	kubectl rolling-update psearchsvc-uc1b-dev-ctl --image $TAG
+		docker images
+
+	kubectl rolling-update psearchsvc-uc1b-dev-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-a8b0006
+
+
+Clean up
+	Delete service
+		kubectl get services OR gServiceList
+		kubectl delete services
+	Delete pod
+		kubectl get rc OR gReplicationControllerList
+		kubectl delete rc psearchsvc-uc1b-dev-ctl
+		psearchsvc-uc1b-dev-ctl-ac2672cc05e6821643fdb9759061455c
+	Delete cluster
+		gcloud container clusters list | grep search OR gClusterList
+
+		gcloud container clusters delete psearchsvc-uc1b-dev-cluster
+
+
+
+--------------------------
+To fix production
+	- deployutil.sh N_DEPLOY_ENV= production
+		application.conf has to match deployutil.sh
+
+(S1) Create my own google resources
+	Set up google cloud resources
+		gcloud container clusters create psearchsvc-uc1b-dev-cluster --num-nodes 1 --machine-type n1-standard-2
+
+		gcloud container clusters get-credentials searchsvc-uc1b-dev-cluster --zone us-central1-b
+		cat controller.yaml | sed 's/${replicas}/2/g;s/${appInstance}/feedssvc-qa/g;s/${N_DEPLOY_ENV}/qa/g' | kubectl create -f -
+
+		gcloud container clusters get-credentials searchsvc-uc1b-dev-cluster --zone us-central1-b
+		cat service.yaml | sed 's/${appInstance}/feedssvc-qa/g' | kubectl create -f -
+
+(S2) Deploy
+	deployutil.sh
+		make sure env=production
+	deployutil.sh build
+	deployutil.sh publish
+	deployutil.sh deploy
+	
+
+
+
+To debug
+	kubectl get rc
+	
+	kubectl get pods
+		kubectl logs psearchsvc-uc1b-prod-ctl-3d0fd8626850db928ca0d33d0efbd478-6eu25 -f
+
+		gLogPods psearchsvc-uc1b-prod-ctl-3d0fd8626850db928ca0d33d0efbd478-6eu25
+
+	kubectl get services
+	
+
+
+----------------
+Sumo
+----------------
+docker build -t tom:docker-localfile-image .
+
+docker run -d --name="sumologic-file-collector-container" tom:docker-localfile-image sujJUhTEw6Wqxw ZuHFE2ESyWRlL5ggitI2I39LTuIVCEm36ZurFTKP6hvC5mwcXz1lQb5XotpU4vx9
+
+docker build -f Dockerfile -t gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490 .
+
+	./deployutil.sh publish
+		gcloud docker push gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+	./deployutil.sh deploy	
+		kubectl rolling-update psearchsvc-uc1b-dev-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-596d490
+
+
+------------------------------
+ Gcloud WIP
+------------------------------
+docker build -f Dockerfile -t gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-bda13d8 .
+
+gcloud docker push gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-9fe89f4
+
+kubectl rolling-update psearchsvc-uc1b-dev-ctl --image gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-9fe89f4
+
+
+
+docker run -d --name="sumologic-file-collector-container-on-gcloud" gcr.io/ebay-n/psearchsvc:0.0.17-SNAPSHOT-e753692
+
+
+
+------------------------------
+Separated
+------------------------------
+source rmProdSearch.bat
+
+dBuildImageSearch
+dRunSearch 
+	dRunSearch gcr.io/ebay-n/psearchsvc:
+
+Make sure sumo/sumo-sources point to the right contiainer: "specifiedContainers": ["psearch-dev"],
+
+dBuildImageSumo
+
+dRunSumo 
+
+
+
+2015-01-23 23:59:59:123, lvl=info, metaData={svc:'search', txid:'123', usrid:'User123'}, log={msg:'Transaction: bought', expmtId='Exp1', algoId='search-algo-1'}
+

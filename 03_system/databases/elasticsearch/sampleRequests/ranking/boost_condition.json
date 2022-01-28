@@ -1,0 +1,38 @@
+// https://www.elastic.co/guide/en/elasticsearch/guide/current/_boosting_query_clauses.html
+// GET /ebay-n/listing/_search
+{
+  "fields": [
+    "title",
+    "condition"
+  ],
+  "size": 100,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "attr_ner_keys": "type:shoes"
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "condition": {
+              "value": 1000,
+              "boost": 5
+            }
+          }
+        },
+        {
+          "term": {
+            "condition": {
+              "value": 1500,
+              "boost": 0.5
+            }
+          }
+        }
+      ]
+    }
+  }
+}

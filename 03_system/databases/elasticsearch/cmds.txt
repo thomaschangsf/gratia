@@ -1,0 +1,1804 @@
+# ----------------------------------
+# ------ Creating indexes-----------
+# ----------------------------------
+# Get index info: esGetIndexInfo
+GET _cat/indices?v
+
+# Define listing type mapping
+PUT ebay-n-v2.5-test/
+{
+    "settings":{
+    "number_of_shards": 90,
+    "number_of_replicas": 1,
+    "refresh_interval": "45s",
+    "similarity":{
+      "my_bm25":{
+        "type": "BM25",
+        "k1": 0.2,
+        "b": 0
+      }
+    },
+    "analysis": {
+      "filter": {
+        "english_keywords": {
+          "keywords": [
+            "lots"
+          ],
+          "type": "keyword_marker"
+        },
+        "english_stemmer": {
+          "type": "stemmer",
+          "language": "english"
+        },
+        "english_possessive_stemmer": {
+          "type": "stemmer",
+          "language": "possessive_english"
+        },
+        "english_stop": {
+          "type": "stop",
+          "stopwords": "_english_"
+        }
+      },
+      "analyzer": {
+        "ebay-n-search": {
+          "filter": [
+            "english_possessive_stemmer",
+          "lowercase",
+          "english_stop",
+          "english_keywords",
+          "english_stemmer"
+          ],
+          "tokenizer":
+            "standard"
+        }
+      }
+    }
+  },
+  "mappings": {
+      "listing": {
+        "include_in_all": false,
+        "properties": {
+          "ai_interest_id": {
+            "type": "keyword"
+          },
+          "attr_cls_keys": {
+            "type": "keyword"
+          },
+          "attr_msku_keys": {
+            "type": "keyword"
+          },
+          "attr_ner_keys": {
+            "type": "keyword"
+          },
+          "attr_seller_keys": {
+            "type": "keyword"
+          },
+          "auction_type": {
+            "type": "keyword"
+          },
+          "brand": {
+            "type": "keyword"
+          },
+          "canonical_aspects_a": {
+            "type": "keyword"
+          },
+          "canonical_aspects_b": {
+            "type": "keyword"
+          },
+          "condition": {
+            "type": "keyword"
+          },
+          "condition_description": {
+            "type": "text",
+            "index": false
+          },
+          "currency": {
+            "type": "keyword"
+          },
+          "data_flag": {
+            "type": "byte"
+          },
+          "deal_score": {
+            "type": "float"
+          },
+          "demote_v2": {
+            "type": "float",
+            "index": false
+          },
+          "desc": {
+            "type": "text",
+            "index": false
+          },
+          "direct_shipping": {
+            "properties": {
+              "0": {
+                "type": "boolean"
+              },
+              "15": {
+                "type": "boolean"
+              },
+              "223": {
+                "type": "boolean"
+              }
+            }
+          },
+          "direct_shipping_n2": {
+            "type": "keyword"
+          },
+          "end_ts": {
+            "type": "long"
+          },
+          "fast_and_free_shipping": {
+            "type": "boolean"
+          },
+          "free_and_fast_shipping": {
+            "properties": {
+              "0": {
+                "type": "boolean"
+              },
+              "15": {
+                "type": "boolean"
+              },
+              "223": {
+                "type": "boolean"
+              }
+            }
+          },
+          "free_shipping": {
+            "properties": {
+              "0": {
+                "type": "boolean"
+              },
+              "15": {
+                "type": "boolean"
+              },
+              "223": {
+                "type": "boolean"
+              }
+            }
+          },
+          "handling_days": {
+            "type": "short"
+          },
+          "images": {
+            "type": "text",
+            "index": false
+          },
+          "inventory_tuning": {
+            "type": "keyword"
+          },
+          "is_n1_rpp_deal": {
+            "type": "boolean"
+          },
+          "item_country_id": {
+            "type": "keyword"
+          },
+          "item_id": {
+            "type": "long"
+          },
+          "item_loc": {
+            "type": "keyword",
+            "index": false
+          },
+          "item_visibility_info": {
+            "properties": {
+              "0": {
+                "properties": {
+                  "ivf": {
+                    "type": "keyword"
+                  },
+                  "reason_code": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "visibility": {
+                    "type": "keyword"
+                  },
+                  "visibility_reason": {
+                    "type": "keyword",
+                    "index": false
+                  }
+                }
+              },
+              "15": {
+                "properties": {
+                  "ivf": {
+                    "type": "keyword"
+                  },
+                  "reason_code": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "visibility": {
+                    "type": "keyword"
+                  },
+                  "visibility_reason": {
+                    "type": "keyword",
+                    "index": false
+                  }
+                }
+              },
+              "100": {
+                "properties": {
+                  "ivf": {
+                    "type": "long"
+                  },
+                  "reason_code": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "visibility": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "223": {
+                "properties": {
+                  "ivf": {
+                    "type": "keyword"
+                  },
+                  "reason_code": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "visibility": {
+                    "type": "keyword"
+                  },
+                  "visibility_reason": {
+                    "type": "keyword",
+                    "index": false
+                  }
+                }
+              }
+            }
+          },
+          "leaf_categ_id": {
+            "type": "keyword"
+          },
+          "listing_site_id": {
+            "type": "keyword"
+          },
+          "max_delivery_hours": {
+            "type": "short"
+          },
+          "meta_categ_id": {
+            "type": "keyword"
+          },
+          "min_delivery_hours": {
+            "type": "short"
+          },
+          "msku": {
+            "type": "text",
+            "index": false
+          },
+          "n1_rpp_deal": {
+            "properties": {
+              "agreed_price": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "deal_id": {
+                "type": "keyword"
+              },
+              "deal_type": {
+                "type": "short"
+              },
+              "featured_category_id": {
+                "type": "keyword"
+              },
+              "flags": {
+                "type": "byte"
+              },
+              "global_rank": {
+                "type": "long"
+              },
+              "image_url": {
+                "type": "keyword",
+                "index": false
+              },
+              "is_stp_suppressed": {
+                "type": "boolean"
+              },
+              "original_retail_price": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "position": {
+                "type": "short"
+              },
+              "purchase_quantity_limit": {
+                "type": "short"
+              },
+              "schedule_end": {
+                "type": "date",
+                "format": "epoch_second"
+              },
+              "schedule_start": {
+                "type": "date",
+                "format": "epoch_second"
+              },
+              "stp_type": {
+                "type": "integer"
+              },
+              "subsidy_amount": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              }
+            }
+          },
+          "nrt_timestamp": {
+            "type": "long"
+          },
+          "original_price": {
+            "type": "scaled_float",
+            "scaling_factor": 100
+          },
+          "postal_code": {
+            "type": "keyword"
+          },
+          "price": {
+            "type": "scaled_float",
+            "scaling_factor": 100
+          },
+          "product_id": {
+            "type": "keyword",
+            "index": false
+          },
+          "product_rating": {
+            "type": "scaled_float",
+            "scaling_factor": 10
+          },
+          "product_rating_count": {
+            "type": "integer"
+          },
+          "product_rating_histogram": {
+            "type": "keyword",
+            "index": false
+          },
+          "product_review_count": {
+            "type": "integer",
+            "index": false
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "quantity_sold": {
+            "type": "integer"
+          },
+          "raw_version": {
+            "type": "long",
+            "index": false
+          },
+          "return": {
+            "type": "text",
+            "index": false
+          },
+          "seller_all_fb": {
+            "type": "integer"
+          },
+          "seller_country_id": {
+            "type": "keyword"
+          },
+          "seller_creation_date": {
+            "type": "text",
+            "index": false
+          },
+          "seller_feedback_aspects": {
+            "type": "text",
+            "index": false
+          },
+          "seller_feedback_count": {
+            "type": "integer",
+            "index": false
+          },
+          "seller_name": {
+            "type": "text"
+          },
+          "seller_neg_fb": {
+            "type": "integer"
+          },
+          "seller_net_fb": {
+            "type": "integer"
+          },
+          "seller_pos_fb": {
+            "type": "integer"
+          },
+          "seller_rating": {
+            "type": "scaled_float",
+            "scaling_factor": 10
+          },
+          "seller_site_id": {
+            "type": "keyword"
+          },
+          "semantic_v": {
+            "type": "float",
+            "index": false
+          },
+          "ship": {
+            "type": "text",
+            "index": false
+          },
+          "ship_methods": {
+            "type": "text",
+            "index": false
+          },
+          "shipping_costs": {
+            "properties": {
+              "0": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "15": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "223": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              }
+            }
+          },
+          "shipping_fee": {
+            "type": "scaled_float",
+            "scaling_factor": 100
+          },
+          "start_ts": {
+            "type": "long"
+          },
+          "sub_title": {
+            "type": "text",
+            "index": false
+          },
+          "title": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "my_bm25",
+            "analyzer": "ebay-n-search",
+            "search_analyzer": "english"
+          },
+          "trend_score": {
+            "type": "float"
+          },
+          "us_leaf_category": {
+            "type": "keyword"
+          },
+          "visit_count": {
+            "type": "integer",
+            "index": false
+          },
+          "watch_count": {
+            "type": "integer",
+            "index": false
+          }
+        }
+      }
+    }
+  }
+
+# Define listing type mapping
+PUT ebay-n-v2.6/
+{
+  "settings":{
+    "number_of_shards": 90,
+    "number_of_replicas": 1,
+    "refresh_interval": "45s",
+    "similarity":{
+      "my_bm25":{
+        "type": "BM25",
+        "k1": 0.2,
+        "b": 0
+      }
+    },
+    "analysis": {
+      "filter": {
+        "english_keywords": {
+          "keywords": [
+            "lots"
+          ],
+          "type": "keyword_marker"
+        },
+        "english_stemmer": {
+          "type": "stemmer",
+          "language": "english"
+        },
+        "english_possessive_stemmer": {
+          "type": "stemmer",
+          "language": "possessive_english"
+        },
+        "english_stop": {
+          "type": "stop",
+          "stopwords": "_english_"
+        }
+      },
+      "analyzer": {
+        "ebay-n-search": {
+          "filter": [
+            "english_possessive_stemmer",
+          "lowercase",
+          "english_stop",
+          "english_keywords",
+          "english_stemmer"
+          ],
+          "tokenizer":
+            "standard"
+        }
+      }
+    }
+  },
+  "mappings":{
+    "listing":{
+      "include_in_all": false,
+      "properties":{
+        "item_id":{
+          "type":"long"
+        },
+        "title":{
+          "type":"text",
+          "analyzer": "ebay-n-search",
+          "search_analyzer": "english",
+          "similarity":"my_bm25",
+          "index_options":"docs"
+        },
+        "sub_title":{
+          "type":"text",
+          "index":false
+        },
+        "desc":{
+          "type":"text",
+          "index":false
+        },
+        "leaf_categ_id":{
+          "type":"keyword"
+        },
+        "semantic_v":{
+          "type":"float",
+          "index":false
+        },
+        "price":{
+          "type":"scaled_float",
+          "scaling_factor":100
+        },
+        "original_price":{
+          "type":"scaled_float",
+          "scaling_factor":100
+        },
+        "images":{
+          "type":"text",
+          "index":false
+        },
+        "attr_ner_keys":{
+          "type":"keyword"
+        },
+        "attr_seller_keys":{
+          "type":"keyword"
+        },
+        "attr_cls_keys":{
+          "type":"keyword"
+        },
+        "condition":{
+          "type":"keyword"
+        },
+        "demote_v2":{
+          "type":"float",
+          "index":false
+        },
+        "deal_score":{
+          "type":"float"
+        },
+        "item_loc":{
+          "type":"keyword",
+          "index":false
+        },
+        "ship":{
+          "type":"text",
+          "index":false
+        },
+        "handling_days":{
+          "type":"short"
+        },
+        "min_delivery_hours":{
+          "type":"short"
+        },
+        "max_delivery_hours":{
+          "type":"short"
+        },
+        "shipping_fee":{
+          "type":"scaled_float",
+          "scaling_factor":100
+        },
+        "return":{
+          "type":"text",
+          "index":false
+        },
+        "raw_version":{
+          "type":"long",
+          "index":false
+        },
+        "nrt_timestamp":{
+          "type":"long"
+        },
+        "trend_score":{
+          "type": "float"
+        },
+        "start_ts":{
+          "type":"long"
+        },
+        "end_ts":{
+          "type":"long"
+        },
+        "data_flag":{
+          "type":"byte"
+        },
+        "visit_count":{
+          "type":"integer",
+          "index":false
+        },
+        "watch_count":{
+          "type":"integer",
+          "index":false
+        },
+        "quantity_sold":{
+          "type":"integer"
+        },
+        "quantity":{
+          "type":"integer"
+        },
+        "msku":{
+          "type":"text",
+          "index":false
+        },
+        "attr_msku_keys":{
+          "type":"keyword"
+        },
+        "meta_categ_id":{
+          "type":"keyword"
+        },
+        "seller_name":{
+          "type":"text"
+        },
+        "fast_and_free_shipping":{
+          "type":"boolean"
+        },
+        "ai_interest_id":{
+          "type":"keyword"
+        },
+        "seller_rating":{
+          "type": "scaled_float",
+          "scaling_factor": 10
+        },
+        "product_rating":{
+          "type": "scaled_float",
+          "scaling_factor": 10
+        },
+        "product_rating_count":{
+          "type":"integer"
+        },
+        "product_review_count":{
+          "type":"integer",
+          "index":false
+        },
+        "product_rating_histogram":{
+          "type":"keyword",
+          "index":false
+        },
+        "product_id":{
+          "type":"keyword",
+          "index":false
+        },
+        "postal_code":{
+          "type":"keyword"
+        },
+        "inventory_tuning":{
+          "type":"keyword"
+        },
+        "is_n1_rpp_deal":{
+          "type":"boolean"
+        },
+        "n1_rpp_deal":{
+          "properties":{
+            "deal_id":{
+              "type":"keyword"
+            },
+            "deal_type":{
+              "type":"short"
+            },
+            "stp_type":{
+              "type":"integer"
+            },
+            "is_stp_suppressed":{
+              "type":"boolean"
+            },
+            "agreed_price":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            },
+            "original_retail_price":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            },
+            "schedule_start":{
+              "type":"date",
+              "format":"epoch_second"
+            },
+            "schedule_end":{
+              "type":"date",
+              "format":"epoch_second"
+            },
+            "featured_category_id":{
+              "type":"keyword"
+            },
+            "purchase_quantity_limit":{
+              "type":"short"
+            },
+            "subsidy_amount":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            },
+            "image_url":{
+              "type":"keyword",
+              "index":false
+            },
+            "flags":{
+              "type":"byte"
+            },
+            "position":{
+              "type":"short"
+            },
+            "global_rank":{
+              "type":"long"
+            }
+          }
+        },
+        "brand":{
+          "type":"keyword"
+        },
+        "seller_feedback_count":{
+          "type":"integer",
+          "index":false
+        },
+        "seller_feedback_aspects":{
+          "type":"text",
+          "index":false
+        },
+        "canonical_aspects_a":{
+          "type":"keyword"
+        },
+        "canonical_aspects_b":{
+          "type":"keyword"
+        },
+        "listing_site_id":{
+          "type":"keyword"
+        },
+        "us_leaf_category":{
+          "type":"keyword"
+        },
+        "currency":{
+          "type":"keyword"
+        },
+        "direct_shipping_n2":{
+          "type":"keyword"
+        },
+        "item_country_id":{
+          "type":"keyword"
+        },
+        "seller_creation_date":{
+          "type":"text",
+          "index":false
+        },
+        "condition_description":{
+          "type":"text",
+          "index":false
+        },
+        "seller_pos_fb":{
+          "type":"integer"
+        },
+        "seller_neg_fb":{
+          "type":"integer"
+        },
+        "seller_net_fb":{
+          "type":"integer"
+        },
+        "seller_all_fb":{
+          "type":"integer"
+        },
+        "seller_site_id":{
+          "type":"keyword"
+        },
+        "auction_type":{
+          "type":"keyword"
+        },
+        "seller_country_id":{
+          "type":"keyword"
+        },
+        "shipping_costs":{
+          "properties":{
+            "0":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            },
+            "15":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            },
+            "223":{
+              "type":"scaled_float",
+              "scaling_factor":100
+            }
+          }
+        },
+        "ship_methods":{
+          "type":"text",
+          "index":false
+        },
+        "free_and_fast_shipping":{
+          "properties":{
+            "0":{
+              "type":"boolean"
+            },
+            "15":{
+              "type":"boolean"
+            },
+            "223":{
+              "type":"boolean"
+            }
+          }
+        },
+        "direct_shipping":{
+          "properties":{
+            "0":{
+              "type":"boolean"
+            },
+            "15":{
+              "type":"boolean"
+            },
+            "223":{
+              "type":"boolean"
+            }
+          }
+        },
+        "free_shipping":{
+          "properties":{
+            "0":{
+              "type":"boolean"
+            },
+            "15":{
+              "type":"boolean"
+            },
+            "223":{
+              "type":"boolean"
+            }
+          }
+        },
+        "item_visibility_info":{
+          "properties":{
+            "0":{
+              "properties":{
+                "ivf":{
+                  "type":"keyword"
+                },
+                "visibility":{
+                  "type":"keyword"
+                },
+                "visibility_reason":{
+                  "type":"keyword",
+                  "index":false
+                }
+              }
+            },
+            "15":{
+              "properties":{
+                "ivf":{
+                  "type":"keyword"
+                },
+                "visibility":{
+                  "type":"keyword"
+                },
+                "visibility_reason":{
+                  "type":"keyword",
+                  "index":false
+                }
+              }
+            },
+            "223":{
+              "properties":{
+                "ivf":{
+                  "type":"keyword"
+                },
+                "visibility":{
+                  "type":"keyword"
+                },
+                "visibility_reason":{
+                  "type":"keyword",
+                  "index":false
+                }
+              }
+            }
+          }
+        },
+        "free_shpng_ind":{
+          "type":"keyword"
+        },
+        "title_length":{
+          "type":"integer"
+        },
+        "seller_is_trp":{
+          "type":"keyword"
+        }
+      }
+    }
+  }
+}
+
+# Fetch all the aliases
+GET /*/_alias/ebay-n 
+
+POST _aliases
+{
+  "actions":[
+    {
+      "add":{
+        "alias":"ebay-n",
+        "index":"ebay-n-v2.5-test"
+      }
+    }
+  ]
+}
+
+# CAREFUL!!: Delete an index
+DELETE ebay-n-v2.5-test/
+
+# Get the product type mapping
+GET /_mapping/product
+
+
+# ----------------------------------
+# ------ Listing Type Below --------
+# ----------------------------------
+# Get the listing type
+GET /_mapping/listing
+
+GET /ebay-n-v2.5-test/listing/_count
+
+# Refresh database
+GET ebay-n/_refresh
+
+# Delete a listing
+DELETE /ebay-n-v2.5-test/listing/222694526738
+
+#Insert sample listing
+PUT /ebay-n-v2.5-test/listing/346700000390?op_type=create
+{
+  "ai_interest_id": [
+    "8084354d-cd9a-39a3-a50b-6a9a51a27a0c"
+  ],
+  "attr_ner_keys": [
+    "brand:skip",
+    "model:baby",
+    "model:view",
+    "type:activity",
+    "type:center"
+  ],
+  "attr_seller_keys": [
+    "brand:skip hop",
+    "color:white",
+    "gender:unisex",
+    "model:303325-us",
+    "recommended_age_range:4m+",
+    "theme:activity center"
+  ],
+  "auction_type": 9,
+  "attr_cls_keys": [
+    "brand:skip hop",
+    "gender:unisex"
+  ],
+  "brand": "Skip Hop",
+  "canonical_aspects_a": [
+    "recommended_age_range:4m+",
+    "brand:skip hop",
+    "color:white",
+    "gender:unisex",
+    "theme:activity center",
+    "model:303325-us"
+  ],
+  "condition": 3000,
+  "condition_description": "",
+  "currency": "USD",
+  "data_flag": 0,
+  "desc": "Lightly used jumper in great condition. ",
+  "direct_shipping": {
+    "15": false,
+    "223": false
+  },
+  "end_ts": 1511648492000,
+  "fast_and_free_shipping": false,
+  "free_and_fast_shipping": {},
+  "free_shipping": {},
+  "handling_days": 3,
+  "images": [
+    "https://i.ebayimg.com/00/s/NjQwWDY0MA==/z/w48AAOSwk~ZZ8l-I/$_32.JPG?set_id=880000500F"
+  ],
+  "inventory_tuning": [
+    655366,
+    589830,
+    524294,
+    458758,
+    393222,
+    327686,
+    262150,
+    196614,
+    131078,
+    65542
+  ],
+  "item_country_id": 1,
+  "item_id": 222694526738,
+  "item_loc": "Mountain View, California",
+  "item_visibility_info": {
+    "0": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 31
+    },
+    "15": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 5
+    },
+    "100": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 5
+    },
+    "223": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 31
+    }
+  },
+  "leaf_categ_id": 100227,
+  "listing_site_id": 0,
+  "max_delivery_hours": 72,
+  "meta_categ_id": 2984,
+  "min_delivery_hours": 24,
+  "nrt_timestamp": 1509344890706,
+  "original_price": 0,
+  "postal_code": "94040",
+  "price": 130,
+  "quantity": 1,
+  "quantity_sold": 0,
+  "raw_version": 1509344889948,
+  "return": """{"Restocking":"","Returns":"false","Returned within":"0","Refund":"","Return shipping":""}""",
+  "seller_creation_date": "2015-09-08 17:31:59",
+  "seller_neg_fb": 0,
+  "seller_site_id": 0,
+  "seller_country_id": 1,
+  "seller_feedback_aspects": """{"item_as_described":{"count": 0,"avg": 0.0},"communication": {"count": 0,"avg": 0.0},"ship_time": {"count": 0,"avg": 0.0},"ship_charge": {"count": 0,"avg": 0.0}}""",
+  "seller_feedback_count": 0,
+  "seller_name": "drkranthi",
+  "seller_net_fb": 0,
+  "seller_pos_fb": 0,
+  "semantic_v": [
+    0.00950082,
+    -0.008084445,
+    -0.00137859932,
+    0.006215919,
+    -0.0126194516,
+    -0.0182192139,
+    -0.002774256,
+    0.009397125,
+    -0.0000413088128,
+    -0.00314575341,
+    0.0278074667,
+    -0.0191882569,
+    0.00726163574,
+    -0.000195576635,
+    0.016158212,
+    -0.00328385062,
+    -0.0132012814,
+    0.0155826975,
+    0.00761572272,
+    0.0129088555,
+    -0.00263247453,
+    0.008229169,
+    0.009877521,
+    0.00694904756,
+    -0.0139743,
+    -0.005975085,
+    -0.0154579561,
+    -0.029846672,
+    0.0122181522,
+    0.014063633,
+    0.00148486171,
+    0.0110131949,
+    0.0139401751,
+    -0.004684179,
+    -0.00118424988,
+    0.00236684247,
+    -0.0248103477,
+    -0.001553685,
+    0.002567191,
+    0.008621636,
+    0.00509300036,
+    0.0077876905,
+    -0.005843654,
+    -0.0181612056,
+    0.002244674,
+    -0.00339771528,
+    0.003904896,
+    0.0103626363,
+    -0.0033394685,
+    -0.00261826161,
+    -0.0088342,
+    -0.000027339207,
+    -0.00148126541,
+    -0.009541992,
+    0.0409210175,
+    0.0008897785,
+    0.00942461751,
+    -0.00780751044,
+    0.00232277764,
+    0.00192433852,
+    0.0132443141,
+    -0.009975006,
+    -0.000481372437,
+    0.000795096,
+    -0.00686161825,
+    -0.0132132713,
+    -0.000892806333,
+    0.0144752543,
+    0.0008694688,
+    -0.0219567735,
+    0.00122639851,
+    -0.0113906739,
+    0.0265131686,
+    0.0218402725,
+    0.0130672688,
+    -0.004507439,
+    -0.006831405,
+    0.0186835118,
+    -0.0148324473,
+    -0.0120079583,
+    0.004930644,
+    -0.003512364,
+    0.00338656735,
+    -0.0190489441,
+    -0.0101853972,
+    0.00742931,
+    0.001258302,
+    0.0105352551,
+    0.0154067324,
+    0.00225535221,
+    0.014259601,
+    0.0034550447,
+    0.009120441,
+    -0.006766093,
+    -0.008233741,
+    0.006171602,
+    0.02410763,
+    -0.0158761982,
+    0.012511462,
+    0.006136981,
+    0.0002992784,
+    -0.0191472918,
+    -0.005515299,
+    -0.0271072257,
+    -0.016064316,
+    0.005189955,
+    0.0165335964,
+    0.0202286635,
+    0.00166408159,
+    0.0167395417,
+    -0.0143213784,
+    0.00429702038,
+    -0.007889527,
+    0.0077890316,
+    0.00718449149,
+    0.018996954,
+    0.0146277538,
+    -0.01067835,
+    -0.000964420557,
+    0.0217839014,
+    0.004293305,
+    -0.007943715,
+    -0.00182731543,
+    0.0147107765,
+    0.005877347,
+    0.000296989921,
+    -0.007478029,
+    -0.0005558895,
+    -0.03275868,
+    0.016504189,
+    0.00259997766,
+    -0.00903123152,
+    0.009063007,
+    -0.017377289,
+    -0.00725456746,
+    0.00268219365,
+    0.00614752062,
+    -0.00101007137,
+    0.01869577,
+    0.00114716589,
+    -0.008014899,
+    0.005441289,
+    0.007538793,
+    -0.0022042417,
+    -0.004694406,
+    -0.00220226729,
+    0.00485780463,
+    -0.00443462841,
+    0.00551830325,
+    -0.005711082,
+    0.004623639,
+    -0.00109816075,
+    -0.00248327735,
+    0.00773441838,
+    -0.0138533236,
+    0.0198839772,
+    -0.008838212,
+    0.00276620244,
+    -0.0060896026,
+    -0.006632947,
+    0.0158720911,
+    -0.015808519,
+    0.0220052022,
+    -0.0222024415,
+    0.0185782611,
+    0.0109660458,
+    0.0220679324,
+    -0.01981214,
+    0.00742812967,
+    -0.004310164,
+    0.0258836653,
+    -0.0124693038,
+    -0.0174169019,
+    0.02639374,
+    0.000165048521,
+    -0.008050916,
+    -0.009752363,
+    -0.00841289852,
+    -0.006221697,
+    -0.0141431587,
+    -0.0121129081,
+    -0.02410187,
+    0.0247224439,
+    0.0227838624,
+    0.00520628,
+    -0.0167568456,
+    -0.006691045,
+    -0.01651321,
+    0.00606294256,
+    0.0154044814,
+    0.01293953,
+    -0.002975208,
+    0.0104647465,
+    -0.00894364,
+    0.0109950444,
+    -0.00720503647,
+    0.010550593,
+    -0.0273431782,
+    -0.00349343452,
+    -0.003453343
+  ],
+  "ship": """{"max_delivery_hours":72,"min_delivery_hours":24,"shipping_fee":0.0,"shipping_method":7,"is_fast_shipping":false,"handling_days":3}""",
+  "shipping_costs": {},
+  "shipping_fee": 0,
+  "ship_methods": """[{"max_delivery_hours":72,"min_delivery_hours":24,"ship_to_location":"USA","shipping_fee":0.0,"shipping_method":7}]""",
+  "start_ts": 1509056492000,
+  "sub_title": "",
+  "title": "Skip Hop Explore and More Baby's View 3-Stage Activity Center",
+  "us_leaf_category": 0,
+  "visit_count": 1373635584,
+  "watch_count": 0
+}
+
+#Insert sample listing: empty sematnic
+PUT /ebay-n/listing/987654321?op_type=create
+{
+"ai_interest_id": [
+    "8084354d-cd9a-39a3-a50b-6a9a51a27a0c"
+  ],
+  "attr_ner_keys": [
+    "brand:skip",
+    "model:baby",
+    "model:view",
+    "type:activity",
+    "type:center"
+  ],
+  "attr_seller_keys": [
+    "brand:skip hop",
+    "color:white",
+    "gender:unisex",
+    "model:303325-us",
+    "recommended_age_range:4m+",
+    "theme:activity center"
+  ],
+  "auction_type": 9,
+  "attr_cls_keys": [
+    "brand:skip hop",
+    "gender:unisex"
+  ],
+  "brand": "Skip Hop",
+  "canonical_aspects_a": [
+    "recommended_age_range:4m+",
+    "brand:skip hop",
+    "color:white",
+    "gender:unisex",
+    "theme:activity center",
+    "model:303325-us"
+  ],
+  "condition": 3000,
+  "condition_description": "",
+  "currency": "USD",
+  "data_flag": 0,
+  "desc": "Lightly used jumper in great condition. ",
+  "direct_shipping": {
+    "15": false,
+    "223": false
+  },
+  "end_ts": 1511648492000,
+  "fast_and_free_shipping": false,
+  "free_and_fast_shipping": {},
+  "free_shipping": {},
+  "handling_days": 3,
+  "images": [
+    "https://i.ebayimg.com/00/s/NjQwWDY0MA==/z/w48AAOSwk~ZZ8l-I/$_32.JPG?set_id=880000500F"
+  ],
+  "inventory_tuning": [
+    655366,
+    589830,
+    524294,
+    458758,
+    393222,
+    327686,
+    262150,
+    196614,
+    131078,
+    65542
+  ],
+  "item_country_id": 1,
+  "item_id": 222694526738,
+  "item_loc": "Mountain View, California",
+  "item_visibility_info": {
+    "0": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 31
+    },
+    "15": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 5
+    },
+    "100": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 5
+    },
+    "223": {
+      "reason_code": "",
+      "visibility": "EXTERNAL",
+      "ivf": 31
+    }
+  },
+  "leaf_categ_id": 100227,
+  "listing_site_id": 0,
+  "max_delivery_hours": 72,
+  "meta_categ_id": 2984,
+  "min_delivery_hours": 24,
+  "nrt_timestamp": 1509344890706,
+  "original_price": 0,
+  "postal_code": "94040",
+  "price": 130,
+  "quantity": 1,
+  "quantity_sold": 0,
+  "raw_version": 1509344889948,
+  "return": """{"Restocking":"","Returns":"false","Returned within":"0","Refund":"","Return shipping":""}""",
+  "seller_creation_date": "2015-09-08 17:31:59",
+  "seller_neg_fb": 0,
+  "seller_site_id": 0,
+  "seller_country_id": 1,
+  "seller_feedback_aspects": """{"item_as_described":{"count": 0,"avg": 0.0},"communication": {"count": 0,"avg": 0.0},"ship_time": {"count": 0,"avg": 0.0},"ship_charge": {"count": 0,"avg": 0.0}}""",
+  "seller_feedback_count": 0,
+  "seller_name": "drkranthi",
+  "seller_net_fb": 0,
+  "seller_pos_fb": 0,
+  "semantic_v": [],
+  "ship": """{"max_delivery_hours":72,"min_delivery_hours":24,"shipping_fee":0.0,"shipping_method":7,"is_fast_shipping":false,"handling_days":3}""",
+  "shipping_costs": {},
+  "shipping_fee": 0,
+  "ship_methods": """[{"max_delivery_hours":72,"min_delivery_hours":24,"ship_to_location":"USA","shipping_fee":0.0,"shipping_method":7}]""",
+  "start_ts": 1509056492000,
+  "sub_title": "",
+  "title": "Skip Hop Explore and More Baby's View 3-Stage Activity Center",
+  "us_leaf_category": 0,
+  "visit_count": 1373635584,
+  "watch_count": 0
+}
+
+# Return all listings
+#GET /ebay-n-v2.5-test/listing/_search
+GET /ebay-n-v2.5-test/listing/_search
+{
+  "size": 500,
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "exists": {
+                "field": "nrt_timestamp"
+              }
+            },
+            {
+              "range": {
+                "nrt_timestamp": {
+                  "gte": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explain": false
+}
+
+
+
+
+# Fetch item by id - for product rating dev: 322063196825 282381875088
+GET ebay-n/listing/_search
+{
+  "stored_fields": [
+    "item_id",
+    "nrt_timestamp", 
+    "fast_and_free_shipping",
+    "product_id",
+    "product_rating",
+    "product_rating_count",
+    "product_review_count",
+    "product_rating_histogram", 
+    "seller_rating"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "item_id": "122376164472"
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+GET /ebay-n/listing/_search
+{
+  "size": 500,
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "exists": {
+                "field": "nrt_timestamp"
+              }
+            },
+            {
+              "range": {
+                "nrt_timestamp": {
+                  "gte": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explain": false
+}
+
+
+# Fetch item by id - for fast and free - expect fast and free is 1
+GET ebay-n/listing/_search
+{
+  "stored_fields": [
+    "item_id",
+    "fast_and_free_shipping",
+    "product_id",
+    "product_rating",
+    "product_rating_count",
+    "product_review_count",
+    "product_rating_histogram", 
+    "seller_rating"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "item_id": "121324682340"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Get listings after a certain nrt time 
+# https://www.epochconverter.com/
+GET /ebay-n/listing/_search
+{
+  "stored_fields": [
+    "item_id",
+    "nrt_timestamp", 
+    "fast_and_free_shipping",
+    "product_id",
+    "product_rating",
+    "product_rating_count",
+    "product_review_count",
+    "product_rating_histogram", 
+    "seller_rating"
+  ],
+  "size": 500,
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "exists": {
+                "field": "nrt_timestamp"
+              }
+            },
+            {
+              "range": {
+                "nrt_timestamp": {
+                  "gte": 1490395185
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explain": false
+}
+
+# select all items [291937830091,401085001488,301958766932,251846826043,222243364489,332024086999,301665814921,371411245309]
+GET ebay-n/listing/_search
+{
+  "stored_fields": [
+    "item_id",
+    "fast_and_free_shipping",
+    "product_id",
+    "product_rating",
+    "product_rating_count",
+    "product_review_count",
+    "product_rating_histogram", 
+    "seller_rating"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+    }
+  }
+}
+
+
+# fast_free_shipping = 1
+GET ebay-n/listing/_search
+{
+  "stored_fields": [
+    "title",
+    "fast_and_free_shipping"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "fast_and_free_shipping": "1"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# fast_free_shipping = 0
+POST ebay-n/listing/_search
+{
+  "stored_fields": [
+    "title",
+    "item_id",
+    "fast_and_free_shipping"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "fast_and_free_shipping": "1"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# WIP
+GET ebay-n/listing/_search?scroll=1m
+{
+  "stored_fields": [
+    "item_id",
+    "fast_and_free_shipping"
+  ],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "fast_and_free_shipping": "0"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Intial scroll
+POST ebay-n/listing/_search?scroll=1m
+{
+  "stored_fields": [
+    "fast_and_free_shipping"
+  ],
+  "query": {
+    "bool": {
+    }
+  },
+  "sort": [
+    "_doc"
+  ]
+}
+
+POST  /_search/scroll 
+{
+    "scroll" : "1m", 
+    "scroll_id" : "cXVlcnlUaGVuRmV0Y2g7NDA7NDI1Mjp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNTM6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjU0OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI1NTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNTc6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjU2OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI1ODp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyODY6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0Mjg3OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI4OTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyODg6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjkwOnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI5MTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNjA6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjU5OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI2MTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNjI6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjYzOnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI2NDp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNjU6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjY2OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI2Nzp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNjg6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjY5OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI3MDp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNzE6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjcyOnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI3Mzp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNzQ6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0Mjc1OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI3Njp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyNzc6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0Mjc4OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI3OTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyODA6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0MjgxOnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI4Mjp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzQyODM6eWtqakllQ21RSzZ2am5FYTVxLTM4Zzs0Mjg0OnlrampJZUNtUUs2dmpuRWE1cS0zOGc7NDI4NTp5a2pqSWVDbVFLNnZqbkVhNXEtMzhnOzA7" 
+}
+
+
+
+
+# ----------------------------------
+# ------ Product Below -------------
+# ----------------------------------
+# Get index info: esGetIndexInfo
+GET _cat/indices?v
+
+# Refresh database
+GET ebay-n/_refresh
+
+# Find by product id 2162325 (gPubSubPostToProductI/D)
+GET ebay-n/product/_search
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+              "product_id": 2162325
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET ebay-n/product/_search
+{
+  "size": 1000,
+  "query": {
+    "match": {
+      "product_id": 2162325
+    }
+  }
+}
+
+# Find by product id 867804634 (gPubSubPostToProductI2/D2)
+GET ebay-n/product/_search
+{
+  "stored_fields": [
+    "product_id",
+    "raw_version", 
+    "nrt_timestamp", 
+    "ratings"
+  ],
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+              "product_id": "867804634"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Delete item by productId
+DELETE /ebay-n/product/2162325
+
+GET /ebay-n/product/_search
+{
+  "size": 500,
+  "query": {
+    "bool": {
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "exists": {
+                "field": "nrt_timestamp"
+              }
+            },
+            {
+              "range": {
+                "nrt_timestamp": {
+                  "gte": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explain": false
+}
+
+
+
+
+
+

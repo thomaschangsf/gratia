@@ -1,0 +1,80 @@
+// -----------------------------------------------------
+// For a give set columnA value, 2hat are some column values in columnX,Y,Z?
+// -----------------------------------------------------
+spark.sql("""
+     |   select source_page_id, placement_id, algorithm_id
+     |   from bpe.plmerch_data
+     |   where SITE_ID in (0)
+     |   and dt = '20190901'
+     |   and PLACEMENT_ID in (101018, 101006) //101018=DesktopUnifiedRanking 101006=DesktopSRPSLOT1
+     |   group by source_page_id, placement_id, algorithm_id
+     |   limit 100
+     | """).show(200, false)
+
+
+
+// -----------------------------------------------------
+// Split a column of array
+//		Look at transactionId
+// -----------------------------------------------------
+val sqlCmdUR = s"""
+      select
+      ${CDL.dt}, 
+      (split(GMV_7D[0],":"))[0] as dwUserId,
+      (split(GMV_7D[0],":"))[1] as itemId,
+      (split(GMV_7D[0],":"))[2] as transactionId
+
+      from ${CDL.table} t
+
+      where
+        ${CDL.siteId} in ($site)
+        and ${CDL.dt} = '${settings.endDate}'
+        and ${CDL.productLineCode} in ("PL", "ORPHANED_PL")
+
+        and ${CDL.sourcePageId} in (2351460)
+        and ${CDL.placementId} in (${PlacementId.PL_Desktop_SRP_Unified_Ranking})
+        and ${CDL.algoId} in (999004)
+    """
+
+
+// -----------------------------------------------------
+// Count distinct X based on multiple columns
+// Create a new column using other coluns based on some condition 
+// -----------------------------------------------------
+val sqlCmd = s"""
+          select
+
+          ${PS.siteId}, ${PS.date}, ${PS.guid}, ${PS.session}, ${PS.sequence}, ${PS.itemId}, ${PS.application},
+
+          sum(case when (itmindex =1 AND last_click = 1 AND seven_day_attribution_flag = 1) then PL_Revenue else 0 end) as plRevenue,
+
+          count(distinct a.guid, a.sessionkey, a.dt, a.sequencenumber) as impAll,
+
+          count(distinct case when itmindex = 1 and plflag = 1 then concat(a.guid, a.sessionkey, a.dt, a.sequencenumber) end) as impPlSlot1,
+
+          count(distinct case when itmindex = 1 and  viunixtime_v2 > 0 then concat(a.guid, a.sessionkey, a.dt, a.sequencenumber) end) as clickUniqueSlot1,
+
+          count(distinct case when itmindex = 1 and  viunixtime_v2 > 0 and plflag = 1 then concat(a.guid, a.sessionkey, a.dt, a.sequencenumber) end) as clickUniquePLSlot1,
+
+          count( case when itmindex = 1 and  viunixtime_v2 > 0 and plflag = 1 then concat(a.guid, a.sessionkey, a.dt, a.sequencenumber) end) as clickNonUniquePLSlot1
+
+          from ads_adv.pl_search_clk_partition_with_mobile_data A
+
+          where
+            A.siteid in ($site)
+            and dt between '$plTransStart' and '$plTransEnd'
+
+          group by ${PS.siteId}, ${PS.date}, ${PS.guid}, ${PS.session}, ${PS.sequence}, ${PS.itemId}, ${PS.application}
+      """
+
+
+
+// -----------------------------------------------------
+//
+// -----------------------------------------------------
+
+
+
+// -----------------------------------------------------
+//
+// -----------------------------------------------------

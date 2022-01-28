@@ -1,0 +1,272 @@
+// ---------------------------------------
+// Overview
+// ---------------------------------------
+- Course link @ https://www.linkedin.com/learning/apache-pyspark-by-example/apache-pyspark?u=2101921
+- Notes @ /Users/chang/Documents/dev/git/ml-tools/tools/pyspark
+- Lab excercises code @ /Users/chang/Documents/dev/git/ml/pyspark_linkedin
+
+
+
+
+
+// ---------------------------------------
+// 2 Setup
+// ---------------------------------------
+<-- Uses Collaboratory
+
+<-- Setup pyspark on mac
+
+	--> One time setup
+		Follow instructions from https://www.lukaskawerau.com/local-pyspark-jupyter-mac/
+		pyenv env list
+		python3 --> 3.9
+
+		python3 -m venv .venv
+		source .venv/bin/activate
+
+		which python3 --> should point to .venv
+
+		pip install --upgrade pip
+		pip3 install pyspark
+		pip3 install jupyter
+
+		# ALL ENV VARIABLE HAS BEEN CHECKED INTO ML-TOOLS
+
+		Download Java
+			Update JAVA_HOME
+
+		Download spark
+			https://spark.apache.org/downloads.html
+			UPDATE SPARK_HOME
+
+		export SPARK_HOME="/opt/spark"
+		export PATH=$SPARK_HOME/bin:$PATH
+		export SPARK_LOCAL_IP='127.0.0.1'
+
+    --> Everytime
+        cd /Users/chang/Documents/dev/git/ml/pyspark_linkedin
+
+		export PYSPARK_DRIVER_PYTHON=jupyter
+		export PYSPARK_DRIVER_PYTHON_OPTS='notebook'
+		export PYSPARK_PYTHON=python3
+
+		source .venv/bin/activate
+
+        pyspark
+            # will start jupyter notebook
+
+<-- Download data
+	def create_session():
+	    import findspark
+	    findspark.init()
+	    from pyspark import SparkContext
+
+	    sc = SparkContext.getOrCreate()
+
+	    return SparkSession.builder.getOrCreate() 
+
+	spark = create_session()
+
+	data_file='/Users/chang/Documents/dev/git/ml/pyspark_linkedin/data/crimes.csv'
+
+	rc = spark \
+	    .read \
+	    .csv(data_file, header=True) \
+	    .withColumn('Date', to_timestamp(col('Date'),'MM/dd/yyyy hh:mm:ss a')) \
+	    .filter(col('Date') <= lit('2018-11-11'))
+
+
+// ---------------------------------------
+// 3 Working with DataFrameAPI
+// ---------------------------------------
+<-- 3.1 DataFrame API
+	High Level API.  Lower level is RDD.  Dataframe is closer to analysst who knows panda and r.  But unlike panda, dataframe is distributed.
+
+	A thrid API is Dataset, which are statically typed language.  Python, since it is a dynamic language,it does not support dataset.
+
+
+
+
+
+<-- 3.2 Working with DataFrames
+	panda						VS   			Pyspark
+	pd.read_csv(path, head)						spark.read.csv(path, header=)
+	df.head()									df.take(n)  df.collect() 	df.show
+
+
+	can view api on spark pyspark module
+		http://spark.apache.org/docs/latest/api/python/search.html
+
+<-- 3.3 Schemas
+	Data from csv are string. We may want to convert string to type like date. Otherwise, spark will infer
+
+	rc.printSchema()
+
+	from pyspark.sql.types import StructType, StructField, StringType, TimestampType, BooleanType, DoubleType, IntegerType
+
+	rc.columns --> copy 
+
+	# Option1: Manually
+	schemaV1 = StructType([
+		StructField('ID', StringType, True), # True can have null values
+		StructField(''),
+	])
+
+
+	# Option2: Programatically
+	But for some bad data, we can get NULL because the types is not what we expected. 
+	labels = [
+		('ID', StringType()), 
+		..
+	]
+	schema = StructType([ StructField (x[0], x[1], True) for x lin labels] )
+
+	rc = spark.read.csv("reported-crimes.csv", schema)
+
+	rc.printSchema
+
+
+<-- 3.4 Working with Columns
+	--> 	panda       				VS 					PySpark
+			------------------								---------------
+			df.col1											df.col1
+			df['col1']										df['col1']
+															df.select(col('col1'))
+
+
+		 	df.columns 										df.columns
+
+		 	df[ ['col1', 'col2']]							df.select('col1', 'col2').show()
+
+		 	df['newcol']=2*df['col1']						df.withColumn('newCol', 2* df['col1'])
+
+		 	df.rename(columns={'existingCol':'newCol'})		df.withColumnRenamed(existingCol, newColName)
+
+		 	df.drop('col', inplace=True)					df.drop('col1', 'col2') 
+
+		 	df.groupBy..									df.groupBy('col')
+
+
+	--> code snippet
+		rc.select('IUCR').show(2)
+		rc.select(rc.IUCR).show(2)
+		rc.select(col('IUCR')).show(2)
+
+
+
+
+<-- 3.5 Working with Rows
+	--> 	panda       				VS 					PySpark
+			------------------								---------------
+			df[df.col >1]									df.filter(col('col')>1)	
+			df[cond, col] = newValue
+
+			df.column.unique()								df.select(col).distinct().show()
+
+			df.column.sort_values(by= ) 					df.orderBy(col('col1'))
+
+			pd.concat([df1, df2]) 							df1.union(df2) #Make sure both df has same columns
+
+
+
+<-- Challenge
+
+
+
+
+
+// ---------------------------------------
+// 4 Functions
+// ---------------------------------------
+<-- 4.1 Builtin Functions
+	--> using existing pyspark.sql functions
+		
+		from pyspark.sql.functions import mean
+		df.select(mean(df.col1)).show()
+
+		to see all the pyspark.sql functions, 
+			from pysprk.sql import functions
+			print(dir(functions))
+
+		How to understand these functions?
+			use autocompletion to see what functions are available
+
+			from pyspark.sql.functions import substring
+
+			help(substring)
+
+			rc.select(lower(col('col1')), upper(col('col2')), substring(col('col3') 1, 4))
+
+<-- 4.2 Working with Date
+
+
+
+
+
+
+
+
+<-- 4.3 User Defined Functions
+	Builtin functions can be more performant
+		Worker node's executor is JVM. Python starts as a process on worker.  Performance hits occurs when we have to serialize the any data going between the executor and python worker.  Whereever we can minimize this serializatoin and deserialization, it would be great.
+
+		Another approach is apache arrow, which stries to standarize how columnar data is store, so we do not need to serialize/deserialized between different formats.
+
+	Create function in Java, scala, python, or R
+
+	--> To see how to use use fastext as a udf, see https://futurice.com/blog/classifying-text-with-fasttext-in-pyspark
+		* Define wrapper for fasttext model in fasttext_lang_classifier.py
+			import fasttext
+			model = fasttext.load_model('data/model_fasttext.bin')
+			def predict_language(msg):
+		        pred = model.predict([msg])[0][0]
+		        pred = pred.replace('__label__', '')
+		        return pred
+
+		* Add model and inference code to spark context
+			sc.addFile('data/model_fasttext.bin')
+			sc.addPyFile('fasttext_lang_classifier.py')
+	
+		* Define and apply UDF
+			from pyspark.sql.functions import col, udf
+			import fasttext_lang_classifier
+			udf_predict_language = udf(fasttext_lang_classifier.predict_language)
+
+			messages = messages.withColumn('predicted_lang', udf_predict_language(col('text')))
+
+
+ 
+
+
+<-- 4.4 Working with Joins
+	--> Breaking it down
+		(1) Join expression: Decide whether 2 rows should join
+		(2) Type of join: Decide what results look like
+			Inner 			: keep rows that exists in BOTh datasets
+			Outer 			: keep rows with keys in EITHER dataset 
+			Left Outer		: keep rows in the left dataset
+			Right Outer		: keep rows in the right dataset
+
+ 	--> Syntax
+ 		df_left.join(
+ 			dfRight,  								# Join expression
+ 			df_left.column == d_right.column, 		# Join expression
+ 			how = {'inner'| 'right' | 'left'}   	# Join type
+		)
+
+
+
+
+
+// ---------------------------------------
+// 5 Resilient Distributed Datasets (RDDs)
+// ---------------------------------------
+<-- RDD
+
+
+<-- Working with RDD
+
+
+
+
+

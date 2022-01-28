@@ -1,0 +1,7 @@
+- Provies a summary view of hadoop directories:quota, dirCnt
+	hadoop fs -count -q -h -v  /apps/b_sscience/srchmon/monetization-policy/prod/stage1-revenue-analysis/20190901/
+
+	hcount /apps/b_sscience/srchmon/monetization-policy/prod/stage1-revenue-analysis/20190901/*
+
+- List directories
+	hls /apps/b_sscience/srchmon/monetization-policy/prod/stage1-revenue-analysis/*/*

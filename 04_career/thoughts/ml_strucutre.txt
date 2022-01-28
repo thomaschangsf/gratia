@@ -1,0 +1,152 @@
+// ------------------------------------------
+// 1 Problem Definition
+// ------------------------------------------
+<-- Problem Description
+	--> Informal & Formal Description
+
+	--> Assumptions
+
+
+
+<-- Provided Data
+	--> Constraints imposed on data
+
+	--> Define each attribute
+
+
+
+<-- Motivation
+	--> Benefits 
+		When viewed from perspective of businesses, all ML problems are to either:
+			* Increase Revenues
+				Adrate gu
+			* Reduce Risk
+				NLP M2M Offensive Content Models
+			* Reduce Costs
+			
+
+	--> Previous Learnings
+
+	--> Use case
+
+	--> Base Lines | Manual Solution
+
+
+
+
+// ------------------------------------------
+// 2 Analyze Data
+// ------------------------------------------
+<-- Summarize Data
+	--> Data structure
+
+	--> Data Distribution
+
+
+
+<-- Visualize Data
+	--> Histogram | Pairwise | scatter plots
+		Does data show a pattern; can 
+
+
+
+
+// ------------------------------------------
+// 3 Prepare Data
+// ------------------------------------------
+<-- Select Data
+
+
+<-- Preprocess Data
+	--> Formatting
+
+	--> Cleaning
+
+	--> Sampling
+		minority class
+
+
+
+<-- Transform Data
+	--> Scaling
+		Some algorithm are more sensitive to scaling
+
+	--> Decompositions
+
+	--> Aggregation
+
+
+
+// ------------------------------------------
+// 4 Evaluate Algorithm
+// ------------------------------------------
+<-- Test Harness and Options
+
+	
+
+<-- Explore and Evaluate Algorithms
+	Supervised
+
+	Unsupervised
+
+	Semi-supervised
+
+
+<-- Interpret and Report Results
+
+
+
+
+// ------------------------------------------
+// 5 Improve Results
+// ------------------------------------------
+<-- Algorithm Training
+
+	
+
+
+<-- Ensemble Methods
+	--> Bagging
+	--> Boosting
+	--> Blending
+
+	See ensemble_algorithm_linkedin.txt
+
+
+
+<-- Feature Engineering (?)
+
+
+
+
+// ------------------------------------------
+// 6 Present Results
+// ------------------------------------------
+<-- Present Results
+
+	--> Context
+
+	--> Problem
+
+	--> Solution
+
+	--> Finding
+
+	--> Limitations
+
+	--> Conclusion
+
+
+
+// ------------------------------------------
+// 7 ML Framework
+// ------------------------------------------
+	https://www.linkedin.com/in/nikhilgarg28/detail/overlay-view/urn:li:fsd_profileTreasuryMedia:(ACoAAAQWSRoB7KJNyIpbVcF0Nkh7XfTUkWadnNQ,1496775500128)/
+
+
+
+// ------------------------------------------
+// 8 Deployment
+// ------------------------------------------
+
+

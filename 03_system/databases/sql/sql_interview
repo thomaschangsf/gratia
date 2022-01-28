@@ -1,0 +1,111 @@
+# You can also use commands like `show tables` and `desc employees`
+# 
+# employees                             projects
+# +---------------+---------+           +---------------+---------+
+# | id            | int     |<----+  +->| id            | int     |
+# | first_name    | varchar |     |  |  | title         | varchar |
+# | last_name     | varchar |     |  |  | start_date    | date    |
+# | salary        | int     |     |  |  | end_date      | date    |
+# | department_id | int     |--+  |  |  | budget        | int     |
+# +---------------+---------+  |  |  |  +---------------+---------+
+#                              |  |  |
+# departments                  |  |  |  employees_projects
+# +---------------+---------+  |  |  |  +---------------+---------+
+# | id            | int     |<-+  |  +--| project_id    | int     |
+# | name          | varchar |     +-----| employee_id   | int     |
+# +---------------+---------+           +---------------+---------+
+#
+# 
+# Question 1:  Find the highest and lowest salary amount
+# Expected Output:
+# +----------------+---------------+
+# | highest_salary | lowest_salary |
+# +----------------+---------------+
+# |          80000 |         10000 |
+# +----------------+---------------+
+#
+select min(e.salary), max(e.salary) from employee as e;
+
+
+# Question 2:  Find employees that have highest and lowest salary amount
+# Expected Output:
+# +----+------------+-----------+--------+---------------+
+# | id | first_name | last_name | salary | department_id |
+# +----+------------+-----------+--------+---------------+
+# |  2 | Ava        | Muffinson |  10000 |             5 |
+# |  5 | Ian        | Peterson  |  80000 |             2 |
+# +----+------------+-----------+--------+---------------+
+# 
+select * from employees 
+  where salary = (
+    select min(e.salary) from employees as e
+  ) or salary = (select max(e.salary) from employees as e);
+
+
+# Question 3:  Find department that has the highest salary
+# Expected Output:
+# +---------------+-------------+--------+
+# | department_id | name        | salary |
+# +---------------+-------------+--------+
+# |             2 | Engineering |  80000 |
+# +---------------+-------------+--------+
+#
+# INNER JOIN employees with deparments by deparment_d
+# GGROUP BY department_id
+# AGG SUM(SUMMARY)
+# 
+select 
+  from employees as e
+  inner join department as d
+  where (e.department_id = d.id)
+  group by e.department_id
+  AGG SUM(e.salary) as department_salary
+  
+
+
+# Question 4a: Find how many employees work in each department 
+# Expected Output:
+# +----+-------------+-------------+
+# | id | name        | num_employees |
+# +----+-------------+-------------+
+# |  2 | Engineering |           3 |
+# |  1 | Reporting   |           1 |
+# |  3 | Marketing   |           1 |
+# |  5 | Silly Walks |           1 |
+# +----+-------------+-------------+
+#
+
+
+
+# Question 4b: Find department with most no of employees
+# Expected Output:
+# +----+-------------+-------------+
+# | id | name        | num_employees |
+# +----+-------------+-------------+
+# |  2 | Engineering |           3 |  
+# +----+-------------+-------------+
+#
+
+
+
+# Question 5: Find departments with an aggregate salary, across all employees, of more than 25,000 
+# Expected Output:
+# +----+-------------+---------------+
+# | id | name        | sum(e.salary) |
+# +----+-------------+---------------+
+# |  2 | Engineering |        130000 |
+# |  3 | Marketing   |         50000 |
+# +----+-------------+---------------+
+#
+
+
+# Problem 6:  Find projects that have more than 1 employees assigned to them 
+# Expected Output
+# +----+-------------------+---------------+
+# | id | title             | num_employess |
+# +----+-------------------+---------------+
+# |  1 | Build a cool site |             3 |
+# +----+-------------------+---------------+
+#
+
+

@@ -1,0 +1,164 @@
+
+
+
+
+-------------------------
+Summary : How to deploy a production esmonitor & kibana
+-------------------------
+* Code is in infra repository.
+
+* Create ESMON cluster : 
+	Side
+		need ansible to be 2.3
+			ansible --version
+
+		hard code pem path in create-esmon-cluster.yml
+			"?  Where are the variables coming form?"
+
+		update project name in gce.ini
+
+		Need data-admin.json in ~/ssh
+
+		First time through, might not have credential on mac. So need to ssh to machine, delete vm, and try again.
+			gcloud compute ssh esmon-prod-nchant-us-c1-bb-1 --zone=us-central1-b
+
+
+		If fail, need to delete vm
+			Wait for deletion to complete
+				gcloud compute operations list --zones us-central1-b  | grep esmon-prod-nchant-us-c1-bb-1
+
+				OR go to google cloud vm page and click the bell.
+
+				gcloud info
+
+		Note: gce.py : used to create resources
+		hostname : CLUSTERNAME-1
+
+
+	Cmds
+		n1shotBotProd
+		knprod
+
+		ansible-playbook --private-key=~/.ssh/google_compute_engine -e "tag=esmon-prod-nchant-us-c1-bb project=ebay-n1-prod zone=us-central1-b network=n1-prod-m subnetwork=us-central1-m sumo=true" ./scripts/create_esmon_cluster.yml
+
+
+* Install kibana
+		ansible-playbook --private-key=~/.ssh/google_compute_engine -i ./inventory/gce.py -e "tag=esmon-prod-nchant-us-c1-bb" -l esmon-prod-nchant-us-c1-bb-1 ./scripts/install_es_kibana.yml
+			Check: 104.155.186.13:5601
+		Note: Sometimes you may need to rerun the command
+
+* Install bb cluster
+	create elasticsearch-prod-nchant-us-c1-bb.yml
+		make sure the proxy tag points to the esmon cluster.
+			marvel.agent.exporters:
+			  id1:
+			    type: http
+			    host: ["http://esmon-prod-nchant-us-c1-bb-1:9200"]
+	    make sure you copy a config file based on ES 5 
+
+	Update host to have the new cluster
+		[esmon-prod-nchant-us-c1-bb]
+		esmon-prod-nchant-us-c1-bb-1
+		
+		[elasticsearch-prod-nchant-us-c1-bb]
+		elasticsearch-prod-nchant-us-c1-bb-[1:8]
+
+	Cmd
+		ansible-playbook --private-key=~/.ssh/google_compute_engine -e "tag=elasticsearch-prod-nchant-us-c1-bb project=ebay-n1-prod zone=us-central1-b network=n1-prod-m subnetwork=us-central1-m sumo=true" ./scripts/create_es_cluster.yml
+
+
+
+-------------------------
+How Ansible works
+-------------------------
+- What it's for
+	config management (cmdb) + provisioning + orchestration
+
+- Does not require to install a server on the machines to be spun up. so we don't need to have firewalls. I can run from my mac, via ansible-playbook or ansible.  Can also run from tower.
+
+- Concepts
+	Playbook: describe desire state of the resources.
+		Can be decomposed into tasks
+		Each task refers to a module
+
+		Ex: create_esmon_cluster.yml
+			tag
+
+	Modules:
+		A module is like an action that ctrl system/resources on the host machine. Example: yum
+
+	Inventory: hosts in elasticsearch example above	
+		List a list of hardware resources we want to update
+
+		Ex:
+			[esmon-prod-nchant-us-c1-bb]
+			esmon-prod-nchant-us-c1-bb-1
+
+			[elasticsearch-prod-nchant-us-c1-bb]
+			elasticsearch-prod-nchant-us-c1-bb-[1:8]
+
+
+-------------------------
+Setup
+-------------------------
+sudo pip install --upgrade pip
+
+LibCloud is already in : /Users/thchang/Documents/dev/git/infra/aerospike/src/apache-libcloud
+
+gcloud init
+
+cp /Users/thchang/Documents/dev/git/infra/elasticsearch/scripts/conf/data-admin.pem ~/.ssh/data-admin.pem
+
+
+-------------------------
+Running
+-------------------------
+Create scripts/conf
+	elasticsearch-dev-nchant-us-c1-z.yml
+
+Add clustern name to hosts
+
+spin up ES with ansible
+	DEV:
+		Update host file with cluste rname
+			
+		ansible-playbook --private-key=~/.ssh/google_compute_engine -e "tag=elasticsearch-dev-nchant-us-c1-z project=ebay-n zone=us-central1 network=nchant-m subnetwork=nchant-m-b71d42b8b53ebab2 sumo=true" ./scripts/create_es_cluster.yml
+
+		ansible-playbook --private-key=<~/.ssh/google_compute_engine -i ./inventory/gce.py -e "tag=elasticsearch-dev-nchant-us-c1-z" -l elasticsearch-dev-nchant-us-c1-z ./scripts/install_es_kibana.yml
+			Difference between host and tag?
+
+		Tear down
+
+	PROD:
+
+		Create ES cluster
+			Create config file: elasticsearch-prod-nchant-us-c1-z.yml
+				* Update export tag points to the ES Monitoring node
+					marvel.agent.exporters:
+						  id1:
+						    type: http
+						    host: ["http://esmon-prod-nchant-us-c1-b-1:9200"]
+
+			Update host file
+
+			ansible-playbook --private-key=~/.ssh/google_compute_engine -e "tag=elasticsearch-dev-nchant-us-c1-z project=ebay-n zone=us-central1 network=nchant-m subnetwork=nchant-m-b71d42b8b53ebab2 sumo=true" ./scripts/create_es_cluster.yml
+
+
+
+spin up ESMON
+	./install_es_kibana.yml # Russ: Please provide sample command
+
+spin up Sumo
+	./install_sumo_collector.yml  #Russ: Please provide sample command
+
+
+TODO Check:
+
+- spin up ES with ansible
+	ansible-playbook --private-key=~/.ssh/google_compute_engine -e "tag=elasticsearch-dev-nchant-us-c1-z project=ebay-n zone=us-central1-b network=n1-nonprod-m subnetwork=us-central1-m" ./scripts/create_es_dev_cluster.yml
+
+- with Sumo
+	./install_sumo_collector.yml  #Russ Sampele command
+
+- With ESMON
+	./install_es_kibana.yml # Russ

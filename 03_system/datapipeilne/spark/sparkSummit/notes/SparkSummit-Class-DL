@@ -1,0 +1,325 @@
+-----------
+Deep Learning Hands On Class
+-----------
+
+Loss Function: 
+	Different problem type --> different last layer activation and loss function
+		Binary classification --> sigmoid : binary_corssentropy
+		Multiclass, single label calssification --> softmax : categorical_crossentropy
+		Multiclass, multilable classification --> sigmoid : binary_crossentropy
+		Regression to aribirary values --> None : MSE
+		Regression to values between 0 to 1 --> sgimoid : mse | binary_crossentropy
+
+		Can write your own loss function, but need to wrte all the back propagation.
+
+
+Split data into 2 or 3
+	train : validation /test
+
+	train/test
+
+Activation function
+	provide nonlinear to neural network
+
+	activation function is part of the neuron.
+
+	In the keras lab where we mock linear regression with nn, we set the activation function to be linear, ie none.
+
+	Sigmoid:
+		Issue
+			gradient at the extreme end has no gradient; therefore we cannot learn
+
+			non centured (why is this a issue)
+				https://stats.stackexchange.com/questions/237169/why-are-non-zero-centered-activation-functions-a-problem-in-backpropagation
+
+				Later neurons, for x>0, will gradient on weight 2 during back propagation will either be all positive or negative.
+
+	Tangenet
+		Issue; non-centered
+
+	Relu
+
+	Leaky Relu
+
+	Add computation complexity
+
+
+Optimizer
+	Stochasitc Gradietn Descent: Can be very easy to stuck in local min.
+
+	Adam: Adaptive Momemntum MOment Esitmation
+		Adjust he learning rate (ie step) based on the previous weights
+
+Code: Convert df to panda, which is useful because we can apply Keras training, visualization pacakges
+	df.toPandas()
+
+Code: Showing tensorboard from keras
+	from keras.callbacks import TensorBoard
+	tb_dir = "/tmp/tensorflow_log_dir"
+	tensorboard = TensorBoard(log_dir = tb_dir)
+	dbutils.tensorboard.start(tb_dir)
+	# ***Add the callback here***
+	history = model.fit(X_train, y_train, epochs=20, callbacks=[tensorboard])
+
+
+Hyper parameter selection
+	Train vs Validation vs Test
+		https://stackoverflow.com/questions/2976452/whats-is-the-difference-between-train-validation-and-test-set-in-neural-netwo
+		
+
+			Training Set: this data set is used to adjust the weights on the neural network.
+
+			Validation Set: this data set is used to minimize overfitting. You're not adjusting the weights of the network with this data set, you're just verifying that any increase in accuracy over the training data set actually yields an increase in accuracy over a data set that has not been shown to the network before, or at least the network hasn't trained on it (i.e. validation data set). If the accuracy over the training data set increases, but the accuracy over the validation data set stays the same or decreases, then you're overfitting your neural network and you should stop training.
+
+			Testing Set: this data set is used only for testing the final solution in order to confirm the actual predictive power of the network.
+	
+	Option1:
+
+		Train on the training set
+
+		Validation set: split from training set, to see if we are overfitting. Look at 03 Advanced Keras.
+			history = model.fit(X_train, y_train, validation_split=.2, epochs=10, verbose=2)
+
+		In keras, if we are overfitting, we will not save the checkpoint
+			After each epoch, we want to save the model. However, we will pass in the flag save_best_only=True, which will only save the model if the validation loss decreased. This way, if our machine crashes or we start to overfit, we can always go back to the "good" state of the model.
+
+			checkpointer = ModelCheckpoint(filepath=filepath, verbose=1, save_best_only=True)
+
+			history = model.fit(X_train, y_train, validation_split=.2, epochs=10, verbose=2, callbacks=[checkpointer])
+				[NOTE: if we are overfitting, we will not save the checkpoint]
+
+		Test on test set
+
+	Option 2:
+		training:
+			with cross validation, training is used for training and validation.
+
+
+Model Interpretability for Neural Network
+	Lime and Shap
+
+	Lime:
+		Given a data point (with label)
+			perturb other data point, and fits a hyperplane to see which of the features is important to this particular data point.  All of this conclusion is specific to this data point, and may not apply to another data point.
+
+		To deal with categorical variables, it will look at the distribution of the variable.
+
+		RM > 0.52, 4.73
+			0.5 is the mean, since we normalized.  So if a datapoint has a room greater than average, we have a p
+			4.73 is internally cacluated, used to rank the feature importance.
+
+	Shap
+		How it works: For each feature A of the 10 feature, 
+			https://github.com/slundberg/shap
+
+			what is the marginal gain of having A feature help explain the entire prediction
+
+			Pick randome combination of the other feature.
+
+			Add feature A, and see how much contribution
+
+		In general, trust Shap's number/conclusion.
+
+		To see a global view of feature importannce, we can aggregate across ALL other data points.
+			https://github.com/slundberg/shap
+
+		Shap just only need the test data point; lime needs training and test set.
+
+MLFlow
+	Can be used for
+		track experiment
+		deploy (via log_model or *save_model)
+
+	To infer model in a distributed way, (look at 04 MLFlow notebook)
+		Load model from mlflow package
+			path = client.get_run(last_run.run_uuid).info.artifact_uri.replace("dbfs:/", "/dbfs/") + "/tmp/keras_model"
+		
+		define udf from the model
+			predict = mlflow.pyfunc.spark_udf(spark, path = path)
+
+		register the python udf 
+			spark.udf.register("predictUDF", predict)
+			X_test_DF.createOrReplaceGlobalTempView("X_test_DF")
+
+		Infer at the worker
+			%sql
+			select *, predictUDF(*) as prediction from global_temp.X_test_DF
+
+		As an alternative, look at this documentation
+			https://docs.databricks.com/applications/deep-learning/inference/resnet-model-inference-keras.html
+				This is more low level, as we need to broadcast the weights of the model
+
+		Another alternative: 
+			Use  pyspark.ml
+
+			Notebook: 06 CNN
+				from pyspark.ml.image import ImageSchema
+				from sparkdl import DeepImagePredictor #TWC: This is distributed inferencing.  Horovod is distributed training.
+
+				df = ImageSchema.readImages("mnt/training/dl/img/founders/")
+
+				predictor = DeepImagePredictor(inputCol="image", outputCol="predicted_labels", modelName="VGG16", decodePredictions=True, topK=5)
+				predictions_df = predictor.transform(df).cache()
+
+
+Horowood
+	Calssical Parameter SErver
+		2 options: on each batch, there needs to coordination acorss the rsources
+			1 parameter server, mulitple worker 
+
+				The error is sent back to the single parameter server, where it does the gradient calculaton.  But this is alot of compuation on the parameter server.
+
+				Compuation limited
+
+			multipel server, multioper wokrers
+				Con: bandwidth limited.  Too chatty.  
+
+	Horrowi : all-reduce
+
+		workers are arranged in a ring 
+
+		Data is parallelized to all workers
+
+		At each batch
+			Each worker calculates the gardient for its own data
+
+			For each of the worker, it passes its gradient to all the other workers
+
+			At end of batch, each worker gets an complete copy of all the gradeint from every worker
+
+			It then initilizes its network with the new system weights
+
+		Ex: If we have 10,000 pts, and each batch is 10 points. How many transfers are there?  100
+			This maximize parallel computation and minimize bandwidth 
+
+
+
+Pricing
+	Price prediction of ticket price
+		- Big picture: find the intersection between supply and demand
+
+		- Issue with price forcast is that it is based on past data, which has constraints. For exzample, we only have so much airplanes.
+
+		- Solution: unconstrained demand forecast. Ie what's the demand if we had inifinite supply
+
+	Seat prediction:
+		~ auction, which can be modeled with reinforcement learning
+		
+	unconstrained demand
+
+
+Tuning
+	How to parition data
+
+	Determine partition size = func (workload, memory
+
+	Determine memory
+
+Transfer Learning
+	Function of size of destination data set:
+		Small or Large dataset. 
+
+	Function of similarity of source 
+		Similar domain?
+	In general, going to a large dataset, we need to fine tune, aka update the weights.
+
+	Going into small dataset, we generally add a classifier at the end.
+
+
+
+		https://brookewenig.github.io/Deep_Learning_AWS.html#/65
+
+CNN
+	We are trying to learn filters, which hopefully pulls the important aspects of the picture.
+
+	Pooling: To reduce the structure size
+		max vs avg
+
+Distrbuted
+	Distributed Training --> Horovod (all-reduce in ring)
+
+	Distributed Inference
+		Option 1: Ml Flow --> PySpark UDF
+		Option 2: sparkdl package --> 
+			from sparkdl import DeepImagePredictor
+
+
+
+-----------
+Older
+-----------
+- https://sparkhub.databricks.com/videos/events/spark-summit-2015/
+	* Building, Debugging, and Tuning Apache Spark Machine Pipelines
+		(1) Abstractions
+			- Transformer: Abstraction which takes a DataFrame as input, and output another dataframe. Implements method transform.
+
+			- Estimator: Abstraction which takes a DataFrame as input, and output a model. Abstraction implements fit.
+
+			- Pipeline: A wrapper around transforers and estimator.
+
+			- CrossValidator: Given estimator, parameter grid, and evaluator, finds the best hyper parameter
+
+			- Evaluator: Takes in DataFrame, and outputs a metric
+
+		(2) Hint: Append new columns, as this is good for debugging, and is optimized by using DataFrame (Catalyst)
+
+		(3) Explore data
+			- docs = sqlContext.parquetFile(....)
+			- diplay(docs)
+			- display(docs.groupBy("topic").count())
+			- docs.filter(docs.topic.like("sci%"))
+			- Create new column label
+				def preprocess(dataframe):
+					return dataFrame.withColumn("label", dataFrame.topic.like("sci.%").cast("double")).cache()
+				training = preprocess(docs)
+				diplay(training.groupBy("label").count())
+
+				test = preprocess( docs.readParquet(testDir))
+
+		(4) Create Pipeline
+			tokenizer = RegexTokenizer(inputCol="text", outputCol="words", patter="s")
+			hashingTF = HashingTF(inputCol = tockenizer.getOutputCol(), outputCol="features", numFeatures = 5000)
+			lr = LogisticRegression(maxIter=20, regParam=0.01)
+			pipeline = Pipeline(stages=[tokenizer, hashingTF, lr])
+
+		(5) Train model
+			model = pipeline.fit(training)
+
+		(6) Evaluate metrics
+			predictionTraining = model.transform(training)
+			evaluator = BinaryClassicationEvaluator(metricName="areaUnderROC")
+			metricTraining = evaluator.evaluate(predictionTraining) ==> 0.995 ,  GOOD
+
+			predictionTtest = model.transform(test)
+			metricTest = evaluator.evaluate(predictionTest) ==> 0.7000 , BAD. Why?
+
+		(7) Debug
+			- Evaluate intermediate data
+				Since we were just appending columns, we can now go see. prediction.printSchema
+				display(predictions.select("label", words))
+
+				We didnt split the words correctly. fix our tokenizer:
+
+				test performce --> 0.91
+
+			- Next: close the performance gap by using k fold cross validation
+				Define param grid
+					paramGrid = ParamGridBuild().addGrid(hasingTF.numFeatures, [1000, 100000]).addGrid(lr.regParam, [0.05, 0.2]).build
+
+					cv = CrossValidator(estimator=pipeline, evaluator=evaluator, exitmaotrParampas = paramGrid, numFolds =2)
+						We are splitting the training data into 2 (bc numFolds =2)
+						On 1st iteration, use A for training, B for testing via metrics.
+						On 2nd iteration, use B for training, B for testing via metrics
+						We then take the average of the 2 metrics
+
+					cvModel = cv.fit(training) 
+					evaluator.evalute(cvModel.tranform(test)) ==> 0.92
+
+			- Save model
+
+
+- https://sparkhub.databricks.com/videos/events/spark-summit-2016/
+	Training: Datascience with Apache Spark
+	Training Continues: Datascience with Apache Spark
+
+

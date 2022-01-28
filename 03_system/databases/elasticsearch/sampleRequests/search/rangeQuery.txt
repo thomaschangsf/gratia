@@ -1,0 +1,37 @@
+GET /ebay-n/listing/_search?search_type=dfs_query_then_fetch
+{
+  "fields": [
+    "item_id",
+    "title",
+    "price",
+    "deal_score"
+  ],
+  "size": 500,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "must": {
+            "title": "messi jersey"
+          }
+        }
+      ],
+      "minimum_number_should_match": "100%",
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "price": {
+                  "gte": 0.5,
+                  "lte": 20.0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "explain": false
+}

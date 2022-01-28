@@ -1,0 +1,25 @@
+- References
+	https://stedolan.github.io/jq/tutorial/
+	https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+
+
+- Examples
+	curl 'https://api.github.com/repos/stedolan/jq/commits?per_page=5' | jq '.[] |  {message: .commit.message, name: .commit.committer.name}'
+
+	Multiple pods: Arrays
+		1 pod's full json
+			tkLnp45 get pods -o json | jq '.items[0]'
+			
+		
+		multiple pod name:
+			tkLnp45 get pods -o json | jq '.items[].spec.containers[0].name'
+		
+		multipe pod and create a payload
+			tkLnp45 get pods -o json | jq '.items[] | {name: .spec.containers[0].name, apiVersion: .apiVersion}'
+
+
+	Single pod
+		tkLnp45 get pod svc-lnp-dev -o json
+
+		tkLnp45 get pod svc-lnp-dev -o json | jq '{name: .metadata.name}'

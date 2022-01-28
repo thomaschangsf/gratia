@@ -1,0 +1,175 @@
+<-- Features
+
+	--> Data
+		Connector to Data stores
+			Distributed: HDFS
+			Single File: parquet, csv
+
+		SQL
+
+		How big can you ingest?
+
+
+	--> Model 
+
+		Libraries
+			domains: nlp, vision, DL
+
+
+
+
+		Visualization
+
+		
+		Distributed Training
+
+		Logging/Dashboard/
+
+		Performance and bottleneck profiler
+
+		Hardware compatibility
+
+
+	--> Productization
+
+
+
+// -----------------------------------------------
+// High Perfomance AI
+//		From MIT Article on High Perfomance AI
+//		https://pages.databricks.com/rs/094-YMS-629/images/HighPerformanceAI.pdf?_ga=2.51356460.482851971.1621092781-226948566.1621092781
+// -----------------------------------------------
+
+
+<-- 02: Growth and Complexity
+	--> Origin of complexity
+		4 Types of Data Workloads: 
+			Analytics 
+			Data Engineering: Warehouse (?)
+			Streaming
+			ML
+
+		Each workload is managed by different teams, which can create silos since it is easier to depend on oneself, see immediate return on ROI.
+
+		Silos creates data duplications, non-standardized tool chains, which increases cost of work. 
+
+		Types of Data
+			structured:  can put into a table, excel, sql
+			unsttrucuted: log files, videos, 
+			semi-strutured: json, 
+
+<-- 03: Aliging and Delivering on Strategy
+	--> Clean data
+		What does it mean to have clean data?  
+
+			
+	--> Enablers
+		* Reduce data duplication
+			(1) Happens at different levels: 
+				data warehouse, reports, dashboards, desktop tools
+			(2) Data fragmentation:  silos/ tribal knowledge
+
+		* Ease of data access
+			(1) Democratization of data.  User persona includes: 
+				Analysts: Excel sheet, SQL 
+				ML engineer: Spark, Rest|Grpci, HDFS
+				Research Engineers: Jupyter Notebook, local cpus|gpus 
+
+		* Fast processing and large data compatible
+			Use case: we need to finish the data in a day
+			(1) Use the right technology 
+				Partition data
+				Send the code to the data
+			(2) For really large data, need a deeper understanding/training of the tool. Like C programming.
+
+		* Data quality
+			(0) How accurate is the data?
+				- Are the data we use to derive this table correct? in the past, now, and future?
+				- Was the logic designed correctly?  AdRate Project.
+
+			(1) How fresh is the data?
+
+			(2) Documentation
+				- Data is code, but if you make a mistake, it can be expensive to fix
+				- Data metadata
+				- Data governance: data lineage
+				- Is there a standard for all the data/tables?
+
+			(3) Using the data as it was designed (
+				Ebay Search: search metrics
+					Some keen business logic built in; such as attribution logic
+
+				How to keep account of living data, new requirements --> change.  Data migration is really hard. Create new data will then yield data duplicaiton since old table needs to be maintained . Solution is to have teams use a library, but now we need a dedicated team to manage (Alex Cozzi's code)
+
+
+		* Easy collobaration across cross-functional use cases
+			Complex and FRAGMENTED tools for ML
+			Fragment: 
+				Ebay:  Krylov | AIHUB | Tess | Spark | HDFS | 
+
+		* Ability to do analytics on all data
+
+
+		
+<-- 04: Scaling Analytics and Machine Learning
+
+	--> Scaling
+		Need to scale # of models, deployment surface area to achieve business impact. Too often companies skip craling/walking in ML and go straight to running without mastering the basics well.
+
+		We need to select the correct business use case which maps to business objectives. 
+
+
+	--> Barriers to Scaling:
+			No central place to store and discover models
+				Pybay tries to address this
+
+			Numbers types of deployments
+				Services
+					Kubernetes
+
+				Batch
+					Spark
+
+				Python CLI
+
+
+			Handoff between science and production [HUGE !!!]
+				Result in data science is not what we see in production
+
+				Why?
+					- M2M Jupyter Notebooks != PyKrylov model training jobs	
+						Code is different between the two. Ex: tokenizer logic in (exploration vs pykrylov vs service vs data pipeine). The datascience and ML engineer needs to be on the same team.
+
+					- How does one evaluate whether the Traing|Test|OOT data in model training matches the distribution in production?
+
+					- Lack of ML expertise contributes, in either engineering or data science contributes to poor production performance.
+
+			Too many tools and frameworks
+				Search, Ad, and AAIP all have their own tools. 
+
+			How to explain ML models
+				global model vs local model
+
+			How to manage model versoins
+
+			Model/Data drift
+
+			How to collect relevant high quality data
+
+		* What is the ROI on the project? What ever is produced needs to improve the business; the faster one demonstrates business value rom the ML and data science, the faster one will get management confidence. This is related to how easy/efficient is one's ML ecosystem.
+
+		* Democratization of analytics and ML means the product team has the capability/tooling to do the analytics themsleves.  Product team will only do this if it is easy and see immediate value.
+
+		* Know what data matters most, prioritize it, build discipline to protect and govern it, then democratize the data to enable data specialist(scientest) and end-users (product/analytics) to extract the insights they need to innovate.
+
+--> 05 Future
+	* Improve on the fundamentals
+		stronger security
+		stronger governance
+		better price/performance for 
+			infrastructure, 
+			operations, 
+			maintenance
+			architecture elements. 
+
+

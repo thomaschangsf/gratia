@@ -1,0 +1,64 @@
+// -----------------------------------
+// References
+// -----------------------------------
+	https://www.hostinger.com/tutorials/cron-job
+
+	https://crontab.guru/
+
+	how to debug
+		https://serverfault.com/questions/449651/why-is-my-crontab-not-working-and-how-can-i-troubleshoot-it
+
+
+// -----------------------------------
+// Managing crontab
+// -----------------------------------
+- edit
+	crontab -e 
+
+	50 11 * * * 
+
+
+- list all crontab
+	crontab -l 
+
+- delete 
+	crontab -i
+
+
+
+
+// -----------------------------------
+// Code
+// -----------------------------------
+cd /Users/thchang/Documents/dev/git/nlp/m2m/m2m_model/scripts
+
+Check local server time
+	date
+
+	if need to change server time
+		sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+
+
+Trigger manually
+	/bin/sh /Users/thchang/Documents/dev/git/nlp/m2m/m2m_model/scripts/m2m_job.sh
+
+	tail -f /Users/thchang/Documents/dev/git/nlp/m2m/m2m_model/scripts/m2m_job.out
+
+
+crontab -e
+	25 14 * * * /bin/sh  /Users/thchang/Documents/dev/git/nlp/m2m/m2m_model/scripts/m2m_job.sh
+
+
+code: m2m_job.sh 
+	#! /bin/bash
+	PATH=/usr/local/bin:/usr/local/sbin:~/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+	cd /Users/thchang/Documents/dev/git/nlp/m2m/m2m_model
+	source venv/bin/activate
+	cd scripts
+
+	#nohup date  >> m2m_job.out &
+
+	nohup nohup  python3 find_top_offenders.py --start_date '2021-08-21' --num_days 1 --output_nfs /mnt/pvc/krylov-shared-data/nlp_secure/notebooks/thchang/m2m/reports/data/jobs --output_hdfs hdfs://apollo-rno/user/b_mt/m2m_dev/tmp >> m2m_job.out &
+
+

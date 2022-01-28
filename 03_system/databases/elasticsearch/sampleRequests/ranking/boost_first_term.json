@@ -1,0 +1,29 @@
+// https://www.elastic.co/guide/en/elasticsearch/guide/current/_boosting_query_clauses.html
+// GET /ebay-n/listing/_search
+{
+  "fields": [
+    "title",
+    "leaf_categ_id"
+  ],
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": {
+              "query": "sweater",
+              "boost": 2
+            }
+          }
+        },{
+           "match": {
+            "title": {
+              "query": "donut",
+              "boost": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

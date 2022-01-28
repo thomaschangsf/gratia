@@ -1,0 +1,13 @@
+PUT /_cluster/settings
+{
+ "persistent": {
+   "threadpool": {
+     "bulk": { 
+       "size": 12,
+       "queue_size": 2000
+     }
+   },
+   "indices.store.throttle.type": "none",
+   "indices.store.throttle.max_bytes_per_sec": "400mb"
+ }
+}

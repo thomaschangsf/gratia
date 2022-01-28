@@ -1,0 +1,26 @@
+-------------------------------------------------
+Create project from command line	
+-------------------------------------------------
+echo "# svc-lnp" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.corp.ebay.com:NLP/svc-perf-lnp.git
+git push -u origin master
+
+change username: vi /home/thchang/.gitconfig
+
+-------------------------------------------------
+push an existing repository from the command line
+-------------------------------------------------
+git remote add origin git@github.corp.ebay.com:NLP/svc-perf-lnp.git
+git push -u origin master
+
+
+
+-------------------------------------------------
+Undo a local commit
+-------------------------------------------------
+
+git reset --soft HEAD~1
+	soft keeps the local changes

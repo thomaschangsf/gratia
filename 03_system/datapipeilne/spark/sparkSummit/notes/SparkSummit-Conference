@@ -1,0 +1,1009 @@
+
+
+-------------------------------------------
+Summary
+-------------------------------------------
+Tools
+	Jupyter has magic command timeit
+
+	To see if we have shuffle
+		df.toDebugString
+	To see code gen
+		df.queryExecution.debug.codegen
+
+
+Class Deep Learning
+	databrick community account: 
+		Has class code
+		thchang@ebay.com Databricks123$
+
+Genearl Info
+	https://livestream.com/accounts/8038169/events/8644916/player?width=960&height=540&enableInfoAndActivity=true&defaultDrawer=feed&autoPlay=true&mute=false
+
+What I plan to integrate
+	DL (Keras + Horovod) --> Spark Offline batch
+
+	Spark
+		More Testing
+			Keep Feedback Short
+		Spark Listener via SparkMeasure github
+
+	Todo:
+		get Matthew Tovbin (Salesforce Einstein) slide from SlideShare
+		Daniel Tomes. (Databrick). slide for Apache Spark Core—Deep Dive—Proper Optimization
+		
+		Smart Join (done)
+		Spark Validation slide (done)
+		Deep Learning lab saved (done)
+
+		Deep Learing NLP: (done)
+			https://github.com/ZacharySBrown/deep-learning-nlp-pydata.git
+			is there slide?
+
+-------------------------------------------
+A Deep Dive into Query Execution Engine of Spark SQL (ROOM 2014) 11AM
+-------------------------------------------
+Summary
+	Dataframe/SQL --> Logical plan --> Physical Plan --> Execution: Code Gen --> Execution: Stage/Tasks/
+
+	Logical plan: consist of abstract commandss: 
+		Ex: Sql: JOIN
+
+	Physical plan: specific implementation, that is based on some sort of cost analysis.
+		output: physical operators
+		Sample  operators: filter, broadcasteschange, shuffleexchange
+
+	Execution: Code generation
+		convert phycial operators to actual scala code
+		
+		2 models: Volcano vs Whole stage generation
+
+	Execution: Convert code to tasks/taskSet and schedule how to submit the tsk to the cpu cores (as thread)
+
+	Memory management
+
+	Shuffle is an expensive operation since it involves disk I/O, data serialization, and network I/O. 
+
+	Pyspark
+		If use python dataframe, performance is good for most cases, because it is converted to scala df.
+			exeption: panda udf, where you need to submit to python worker and convert between internal/external type
+
+			Use panda udf for better performance.  3x
+
+
+Spark SQL: 
+	Query compiler + Run time
+
+	SQL/Dataset/DF --> Parser --> Analyzer (Logic Plan) --> Optimizer --> Physical Plan --> Planner (Cost model) --> Phsyical plan. -->
+		DAG
+
+	How to 
+
+Talk: of frond end of flow: 2017
+
+Physical planning: 
+	logical operators to physical operators
+
+	Choose best physical operator: find the best implementation of the abstract operator
+		broadcast-hash-join vs sort-merge join
+
+	Include physical traint of exeuction engine
+		data distribution (parition) and order
+
+	Some ops may be mapped into multiple physical notes
+		eg: parg agg --> shuffle --> agg
+
+Scheduling a physical plan
+	GIven a plan, do we run as a N job, and can we do it in parallel
+
+	Shuffle exchange: breaks job into multiple stages on 1 job
+
+Execution of the physical plan: 
+	Takes the spark code and group it as a set of operationrs, which is arrange it in pipeline(s)
+
+	Each operator is composed of N lines of scala code
+
+	Old: Volcano ITerator Model
+		Pro: good abstraction
+		Con: inefficent because of virtual function calls
+	New: Whole stage code generation (WSCG)	
+		Performance improvement:
+			no virtual function calls
+			data in cpu registers
+			loop unrolling and SIMD
+
+		WSCG: Broad cast hash join (BHJ) vs Sort Mmerge Join (SMG)
+			SMG can only be the source/beginnng operator of each pipeline
+
+			In other words, do use smg
+
+		Limitation of WSCG
+			Not JIT compilation for bytecode > 8000 bytes
+			Over 64kb method not allowed by Java class format.  So if the operator takes more than 64kb, this will be 
+
+			solution
+				fallback to volcano: spark.sql.codegen.fallback; hugeMethodLiit
+
+To see the generated code: 
+	df.queryExecution.debug.codegen (TWC)
+
+Working through an example of a single pipeline (Slide/Picture)
+
+
+How to generate to RDD
+	Physical plan --> execution WSCG--> RDD
+
+	Physical oprator(eg filter) --> Volcano/WSCG model --> code snippet --> output --> RDD
+
+	At executio time, 
+		group the operators on the same partition/stage.
+
+		shuffle exchange: sync between stages. 
+			Side: what is stage vs task vs cpu cores? (TWC)
+				Stage is a set of parallel tasks i.e. one task per partition. Task is a unit of operation; it is execute as a 1 thread on 1 cpu core.
+
+		broadcastexchange: sync between jobs
+
+
+		shuffle exchange and broadcastexchange are not related to shuffle, which moves/updates partitions of data.
+
+	Stage execution:
+		Map the tasks ast taskset
+
+		parition is tied to partition
+
+	Task is run as a thread; that runs on the cpu core.  Number of task gets executed is controlled spark.executor.cores
+
+	Fault tolerance: how does spark recover from failures
+		Teradata, Impala: corse gran recover model
+			need to try the enire failure
+			ok for simple queries..
+		Spark Sql: mid query recover model
+
+
+Memory management from task point of view
+	One task can consume all the shared-memory
+
+	Use of memory
+		execution: aggregation
+		Storage: cache
+		User: large spark matrix
+		resrevice: java
+	
+	Execution memory: 
+		used to buffer intermediate results
+		normally shorted lived
+
+	Storage meory:
+		resued data for future computation
+		Can be long lived, unless unpersist
+		LRU eviction for spll
+
+	Spark uses unified memory manager
+	
+	To manage the 4 memory allocation: 
+		spark.memory.storageFraction
+
+
+	Still may not be enought
+		sol: off-heap memory:
+
+		Off heap memory: 
+			enabled by spark.memroy.offHeap.enabled and spark.memory.offHeap.size
+
+			Pro: 
+				speed of heap memory > Disk
+				Not bound by GC
+
+			Con: Need to allocate/release of memory
+
+	Spark Application pointers:
+		Prefer array of objects intread of pointer based collection (ie hashmap)
+
+		Avoid nested strucutres with alot of small objects and points (WikiData)
+			Nested: each nested object has meta data, like pointer.  THe meta data can be larger than the data itself.
+
+		Use nueric id or enumeration obejct instead of strings
+			String is not as efficient storage 
+
+	Tune memory config
+		spark.memory.fraction
+			more execution and storage memory. Default is 0.6. Increase to 
+			Con: higher risk of OOM, becuase lack of memory reservation. 
+
+		spark.memory.storageFraction
+			Increase storage memory to cahce more data. Enable data cach
+			Con: Have less execution memory lead to task spill
+
+		spark.memory.offHeap,enabled
+			off heap memory is not bound by GC
+			limit: On-heap + off-heap < spark.executor.meory
+
+		spark.shuffle.fil.buffer ; spark.unsafe.sorter.spill.read.buffer.size
+			buffer shuffle file to amoritize disk I/O
+			con: MOre execution memory
+
+
+PySpark and Vectorized Reader
+	Spark run time is mostly a row based.  But some format, like parquet, is columnar.
+
+	Vectorized read:
+		read batch of rows, and present a logical view as columnar.
+
+How functions impplemented
+	ex: max, myudf, higher order function, table value funciton, builtin function
+
+		table value function: range --> produce multiple rows
+
+	How there function compare? Picutre
+		scope: what does the functio nned to know
+		data feed: what do you feed into implementation
+		process model: 
+			most function types run as JVM, except for python udf
+		implemntatino level in code gen: 
+			if context the function needs jsut 1 row --> scala
+			if context neeed 
+		data type: 
+			internal: 
+			external: java, slower and has more overhead since we need to convert to internal represenaion
+
+	UDF execution
+		Support: Java, Scala, Hive, python
+
+		JVM udf:
+			UDF
+			aggregate functions
+				need to implment userDefinedAggregateFunction since it needs more than 1 row
+
+		Hive UDF:
+			is enabled when spark*.enableHiveSuport
+
+		Execution flow:
+			convert external data format to internal format
+				ex: nested type
+			invoke udf
+			convert external data type to internal data type
+
+	Ex: PySpark
+		Python RDD is most effiicient if you use df.
+			RDD invoke python function on python worker.  
+	
+			Dataframe contruct queries, and execute on JVM.  
+				unless for python/panda udf
+
+		Convert between panda and df
+			pdf = df.toPandas()
+			df = spark.createDataFrame(pdf)
+
+
+
+-------------------------------------------
+Parallelizing with Apache Spark in Unexpected Ways (ROOM 3016) 2:40
+-------------------------------------------
+Slides will be available 
+
+- Parallel Job sumbmissions and schedulers
+	Why are jobs not run in parallel?
+		If look at Event viewer, the 3 jobs are execute in parallel
+
+	Leverage scala Future concurrency 
+
+	Put each spark job code, and put in a future
+	val f1 = Future {
+		df....take(10)
+	}
+	Await.ready(f1)
+
+
+	Spark scheduler
+		Even with future, the job may be ran in sequential
+		Need to set the scheuler to be fair.
+
+	Can control the DAG of jobs, 
+
+
+
+- Partiitoning strategies
+	Beginner uneven partitions --> repartition
+
+	2 types: repartition vs coalese
+		repartition
+			allows you to change num partition (up or down) and generally the same size bc it tranfser all the data
+
+		coalese
+			can only go down and for skew data, may not be panaced
+
+	Defining your own paritioner (only avaialbe to rdd)
+
+	Spark defulat paritioner: hash and range partitioner
+		Can create my own ...
+
+	Why extend parition?
+		(1) Collocate data for joins 
+		(2) Group data to operatrion on partiions as whole
+			define onwn uniqueIdMPariton; use mapPartition
+
+		Essentially, minimize chatter by having data closer together ..
+	
+
+
+Distributibg more than data
+	- Distribute scripts
+		Leverage spark api to execute scripts in parallel.
+
+		Ship script to all the executor
+
+		Sprk read the script via SparkFiles.get(broadcst variable)
+
+		exeucte the python scrpit via scala.sys.process
+
+		val outputJson = stdout.tostring
+
+		return (article.id, readJson(outputJson))
+
+		Caveats:
+			the licenses has to be availabe on executor
+			if process communicate via file system, watch for collision
+
+	- Distribute Data gathering
+		Each executor can call web service ..
+
+		Caveats:
+			Manage the number of connection (Eric)
+			Include RateLimmter
+
+
+-------------------------------------------
+Understanding Query Plans and Spark UIs (ROOM 2006) 3:30
+-------------------------------------------
+- Xia li : gatorsmile 
+	https://vimeo.com/274390145 (TWC)
+
+- How to maxiumize spark performance by looking at the query plan and UI
+
+-  Declarative --> RDD (TWC: Very IMPT to understand what's going on)
+	SparkSql: compiler from queries to RDD
+
+	DF/Cypher/DS --> Parser (output: unresolved logic plan) --> Analyzer (locaical plan)--> Optimizer (optimized logical plan) --> Planner (phsical plans, cost model, select phyiscal paln)--> Query Execution (RDD DAGS)
+
+	Parser
+
+	Analyzer
+		unresolved logical plan --> metadata catlaog --> logical paln
+	Optimizer
+		logical plan --> cache manager --> optimized logical plan
+
+	Planner
+		Turns logical plans to physical (what to how)
+			ex: join --> broadcast hash join or sort merge join
+
+	Query Execution
+		code generator: compiles physical plan to java code
+		Tungsten engine: efficient binary data format amnd ds for cpu and memory efficiencey
+
+
+- Read the plan, understand plan, and see if it matches
+
+- Get the plan: 
+	df.explain
+
+	spark ui: for Spark 3.0 will show the query
+
+- Understand the plan
+	Components
+		Parse Logical plan
+		Analyezed logical plan
+		Optimized ligical plan
+		Physical plan
+
+- Examples where understinga plan can help
+	- Examples: HOw to create hive table
+		convert hive reader to internal reader.  
+		Physical plan: 
+			show scan operator use a reaer.
+			solution: set spark.sql.hive.convereststoreOrc=true
+
+		Create native datasource (Spark native ORC table). Verify by checking the plan.
+
+	- Examples : Filter is not push down 
+		because cast is not push down
+		col1 > 3.0 --> col > 3
+
+	- Example: Nested schema pruning
+		Don't need all the nested fields; remove them.
+		spark.sql.optimizer.nesteShecmaPurning.enabled = true
+
+	- Example: Coolapse projects: udf called multipe times
+
+	- Example:
+		if query is cached in one session, the new queries in all th session may be selected.
+
+- Track Execution via UI
+	After optimizing the query, we need to look at the spark ui
+
+	UI was designed for RDD use case.
+
+		1 sql query --> multipe spark job
+			Ex: broadcast exchange, shuffle exchange, scala sub query --> create a job
+
+		spark job ==> a DAG
+			Chard of RDD
+
+			Spark plan & RDD UI. Provide UI at differnt perspective
+
+	Job tab in UI
+		Stage and task failure
+		Look for the stage that takes the most ti
+
+	Stage tab
+		outlier in task eeuctin?
+		straggler task?
+		too many task/few task
+		load balanced? localit
+
+	Task tab: Dig into the tasks: (VERY IMPORTANT)
+		see the picture (very im)
+
+	Executor tab:
+		see picture
+		Thread dump: can interact with hive metastore, slow query planning, slow file listing
+
+
+
+-------------------------------------------
+Apache Spark Core—Deep Dive—Proper Optimization (ROOM 2014) 4:40
+-------------------------------------------
+Daniel Tomes
+	Slide will be availabe in q3
+Spark Hierarchy
+	Executor
+		cpu core (aka slot)
+
+		Memory: 
+			Storage & working (50-50)
+			disk: we want ssd, ram, nfs
+
+	Actionas are eager
+		action --> job --> stage --> n tasks
+
+Spark UI
+	Job
+		click on description --> stages of this job
+	Stage
+		stage --> click description --> task
+
+		can look at all the tasks in this stage
+
+		sort by status, or gc
+
+	Storage
+	Environment: 
+		on shared env, 
+
+	Executor
+		Do I have a problem with a node?
+
+	SQL
+		Key tab with datframe
+
+Understand your hardware
+	how many cores
+	HOw many memory per core? not core
+	local disk, count, size
+	network speed
+	data lake properites: rate I/O limits
+	Cost: finincial for cloud, opportunity for shared and on prem
+
+Get a baseline
+	Are action efficeint
+		any long stages? spills, laggard task
+	go to cpu utilization
+		get cpu utiliziation of 70%.
+
+Minmiize Data scans (lazy load)
+	Data skipping:
+		bucketing: only expermets, impossible to maintain. Can reduce shuffle.  
+
+	Without lazy loading: long time
+
+	Add filter 
+		look at the 
+
+	SQL physica operator: key to reducing
+
+Spark partition types (from instrucotr)
+	input: control size of partition
+		may need to change.  
+		default is 128mb
+
+	shuffle: control = control count
+		default = 200
+
+		largest shuffle stage < 200 MB/partition [TWC]
+
+		spills: memory access disk.
+
+		Eq: count_request = stage input data size / target_partition_size
+			target_parition_size = 200mb
+			use the partition size 
+			stage input = prvious stage(s) output
+
+			to see what is the current target_partition_size: look at ui shuffle read size in the job tab(?). Picutre
+
+
+	output: control = size
+		write.option("maxRecordPerFile", N)
+
+
+Right sizing & Optimizing
+
+Advanced Optimizations
+
+Previous 2017 topic
+	material: https://www.slideshare.net/databricks/lessons-from-the-field-applying-best-practices-to-your-apache-spark-applications-with-silvio-fiorito?qid=9abc81b6-c03c-4b1d-9b76-6bfbf83f5729&v=&b=&from_search=41
+
+	Loading Data:
+		- Infer schema
+			best: df = spark... schema(schemaDF.shcema)
+			ok: df = spark.option("inferSchema", true)
+
+		- just read the partitions that you need
+			df1.explain -->  ss_sold_date_skp IN ()
+				val df2 = spark.read.option("basePath", "").load("/tmp/.../ss_sold_date_sk=123")
+
+	Query optimization:
+		- partition managment: 
+			deffault num partiion is 200; may be small/large for my dataset
+		
+			if have data skew, may need to repartition or have different join strategy
+
+		- data format
+			For analytical queries, prefer columnar and predicate pushdown, like parquet
+
+		- compression scheme
+			prefer splittable (LZ4, Bzip2. Not Gzip)
+
+		- partitin scheme (partition vs bucketizing)
+			 bucketBy vs partitionBy
+
+
+
+		- shuffle magement
+
+	write output
+
+
+
+
+
+
+
+
+-------------------------------------------
+Using Spark Mllib Models in a Production Training and Serving Platform: Experiences and Extension (ROOM 2010)
+-------------------------------------------
+Pipeline: Compost of stage
+	Stage can be Transformer or Estimator
+	Estimator : Abstraction for learning algorithm
+	Transformer: Abstraction fo Feature  transformation and predictors
+
+Pipeline 
+	enforces consistency between training and serving
+		Data Transformation
+		Feature Extraction
+		ML MOdel Raw Prediction
+		Post Fitting Transformation: output format so can be compatible to downward
+
+	encapsulates complexity
+		libraries/frameworks
+
+		differetn workflow needs
+			training --> stratified sampling
+
+		differnt user needs: Research scientists / Data scientists vs ML Engineers
+
+	So the stage is static, and you put together stages to formt 
+
+Goals:
+	See pictures
+
+Evovle: Replace Protobuf MOdel Encoding
+	Candidates: MLEAP, PMML PFA, Spark Pipeline
+
+		In the end, chose Spark Pipeline. 
+			Train in spark, but load with representation, so may get different behavior.
+			Howeer, Spark Pipoine Onle serging talk is tool slow (Pentreath's Spark Summit 2018 talk).  Spark PipelineModel has high load latency !!! 8-10 times slower than protobuf serialization.
+
+			So what if load time is high?  KUberneters scaling is slow, so not responsive.
+
+	Solution: take all the long read fom
+		- replaced sc.textFile with java io read
+		- repalces sparSession.read.parqueth with ParquetUtil.read
+		- Update tree ensemble model : use parquet directly
+
+	Challenge: 
+		- They have a local SparkContext that cleans up memory.
+
+Evolve: Serving API too slow for online serving
+
+Use Cases extension:
+	They allow incorporation of tensorflow into Micahengo
+
+Learnings
+	Pipeline represention is powerful
+		Eoncodes all steps in operational modeling
+		Enforces consistency between training and serving
+	Having ability to extend transformer allows one to support multiple use cases
+
+
+-------------------------------------------
+Smart Join Algorithms for Fighting Skew at Scale (ROOM 3016) 11:50AM
+-------------------------------------------
+- Data Skew: statistical: Mean is very diffrent from the median
+	
+	causes of skew: 
+		outliers
+		2 multi-model distribution in population
+
+
+	Power laws distribution
+		y = x^2
+		Small individual with lots of view counts. and lots of tail
+
+		Common: 80/20 Pareto, gravitational forces, human preferences
+
+		Population that follows power law poses challenges to
+			Data sicence
+				does not really fit mean and median.  (ad rate guidance!!)
+
+				Search query, impressions
+
+			Engineering: Makes divide and conquer harder to parallelize & solution
+				hot shards --> salt keys, change schema
+				Slow load times for certain user: look for O(n2) operations
+				Hot mapper: repartition randomly.
+				Hot reducer during joins and aggregation : ???  
+					Talk will skip aggregation..
+
+	How do I know there is a hoder reducer?
+		Spark UI: Most of executors are finished, but the 75th percentail duration is dramatically longer.
+			Look at the time, and Shuffle read/write size
+
+	How does Spark join work?
+		Default: Shuffled hash join
+
+		Some task may process multiple keys, which is fine.  Each key is all 1 partition, but we may have multiple key per partition.
+
+	Solution
+		Broadcast join: works for small df
+			broadcast the df as a map, and send it to all the executors.  Th
+
+		Split the hot key across multiple tasks/partition. The non-hot key has to be replicated.
+			For hot keys: append random int to the end
+			For nonhot keys: add replicationId 
+
+			Code: See picture
+
+			This works for inner and left outer join; the skew data is on the left side only.
+
+		Differentil replication
+			Differentiate the replication factor for popular and nonpopular keys
+
+			Uses spark freqItem to find the top items
+
+
+		Partial braodcasting
+
+
+	Zipf distributed keys: follows the word distribution
+
+	Checklist
+		If the problem is just outlier, can you safely ingomre them
+		Try broadcast join if possible
+
+		Look at tdata to get distribution
+
+		Start simple: fixed replication factor then iteration if necessary
+
+	Andrew CLegg @andrew_clegg: Follow on twitter to get deck
+		https://twitter.com/search?q=%40andrew_clegg&src=typd
+
+
+
+
+-------------------------------------------
+Deep Learning and Modern NLP (ROOM 2018) 1:40PM
+-------------------------------------------
+https://github.com/ZacharySBrown/deep-learning-nlp-pydata
+
+https://github.com/ZacharySBrown/deep-learning-nlp-pydata.git
+
+NLP Problem Structure
+	Text --> Vectorization --> Task --> Output:Vector
+
+	Ex: 
+		Binary Doc Calssification: Output: binary
+		Multi class sequence classification: vectorization returns a sequence of vector
+
+Starting easy: Single classication
+	TfIdf Vectorizer --> Perceptron Classifier
+
+	For each document, it will be represent by a vector of size CORPUS_SIZE.  Each bit is the word's TF * IDF for this document.  In contrast to this, a countVectorizer is simply the word count.
+
+	If accuracy is 0.8, is it good? Depends on the distribution of our label in our data.  In our case, our labels is 50-50. So it's not bad
+
+Multiclassifcation
+	One change: 
+		Change the shape of ehe output layer from linear (1) to 3
+		Change output activation from sigmoid to softmax || logSoftmax.  logSoftMax can be 
+
+Sequential Model: 
+	Instead of TFIDF vectorizer, we will replace with RNN
+
+	Big picture: text --> RNN vectorizer --> Task (Perceptron). --> output
+
+	Big Picture (Detail): 
+		Given document with D words 
+		for each word w
+			get the index 
+			embedding layer
+			RNN w 
+
+		Pass RNN d output vector to our task (classifier)
+
+	Given a document: red fox jump
+
+		Each word in the document is converted to a embedding, and fed into a RNN
+
+		RNN: 
+			input vector 1 --> r1 --> output vector 1
+			input vector 2 + output vector1 -> r2 --> outupt vector 2
+			input vector i + output vectori-1 -> r2 --> outupt vector i
+
+			We only use output vector i
+
+			This output vevtor i now replaces the tfidf vectorizer
+
+		How to represet the embeddings? WordVec
+			Take a bag of word representation --> dense representation
+
+			Bag of word representation: each word is a one hot encoding
+			Dense representation: 
+
+		Example:
+			Use an embedding layer instead of using Word2Vec, since commerce/finance word domain not be able to use general word space (ie wikiData)
+				What is an embedding layer?
+					take a word --> intitialize a unique vector --> use back propagationto learn the representation
+					Embedding can be viewed as a lookup map. Given a word --> what is the vector.
+
+				The embedding is updated from the back-propagation of our task, based on the label for document.
+
+POS Taggig (NER) : Part of Speech
+	In POS, given a document, we make a prediction on every single word.
+
+	Sequence: take the final output and put in a perceptron
+
+	Similar to Sequence example, now we use every RNN output and not just the final output.
+
+
+Why are we able to learn across multiple epochs for the same data set?
+	In each iteration, we are in high dimensional space. At each end of iteration, where we are in the solution space is differnt position. The same data is now used to decide where we go.
+
+How to combine the text vector with my non-text features?
+	You can concatenate but make sure to (l2) normalize the 2 sub vectors, to make sure one does not overcome the other.
+		https://machinelearningmastery.com/vector-norms-machine-learning/
+
+Development flow:
+	He steps through each code section and look at the shape.
+
+
+-------------------------------------------
+Best Practices for Hyperparameter Tuning with MLflow (ROOM 2010) 2:30 PM
+-------------------------------------------
+
+
+
+-------------------------------------------
+Explain Yourself: Why You Get the Recommendations You Do (ROOM 2001) 3:20
+-------------------------------------------
+2 Types of recommenders
+	Collobaritve model: Given user + item interaction
+		Issue: cold start problem with new user
+
+	Content based filtering: recommend item based on similar items
+		Issue: need to build up the feature of the item
+
+	Hybrid: combine the 2
+
+Matrix factorized colloborative filtering (this )
+	Given a matrix: user - item - rating, decompose into 2 vevtorsEach vector is transformed into smaller space od size latent factors.
+
+
+	Implemented in ALS on Spark
+
+	Hyperpramters
+		rank: number of latent factors to fit --> num cols of the decomposed vector
+
+		lambda: regularization
+		alpha: confidence of weights
+		Model type:
+			explicit: user interaction given. rating is given
+			implicit: infer from clicks, views, etc..  <-- ME !!!
+
+	Implicit latent factors
+		Similar users will have sinilar user factors
+		Similar items will have similar item factors
+
+	Create a item-item space specific to the user
+
+	github.com/nielshanson
+
+	Latent factors: https://arxiv.org/pdf/1711.10816.pdf
+
+	Good article explaining on how Coloobaritve Filtering model works
+		https://medium.com/@rabinpoudyal1995/latent-factor-based-method-in-collaborative-filtering-77756a02f675
+
+
+-------------------------------------------
+Validating Spark ML Jobs-Stopping Failures Before Production on Apache Spark (ROOM 2010)
+-------------------------------------------
+bit.ly/2L1zHdt
+
+
+-------------------------------------------
+Lessons in Linear Algebra at Scale with Apache Spark (ROOM 2006) 4:30
+	Similarity engine
+-------------------------------------------
+Goal: 
+	40k total object
+
+Base line:
+	K-Nearnest Neighotr (KNN)	
+		compares pariwise between all par of points in Dataset.  The scale of this method is O[DN2]
+
+	Use cosine similarity
+
+Collecting features:
+	document --> vector of dcoument (countVectorizer or tfidfVecotrizer) --> matrix
+		This is similar to the NL discussion
+
+Similarity Engine
+	Cosine = pos space between 0 - 1
+	measurement handles sparse data well as only non-zero dimension vecors are needed
+
+	Normalize the matrix
+
+Linear Algerba in Spark
+	Local Vector
+	Implement KNN in Spark
+
+	Distributed Matrix APIs: RowMatrix, IndexRowMatrix
+
+Code
+	document --> token
+
+	token --> counterVcectorizer
+
+	NOrmalizer: l2 with p2
+
+	Linear Algerbra:
+		Use Block Matrix
+
+	Spark cannot serialize/desrizlie SparseVectors.  
+
+	Final solution
+		Broadcase
+
+		Wrap vector in data set
+		broadcast vector to executors
+		Dropping to lower level Breeze AP to do actual linear algebra
+
+	Matrix multiple is heavy and causes spikes in memory.
+
+
+
+
+-------------------------------------------
+The Rule of 10,000 Spark Jobs: Learning From Exceptions and Serializing Your Knowledge
+-------------------------------------------
+Start small
+	unit test
+	code
+
+Think big, deliver quickly
+	Go byong simple test, but have shortest feedback loop possible
+
+	Verify that solutoin fits the problem
+	Check for type and logial issues
+	Test on varity of inputs
+	Troubleshoot and tune performacne issues
+	We have not yet discovered a better way than writing more tests.
+
+	Incorporate holdenkarau spark-testing-base 
+
+	Packages
+		RandomRDD/Random Data generaor
+
+	What about running on real dataset?
+		spark-submit
+
+	Type check of Spark is not great
+		Dataframe = Dataset[Row]
+
+	Trouble shooting:
+		Visual vm for local tuning: https://visualvm/github.io
+
+		Spark UI
+
+		Look for:
+			Mmeory usage on executors. If I persist so much data, that is whay I should expect
+			Executors utiliation
+				how many executors is actually working?
+			GC time
+
+			thread dumps	
+
+
+Prepare fail
+	Nothing works from 1st try
+	If something seem wrong, it propbab is; if something seems correct, it's probably not. 
+
+	Once you are on scala, it's 
+		need to differentiate drive vs executor
+
+		Spark codre base has 5k exceptions
+		Spark has 200+ dependencies
+
+	Spark exception hall of fame
+		- Task cannot be serialized. Part of code cannot move from driver to executor.
+			Closure checker code snippet
+
+			2 solutions
+				* create non-serializble on the fly in the udf
+				* extract non-serizliatble to companion object
+
+		- Janinio Runtime excepion	
+			to trouble shoot:
+				printSchema
+				ds.explain(extended=True)
+
+			Solution
+				SPlit and apply udf in batches. In between batch, convert DS to RDD. Persist and checkpoint
+
+				Disable whole-stage code-gen (not good) 
+				check code.
+
+		- Container killed by YARN
+			causes:
+				not enough memory
+				wrong partition
+			How to solve
+				if memory, incrase driver/executor memory
+				if wrong partitin, look at key distribution
+
+				repartion the data set if I add a hash to key
+				Review Spark API used	
+				Use kryo for serialization
+
+Ask for critical feedback
+	Be honest to yourself
+	Learn to criticize your own work
+	Find people whoe provide constructive feedback
+	Be patient and learn to listen
+
+Instrument performance metrics
+	Deifine Spark Listener to collect metrics
+		open source: sparkMeasure !!!
+	Collect and transform them with Spark
+	Store and visualize on a shared dashboard
+
+Read the source corde and read alot of it
+
+To fully understand, educate people around you
+
+Technolgies change, but principle stay the same
+
+
+
+
+

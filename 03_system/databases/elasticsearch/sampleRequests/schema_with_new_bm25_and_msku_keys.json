@@ -1,0 +1,154 @@
+{
+  "settings": {
+    "number_of_shards": 30,
+    "number_of_replicas": 1,
+    "refresh_interval": "-1",
+    "similarity": {
+      "my_bm25": {
+        "type": "BM25",
+        "k1": 0.2,
+        "b": 0.2
+      }
+    }
+  },
+  "mappings": {
+    "listing": {
+      "include_in_all": false,
+      "properties": {
+        "item_id": {
+          "type": "long"
+        },
+        "title": {
+          "type": "string",
+          "analyzer": "english",
+          "similarity": "my_bm25"
+        },
+        "sub_title": {
+          "type": "string",
+          "index": "no"
+        },
+        "desc": {
+          "type": "string",
+          "index": "no"
+        },
+        "leaf_categ_id": {
+          "type": "long"
+        },
+        "semantic_v": {
+          "type": "double",
+          "index": "no"
+        },
+        "price": {
+          "type": "double"
+        },
+        "original_price": {
+          "type": "double"
+        },
+        "slr_id": {
+          "type": "long"
+        },
+        "images": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_ner_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_ner": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_seller_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_seller": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_cls_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "attr_cls": {
+          "type": "string",
+          "index": "no"
+        },
+        "condition": {
+          "type": "integer"
+        },
+        "demote": {
+          "type": "double"
+        },
+        "demote_v2": {
+          "type": "double"
+        },
+        "deal_score": {
+          "type": "double"
+        },
+        "item_loc": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "ship": {
+          "type": "string",
+          "index": "no"
+        },
+        "return": {
+          "type": "string",
+          "index": "no"
+        },
+        "raw_version": {
+          "type": "long"
+        },
+        "nrt_timestamp": {
+          "type": "long"
+        },
+        "trend_score": {
+          "type": "double"
+        },
+        "start_ts": {
+          "type": "long"
+        },
+        "end_ts": {
+          "type": "long"
+        },
+        "data_flag": {
+          "type": "integer"
+        },
+        "seller_detail": {
+          "type": "string",
+          "index": "no"
+        },
+        "visit_count": {
+          "type": "integer"
+        },
+        "watch_count": {
+          "type": "integer",
+          "index": "no"
+        },
+        "quantity_sold": {
+          "type": "integer",
+          "index": "no"
+        },
+        "quantity": {
+          "type": "integer",
+          "index": "no"
+        },
+        "msku": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_msku": {
+          "type": "string",
+          "index": "no"
+        },
+        "attr_msku_keys": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}

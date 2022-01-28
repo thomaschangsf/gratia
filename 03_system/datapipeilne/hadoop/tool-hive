@@ -1,0 +1,32 @@
+Workflow on how to delete, create, and load table
+
+	/apache/hive/bin/hive -hiveconf mapred.job.queue.name=hdlq-exprce-default
+		m2m_offensive_text <-- --> top_offenders
+		DROP TABLE m2m_offensive_text;
+
+		CREATE external TABLE m2m_offensive_text 
+		(index bigint,
+		intl_email_trckg_id bigint,
+		email_tracking_id bigint,
+		sndr_id int,
+		rcpnt_id int,
+		item_id bigint,
+		src_cre_date string,
+		lang string,
+		flags1 string,
+		pred_insult string,
+		pred_obscene string,
+		pred_hate string,
+		pred_threat string,
+		pred_offensive string ) 
+		ROW FORMAT 
+		DELIMITED FIELDS TERMINATED BY '\t' 
+		STORED AS TEXTFILE
+		tblproperties("skip.header.line.count"="1");
+
+
+		load data inpath '/user/thchang/m2m/jobs/bkup/2021-08-26/final_predictions_data.csv' into table m2m_offensive_text;
+
+		select * from m2m_offensive_text limit 10;
+
+		select count(*) from m2m_offensive_text;

@@ -1,0 +1,13 @@
+CircleCI Project Page
+    https://app.circleci.com/pipelines/github/thomaswchang
+
+    https://app.circleci.com/projects/project-dashboard/github/thomaswchang
+
+    https://app.circleci.com/projects/project-setup/github/thomaswchang/ml-tools
+
+
+References:
+    https://circleci.com/docs/2.0/getting-started/#section=getting-started
+    sample python projects:
+        https://app.circleci.com/pipelines/github/CircleCI-Public/circleci-demo-python-flask
+        https://github.com/pytorch/pytorch/tree/master/.circleci
