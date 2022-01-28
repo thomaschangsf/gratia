@@ -1,0 +1,162 @@
+# ------------------------------------
+# Background
+# ------------------------------------
+<-- Notes based on the book: High Performance
+<-- Code is located at /Users/chang/Documents/dev/git/coding/high_performance_python_2e
+
+# ------------------------------------
+# Chapter1 : Understanding
+# ------------------------------------
+
+
+
+
+# ------------------------------------
+# Chapter2 : Profiling
+# ------------------------------------
+<-- Overview of techniques
+    --> Process
+        Profiling can slow the system by 10-100x.
+        Identify a test case, isolate the system, refactor single test case as a python module
+
+    --> Tools for Runtime:
+        * time.time() | %timeit in IPython: simple; good for general behavior
+
+        * cProfile: which function takes the longest to run
+
+        * line_Profiler: profiles a function line by line
+
+        * PySpy: For Long running systems
+
+    --> tool for Memory
+        * memory_profiler: good for tracking RAM usage over time
+
+        * dis Module to Examine CPython Bytecode
+
+<-- Using time.time()
+    Outputs just the time of function, but you don't know which line took a long time.
+
+    cd /Users/chang/Documents/dev/git/coding/high_performance_python_2e/02_profiling
+
+    --> Method1:
+        execute
+            python3 julia.py
+        code
+            start_time = time.time()
+            output = calculate_z_serial_purepython(max_iterations, zs, cs)
+            end_time = time.time()
+            secs = end_time - start_time
+    --> Method2: with decorator: python3 julia_decorator.py
+
+
+<-- Using cProfiler module
+    See which function is the most expensive
+
+    python3 -m cProfile -s cumulative julia1_nopil.py
+        Order by cumulative time (see page 36)
+
+    To see and have more control how to sort, look at (pg 37)
+        python -m cProfile -o profile.stats julia.py
+
+
+<-- Using line_profiler (pg 41)
+    Good to get detail of one function; line b line
+    install: pip install line_profiler
+        enable ml-tools environment
+
+    kernprof -l -v julia1_lineprofiler.py
+
+
+
+
+# ------------------------------------
+# Chapter3 : List Tuples
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter4 : Dict Set
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter5 : Iterators
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter6 : Matrix
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter7 : Compiling
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter8 : Concurrency
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter9 : Multi-processing
+# ------------------------------------
+<--
+
+
+
+# ------------------------------------
+# Chapter10 : Clusters
+# ------------------------------------
+<--
+
+
+
+
+# ------------------------------------
+# Chapter11 :  Less RAM
+# ------------------------------------
+<--
+
+
+
+# ------------------------------------
+# Chapter :
+# ------------------------------------
+<--
+
+
+
+# ------------------------------------
+# Chapter :
+# ------------------------------------
+<--
+
+
+
+# ------------------------------------
+# Chapter :
+# ------------------------------------
+<--
+
+
+

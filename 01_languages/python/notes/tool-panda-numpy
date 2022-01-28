@@ -1,0 +1,115 @@
+// ----------------------------------
+// Panda
+//	 References:
+//			file:///Users/chang/Documents/dev/git/opus/04_ml/interview/Chime_postinterview.html
+// ----------------------------------
+<-- helper funcions
+	df.head(2)
+	df.describe()
+	df.sample(frac=0.5).reset_index
+	df.drop_duplicates(subset=[col1, col2]).reset_index(drop=True)
+
+<-- DataFrame | Series | Python
+
+<-- Select Columns 
+	df[ [col1, col2] ]
+
+
+<-- Filter Rows
+	df.loc[lambda row: row[col1] == 'X' & row[col2] == True ]
+
+
+<-- Aggregation
+	df.groupby( [key1, key2] )\
+		.count()\
+		.sort_values(by=[ col1, col2])
+
+	df.groupby( [k1, k2])
+		.agg(
+			new_var_1 = pd.NameAgg(column='exisiting_col1', aggfunc=max)
+		)
+
+<-- Apply function
+	def method1():
+		return 1
+
+	df['new_col'] = df[input_col].apply(lambda t: method1(t))
+
+
+<-- Rename labels
+	label_mapping = { old_col: new_col }
+	df[col1].map(label_maping)
+
+<-- JOIN
+	df_joined = df1
+        .join(
+            df2, # can select sub columns, like this df2['col1', 'col2']
+            on = ['col1', 'col2'],
+            how = 'left'
+        )
+
+    # Vs merge.  
+    #  join and merge to combine 2 dataframes. The join method works best when we are joining dataframes on their indexes (though you can specify another column to join on for the left dataframe). The merge method is more versatile and allows us to specify columns besides the index to join on for both dataframes
+
+ <-- Panda to other forms
+ 	numpy: df.to_numpy()
+
+ 	python list: df.to_list
+
+
+// ----------------------------------
+// Numpy
+// ----------------------------------
+<-- Basics
+	--> Create a array to numpy 
+		u =  = np.array( [1, 2, 3] )
+		v =  = np.array( [1, 2, 3] )
+
+		u_v = u.dot(v) #14 = 1 + 4 + 9
+		np.sqrt(u_v)
+
+	--> Convert numpy to python scalars
+		a = u.tolist()
+
+
+	--> create 2 D dimension
+		m = np.arange(12).reshape( (3, 4) )
+		n = np.arange(8).reshape( (4, 2) )
+		np.matmul(m, n)
+
+	--> argmin: returns the index (row or col) of the smallest value
+		* Via Python
+			a = list(reversed(range(10)))
+	 		a.index(min(a))
+	 	* Via numpy
+		 	a = np[ [4, 2, 1], [1, 0,3], [10, -1, 10] ]
+
+		 	# Return the index (ie row #), with the smalleset value
+			np.argmin(a, axis=0) #row
+			array([1,2,0])
+
+			np.argmin(a, axis=1) #col
+			array([2,1, 1])
+			
+	--> argsort: returns the index of the array in sorted order
+		a = np.array( [1, 3, 2, 40, 5])
+		b = np.argsort(a) # 0, 2, 1, 4, 3
+
+<-- Cosine similarity
+	similarity = (A dot B) / [ |A| * |B| ]
+
+	a = np.random.randint(2, size=10)
+	b = np.random.randint(2, size=10)
+	cos_similarity = np.dot(a, b) / ( np.norm(a) * np.norm(b) )
+
+<-- Sigmoid
+	x = np.arange(10)
+	weights = np.arange(10)
+	bias = -2
+	y: np.int64 = np.matmul(x, weights) + b
+
+	def sigmoid(x):
+		return 1/ (1 + math.exp(-x))
+
+	y_logistic = sigmoid(y)
+

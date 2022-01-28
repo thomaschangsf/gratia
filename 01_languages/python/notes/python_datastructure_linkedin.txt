@@ -1,0 +1,138 @@
+// ---------------------------------------
+// Overview
+// ---------------------------------------
+- Course link @ https://www.linkedin.com/learning/python-data-structures-and-algorithms/python-data-structures-and-algorithms-in-action?u=2101921
+
+- Notes @/Users/chang/Documents/dev/git/ml-tools/tools/python_language
+- Lab excercises code @ /Users/chang/Documents/dev/git/coding/python_datastructure_linkedin
+
+
+
+// ---------------------------------------
+// 1. Pathfinding Algorithm in a Maze Game
+// ---------------------------------------
+
+
+
+
+
+
+// ---------------------------------------
+// 2. Stack Data Structure
+// ---------------------------------------
+--> Understand the stack DS
+
+
+--> Build a stack class in Python
+
+
+--> Challenge: reverase a string using stack
+
+
+--> Solution
+
+
+
+// ---------------------------------------
+// 3. 2D List Data Structure
+// ---------------------------------------
+--> Undrstand the 2D list 
+
+
+--> Represet a maze as a 2D list
+
+
+--> Read a maze from text file
+
+
+--> Read and display a maze from a text file
+
+
+
+
+
+// ---------------------------------------
+// 4 DFS Algorithm
+// ---------------------------------------
+--> Understand the DFS algorithm
+
+--> Visualize DFS
+
+
+--> Use Grid Tracer App
+
+
+--> Code a DFS in Python
+
+
+--> Trace a path of a DFS 
+
+
+
+// ---------------------------------------
+// 5 The Queue Data Structure
+// ---------------------------------------
+--> Understand the queue DS
+
+--> Build a queue class in Python
+
+--> Practice queue methods
+
+
+
+
+// ---------------------------------------
+// 6 BFS Algorithm
+// ---------------------------------------
+--> Understand the BFS search
+
+
+--> Visualize
+
+--> Code a BFS in python
+
+
+--> Trace the path of BFS
+
+
+// ---------------------------------------
+// 7 Priority Queue Data Structure
+// ---------------------------------------
+--> Understand the Priority Queue Datasturuce
+
+
+--> Understand the heap module to implement a PQ
+
+
+--> HeapQ method practice
+
+
+
+
+// ---------------------------------------
+// 8 A* Search Algorithm
+// ---------------------------------------
+--> Understand the A* search algoritm
+
+--> Visualize the A* algorithm
+
+--> Code the A* algorithm in Python
+
+--> Trace the path of a A* search
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

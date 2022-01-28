@@ -1,0 +1,93 @@
+  # ---------------------------------------
+  # Setup
+  # ---------------------------------------
+  curl https://pyenv.run | bash
+  pyenv versions
+  pyenv install 3.7.0
+    If have issue:
+        pyenv install -k -v 3.7.0
+  pyenv local|global 3.7.0
+  python binary is located at ~/.pyenv/versions/3.7.0
+
+
+
+  install poetry
+    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
+    source $HOME/.poetry/env
+
+  pycharm: install poetry plugin
+
+  # ---------------------------------------
+  # Poetry
+  # ---------------------------------------
+  poetry shell [-vvv]
+  poetry install
+  poetry env info
+  poetry env list
+
+
+  workflow
+    new terminal
+    cd to project
+    pyenv local 3.6.6
+
+    Use existing poetry venv
+      poetry env use $POETRY_VENV/XXX/bin/python3
+      I think when one poetry install, it creates a new venv based off the base python venv
+
+    Staring with new poetry env
+      poetry env remove ml-tools-DlOOqhtV-py3.7
+      poetry env use ~/.pyenv/versions/3.7.0/bin/python3
+
+    if want to start new, remove poetry.lock.
+    if want to add new library, poetry add numpy.  This will update the toml file.  You may need to sync lock to toml with poetry update.
+
+    poetry shell
+
+    poetry install
+      The install command reads the poetry.lock file from
+      the current directory, processes it, and downloads and installs all the
+      libraries and dependencies outlined in that file. If the file does not
+      exist it will look for pyproject.toml and do the same.
+
+      poetry install will also create the poetry venv cache at $POETRY_VENV
+
+
+    switching between env
+      poetry env use ~/.pyenv/versions/3.6.0/bin/python3
+      poetry env use ~/.pyenv/versions/3.7.0/bin/python3
+
+  Creating new poetry projects
+    From existing project: poetry init
+    From new
+
+  poetry config repositories.pynlp https://artifactory.corp.ebay.com/artifactory/api/pypi/pypi-pynlp
+  poetry config http-basic.pynlp thchang [PASSWORD]
+
+  # Build sbist and wheel
+  poetry build
+
+  # Publish. pynlp is defined in the tmol file
+  poetry publish -r pynlp
+
+  # add packages
+  poetry add nlp-admin
+
+  #Debug
+  in a seperate poetry env, ie poetry-test, pull what you publish
+  Look at the source distribution, /Users/thchang/Library/Caches/pypoetry/virtualenvs/pynlp-test-6Qum585p-py3.6/lib/python3.6/site-packages/pynlp_credential_pkg
+
+  poetry add fasttext_pkg
+  pynlp start -d $MODEL_DIRECTORY -f $MODEL_NAME
+
+
+
+
+  # ---------------------------------------
+  # Alternative to Poetry: setuptools
+  # ---------------------------------------
+  # Reference:  https://pythonhosted.org/an_example_pypi_project/setuptools.html
+  python3 setup.py --help-commands
+  python3 setup.py install
+
+

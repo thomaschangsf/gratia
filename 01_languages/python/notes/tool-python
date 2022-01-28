@@ -1,0 +1,139 @@
+// -------------------------------------------
+// Packaging Python Libraries and Tools
+// -------------------------------------------
+	- Packaging Libraries and Tools
+		https://packaging.python.org/overview/
+
+		method1: python modules: + -> (simple) ; -( doesn't scale to multiple files and python versions)
+
+		method2: python source distributions
+			create source distribution package, compressed as .tar.gz
+			good if: all python code; know your deployed environment (ie python version)
+			ex: numpy
+
+			use setuptools to create source distribtution. poetry will generate the setup.py (which imports setuptools) so we can create the sdistr)
+
+		method3: python binary distributions
+			good to integrate to other software ecosystems, written in C, Rust, Go
+
+			Creates a package format called Wheel, which is designed to ship libraries with compiled artifacts. pip prefer wheel.
+
+			alternate format to wheel are egg.info.  
+
+    - https://packaging.python.org/tutorials/packaging-projects/
+        setup.cfg, setup.py, with pyproject.toml
+
+    - Virtual environment per project
+        cd [TO-PROJECT]
+        python3 -m venv venvMyProject
+        source venvMyProbect/bin/activate
+
+        If project has setup.cfg, setup.py, and pyproject.toml
+            pip install -e . --index-url https://*p/simple --extra-index-url https://pypi.org/simple
+            This will read the setup.cfg, and setup.py, and pyproject.toml to generate the *.egg-info
+
+        If project has requirements.txt
+            pip install -r requirements.txt
+
+        If project follows only *.toml
+            poetry shell
+            poetry install
+            poetry publish
+
+	- Managing Application dependency
+		pip
+		pip-env
+		poetry
+
+
+	- Packaging Python Applications
+		Depends on the framework
+			service
+				heroku, google app egnine, Openshift, etc..
+			web browser and mobile
+
+	- pypirc vs pip.conf
+		pypirc file defines configurtion for package indexes (aka repositories) so you dont have to reenter url, username, and password
+
+		pip uses pip.conf
+
+
+
+// -------------------------------------------
+// Setting up virtualenv PER project WITH PYENV
+//      < LATEST >
+// -------------------------------------------
+    - cd project
+
+    - python3 -m venv venvPROJ
+
+    - source venvPROJ/bin/activate
+
+    - Setup via Pip install
+        * if project follows setup.cfg, setup.py
+            pip3 install -e . --index-url https:*/simple --extra-index-url https://pypi.org/simple
+        * if requirements.txt
+            pip3 install -r requirements.txt
+
+    - cp -rf venvPROJ .venv
+        (TRY ln -s ?)
+
+        pyenv looks for local .venv, overriding its local and global settings
+
+        which python3
+            Hopefully it points to the venvPROJ
+
+    - pip3 list
+
+    - python3 -c "import X"
+
+
+
+
+// -------------------------------------------
+// Managing python version via pyenv
+// -------------------------------------------
+	- References
+		https://realpython.com/intro-to-pyenv/
+
+	- Commands
+		# ls ~/.pyenv/versions/
+		pyenv versions
+		
+		# install new python. For poetry projects, 
+		pyenv install 3.7.0
+
+		# switch version
+		pyenv local 3.7.0 	#local to project, change .python-version
+		pyenv global 3.7.0	# changes ~/.pyenv/version
+
+
+		# start poetry, which looks at the toml file, and 
+		poetry shell
+
+		# make sure python is sound
+		python -m test
+
+
+
+// -------------------------------------------
+// Unicode vs Byte
+// -------------------------------------------
+- Reference
+	https://nedbatchelder.com/text/unipain.html
+
+
+- Concept1: Code Point
+	what a character is represented: 
+		unicode --> supports entire world
+		ascii 	--> supports US
+
+- Concept2: Computers only understand bits, 
+	we need to convert code point to enccodings: 
+		UTF-8 : 1 byte, variable length
+		UTF016
+
+
+	
+
+

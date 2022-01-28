@@ -1,0 +1,34 @@
+
+Create virtual environment
+	conda create -n "<my_name>" python=3.7  
+	conda activate <my_name>
+
+
+Install dependenceis via conda
+	conda install tensorflow-gpu=1
+	conda install keras           
+	conda install matplotlib      
+
+
+Install packages via pip
+	pip install trulens
+
+
+Create jupyter environment
+	ipython kernel install --user --name=<my-name>
+		Creates /Users/chang/Library/Jupyter/kernels/graph-kernel
+	}
+	vi /Users/chang/Library/Jupyter/kernels/graph-kernel/kernel.json
+		{
+		 "argv": [
+		  "/Users/chang/miniforge3/envs/tf_m1/bin/python3",
+		  "-m",
+		  "ipykernel_launcher",
+		  "-f",
+		  "{connection_file}"
+		 ],
+		 "display_name": "graph-kernel",
+		 "language": "python"
+		}
+
+	jupyter notebook

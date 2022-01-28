@@ -1,0 +1,16 @@
+[submodule "01_languages/python/codes/EPIJudge"]
+	path = 01_languages/python/codes/EPIJudge
+	url = git@github.com:thomaswchang/EPIJudge.git
+	branch = master
+[submodule "01_languages/python/codes/fluent_python/example-code"]
+	path = 01_languages/python/codes/fluent_python/example-code
+	url = git@github.com:thomaswchang/example-code.git
+	branch = master
+[submodule "01_languages/python/codes/high_performance_python_2e"]
+	path = 01_languages/python/codes/high_performance_python_2e
+	url = git@github.com:thomaswchang/high_performance_python_2e.git
+	branch = master
+[submodule "01_languages/python/codes/python_devops_book"]
+	path = 01_languages/python/codes/python_devops_book
+	url = git@github.com:thomaswchang/python_devops_book.git
+	branch = master
