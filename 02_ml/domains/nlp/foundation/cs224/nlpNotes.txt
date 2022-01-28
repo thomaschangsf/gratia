@@ -1,0 +1,47 @@
+// ------------------------------
+// Setup for nlp
+// ------------------------------
+Based on http://localhost:8888/notebooks/stanford/nlp/git/cs224u/setup.ipynb
+
+	- [One time setup] Create virtual environment nlu
+		conda create -n nlu python=3.7 anaconda
+
+	- activate nlu env
+		conda activate nlu
+			may need:  conda init bash
+
+	- cdnlp
+
+	- [One time setup] 
+		pip install -r requirements.txt
+		pip install tensorflow
+		python --> import nltk --> nltk.download
+
+	- Start jupyter
+		jupyter notebook --port 5656 &
+
+	- dactivate nlu env
+		conda deactivate 
+
+
+// ------------------------------
+// Setup for d2l
+// ------------------------------
+- http://d2l.ai/chapter_installation/index.html
+
+- one time setup
+	conda activate d2l
+	conda install python=3.7 pip -y
+	pip install mxnet==1.6.0
+
+	pip install git+https://github.com/d2l-ai/d2l-en
+
+
+
+- Activate
+	cdd2l
+	conda activate d2l
+	jupyter notebook --port 5657 &
+
+
+

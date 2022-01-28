@@ -18,3 +18,7 @@
 	path = 02_ml/code/aws_data_science/oreilly_book
 	url = git@github.com:thomaswchang/oreilly_book.git
 	branch = master
+[submodule "02_ml/code/transformers"]
+	path = 02_ml/code/transformers
+	url = git@github.com:thomaswchang/transformers.git
+	branch = master
