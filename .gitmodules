@@ -34,3 +34,15 @@
 	path = 02_ml/techniques/foundations/udacity/MachineLearning
 	url = https://github.com/thomaswchang/MachineLearning
 	branch = master
+[submodule "02_ml/tools_code/aws_data_science/oreilly_book"]
+	path = 02_ml/tools_code/aws_data_science/oreilly_book
+	url = https://github.com/thomaswchang/oreilly_book
+	branch = master
+[submodule "02_ml/tools_code/pytorch/pytorch"]
+	path = 02_ml/tools_code/pytorch/pytorch
+	url = https://github.com/pytorch/pytorch.git
+	branch = master
+[submodule "02_ml/tools_code/ray/ray"]
+	path = 02_ml/tools_code/ray/ray
+	url = https://github.com/ray-project/ray.git
+	branch = master
