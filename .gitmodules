@@ -46,3 +46,7 @@
 	path = 02_ml/tools_code/ray/ray
 	url = https://github.com/ray-project/ray.git
 	branch = master
+[submodule "02_ml/tools_code/ray/tutorial"]
+	path = 02_ml/tools_code/ray/tutorial
+	url = https://github.com/ray-project/tutorial
+	branch = master

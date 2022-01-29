@@ -19,8 +19,8 @@ source $OPUS_DIR/10_environment/.bash_googlecloud.sh
 source $OPUS_DIR/10_environment/.bash_gitcommands.sh
 source $OPUS_DIR/10_environment/.bash_datapipeline.sh
 source $OPUS_DIR/10_environment/.bash_ebay_k8.sh
-source $OPUS_DIR/10_environment/.bash_ebay_compute.sh
-source $OPUS_DIR/10_environment/.bash_ebay_nlp.sh
+#source $OPUS_DIR/10_environment/.bash_ebay_compute.sh
+#source $OPUS_DIR/10_environment/.bash_ebay_nlp.sh
 
 
 

@@ -117,8 +117,9 @@ alias cdDataMlrr='cd /Users/thchang/Documents/dev/data/ebay/mlrr'
 alias cdDataPP='cd /Users/thchang/Documents/dev/data/ebay/price-propensity/'
 
 devGitEPI=$devGit/EPIJudge/epi_judge_python
-devGitOpus=$devGit/opus
-alias cdOpus='cd $devGitOpus'
+devGitOpus=$devGit/gratia
+alias cdGratia='cd $devGitOpus'
+#alias cdOpus='cd $devGitOpus'
 alias cdEPI='cd $devGitEPI'
 
 # ----------------------------------
