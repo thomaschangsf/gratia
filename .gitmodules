@@ -50,3 +50,7 @@
 	path = 02_ml/tools_code/ray/tutorial
 	url = https://github.com/ray-project/tutorial
 	branch = master
+[submodule "03_system/devops/code/python_devops_book"]
+	path = 03_system/devops/code/python_devops_book
+	url = git@github.com:thomaswchang/python_devops_book.git
+	branch = master
