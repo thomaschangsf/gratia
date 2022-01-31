@@ -1,24 +1,4 @@
-// --------------------------------
-// Softmax vs Entropy vs Logistic Regression
-// --------------------------------
-Entropy: cost function
-	H(y, p) = [ -y_i * p(y_i) for i in in samples ]
-		p = learned function
 
-Softmax: Normalization layer
-	P(b|a) = exp( x_a * w_b) / for b' in V exp(x_a * w_b' )
-	V = batch set
-	x = features 
-	w = weights
-
-Logistic Regression: Model
-	P(y=1 | x; theta ) = 1 / (1 + e^-t)
-		x = feature
-		theta = learned parameter = vector
-		t = theta_0 + theta_1 *x
-
-
-		
 // --------------------------------
 // Traversal: BFS
 // --------------------------------
@@ -125,7 +105,7 @@ Logistic Regression: Model
 				result = max(result, curr_state)
 				i += 1 
 // --------------------------------
-// 2 Pointers: Constraint: state var in a sorted List
+// 2 Pointers: Constraint: state var in a SORTED List
 // --------------------------------
 	def two_pointers(arr, target):
 		i,j = 0, len(arr)
@@ -198,3 +178,24 @@ def find_top_k_elemnts(lst, k):
 		if lst[j] > max_elements[0]:
 			heapq.heappush(max_elements, list[j])
 	return sorted(max_elements, reverse=True)
+
+
+// --------------------------------
+// Softmax vs Entropy vs Logistic Regression
+// --------------------------------
+Entropy: cost function
+	H(y, p) = [ -y_i * p(y_i) for i in in samples ]
+		p = learned function
+
+Softmax: Normalization layer
+	P(b|a) = exp( x_a * w_b) / for b' in V exp(x_a * w_b' )
+	V = batch set
+	x = features 
+	w = weights
+
+Logistic Regression: Model
+	P(y=1 | x; theta ) = 1 / (1 + e^-t)
+		x = feature
+		theta = learned parameter = vector
+		t = theta_0 + theta_1 *x
+
