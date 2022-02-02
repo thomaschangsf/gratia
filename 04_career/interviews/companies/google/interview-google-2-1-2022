@@ -1,0 +1,147 @@
+- video link
+	https://meet.google.com/kkz-fmfe-mvu
+- email
+	https://mail.google.com/mail/u/0/#search/goo/FMfcgzGmthfdZSnxbWcRFsStZsdCsxfm
+
+// -------------------------
+// Interview1: 9:15 to 10
+// -------------------------
+https://interview.google.com/virtual/30615069-a245-4f61-8f92-6dd7178a6d20
+
+Given CEO, A, B, find the number of connections to go from A and B?
+
+Needed to come up with the inputs situations
+	case1:
+			 CEO
+			/	\
+			A    B
+
+	case2: 
+				CEO
+				/
+			A
+		  /	
+		B
+
+This is a general tree, and not a GRAPH!!!
+	Tree has one parent and N children
+
+class Employee(name: str, connections: Set[Employee]):
+	def __init__(self, name, connections):
+		self.name = name
+		self.connections = connections
+
+# node0 and node1 are the target node we are trying to find
+def find_common_ancestor_v2(curr_node, node0, node1):
+	Status = namedtuple('Status', ('num_occurences', 'ancestor'))
+
+	if curr_node is None:
+		return Status(num_occurences=0, ancestor=None)
+
+	left_status = recurse(curr_node.left, node0, node1):
+	if left_status.num_occurences == 2:
+		return left_status
+
+	right_status = recurse(curr_node.right, node0, node1)
+	if right_status.num_occurences ==2:
+		return right_status
+
+	num_totol = left_status.num_occurences + right_status.num_occurences + \
+				(node0, node1).count(curr_node) \\is current_node one of the target nodes?
+
+	return Status(num_totoal, curr_node if num_total == 2 else None )
+
+def find_num_levels_v2(CEO, A, B)
+	persons = set([A, B])
+	
+	LCA = find_common_ancestor(CEO, A, B)
+	queue = deque([LCA])
+	
+	while queue:
+		for _ in range(len(queue)):
+			curr_person = queue.pop_left()
+
+			for c in curr_person.connections():
+				queue.append(c)
+
+			if curr_person in persons:
+				persons.remove(curr_person)
+
+			if not curr_person:
+				break # will exit 
+		cnt += 1
+
+	return cnt
+
+
+// -------------------------
+// Interview2: 10:30-11:15
+// -------------------------
+https://interview.google.com/virtual/ddc05a55-68fd-4735-9250-771053bf7759
+
+Giving a mapping dictionary, deserialize and recreate the tree
+
+Constraints:
+	(1) len(left_tree) >= len(right_tree)
+
+	(2) for nodes on level with node count > 2, the left value is smaller
+		fill the left node first, but first
+
+
+Learning:
+	need to work through a couple of inputs
+
+Example1:
+	mapping = {e: 1, b:2, z:2 }
+			  *
+			/	\
+	      e		 *	
+				/  \	
+	   		   b    z
+
+Example2:
+	mapping = {'e': 2, 'b':2, 'f':2, 'z1':3, 'z2':3 }
+	
+	0			 *1
+			   /	\
+	1	     *2		 *3	
+			/\		/  \	
+	2	   b  e	   f    *4
+		   			   / \
+		   			 z1	  z2
+
+
+
+	Node = namedtuple('Node', ('name', 'level' 'left', 'right')) )
+
+	# Via BFS
+	def decodeHuff(mapping):
+		mapping_sorted = deque(sorted([ (v, k) for k, v in mapping.items() ]))
+		root = Node('*', level=0, left=None, right=None)
+		queue = deque(root)
+		
+		while mapping_sorted:
+			next_level = mapping_sorted[0][0]
+			names_on_next_level = deque([ name for level, name in mapping_sorted if level == mapping_sorted[0][0] ])
+
+			for curr_node in queue:
+				if curr_node.level < next_level:
+					node_left = Node('*', curr_node.level+1, None, None)
+					node_right = Node('*', curr_node.level+1, None, None)
+					curr_node.left = node_left
+					curr_node.right = node_right
+					queue.append(node_left)
+					queue.append(node_right)
+
+				else:
+					_, name = mapping_sorted.pop()
+					if names_on_next_level:
+						curr_node.name = names_on_next_level.pop()
+					else:
+						node_left = Node('*', curr_node.level+1, None, None)
+						node_right = Node('*', curr_node.level+1, None, None)
+						curr_node.left = node_left
+						curr_node.right = node_right
+						queue.append(node_left)
+						queue.append(node_right)
+

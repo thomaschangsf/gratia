@@ -166,7 +166,12 @@ def delete(lst, value):
 		prev_node = curr_node
 		curr_node = curr_node.next
 def reverse(head):
-	prev, curr
+	prev, curr, nxt = None, head, None
+	while curr:
+		nxt = curr.next
+		curr.next = prev
+		prev = curr
+		curr = next
 // --------------------------------
 // Heap
 // --------------------------------
