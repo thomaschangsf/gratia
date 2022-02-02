@@ -27,8 +27,8 @@ source $OPUS_DIR/10_environment/.bash_ebay_k8.sh
 # ------------------------------------------------------------------------
 # Scala & SBT
 # ------------------------------------------------------------------------
-export SBT_HOME=/usr/local/Cellar/sbt/1.0.2
-export SCALA_HOME=/System/Library/Scala/scala
+export SBT_HOME=/usr/local/bin/sbt
+export SCALA_HOME=/usr/local/bin/scala
 export PATH=${PATH}:${SCALA_HOME}/bin
 alias sbtca='sbt clean assembly'
 alias sbtVersion='sbt sbtVersion'
