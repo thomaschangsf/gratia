@@ -81,13 +81,13 @@ DataTypes and Structures
 --------------------------------
 TTE 01: File Formats
 --------------------------------
-Type	Inference Type	Inference 		Speed	Reason	Should Supply Schema?
-CSV		Full-Data-Read	Slow			File size	Yes
-Parquet	Metadata-Read	Fast/Medium		Number of Partitions	No (most cases)
-Tables	n/a	n/a	Predefined	n/a
-JSON	Full-Read-Data	Slow	File size	Yes
-Text	Dictated	Zero	Only 1 Column	Never
-JDBC	DB-Read	Fast	DB Schema	No
+Type	Inference Type		Inference 		Speed		Reason					Should_Supply_Schema?
+CSV							Full-Data-Read	Slow		File size				Yes
+Parquet						Metadata-Read	Fast/Medium	Number_of_Partitions	No (most cases)
+Tables						n/a				n/a			Predefined				n/a
+JSON						Full-Read-Data	Slow		File size				Yes
+Text						Dictated		Zero		Only1Column				Never
+JDBC						DB-Read			Fast		DB Schema				No
 
 
 
