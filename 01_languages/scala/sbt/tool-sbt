@@ -1,5 +1,8 @@
-Based on https://www.scala-sbt.org/1.x/docs/sbt-by-example.html
-
+<-- Background
+	* Based on https://www.scala-sbt.org/1.x/docs/sbt-by-example.html
+	* Further documentation: 
+		https://www.scala-sbt.org/1.x/docs/index.html
+		
 <-- Setup
 	cd /Users/chang/Documents/dev/git/gratia/01_languages/scala/sbt/examples/foo-build
 
