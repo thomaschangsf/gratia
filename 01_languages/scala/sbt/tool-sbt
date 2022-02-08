@@ -1,0 +1,252 @@
+Based on https://www.scala-sbt.org/1.x/docs/sbt-by-example.html
+
+<-- Setup
+	cd /Users/chang/Documents/dev/git/gratia/01_languages/scala/sbt/examples/foo-build
+
+	touch build.sbt
+
+<-- Start sbt shell
+	cmd: sbt
+	reads build.sbt and creates project and target folder
+
+<-- Automatic recompile change
+	cmd: ~ compile
+		continuously wait for update
+
+<-- Create Source file
+	Create file
+		touch src/main/scala/example/Hello.scala
+
+	the compile method create Hello.class in the ./target/scala-2.12/classes/example/Hello.class
+		.class files are the Java bytecode that can be executed by JVM
+
+<-- Getting Help
+	cmd: help
+		list commands
+
+<-- Run app
+	run
+
+<-- Save the sbt shell session to build.sbt
+		set ThisBuild / scalaVersion := "2.12.15"
+		session save
+
+<-- Reload build
+	cmd: reload
+
+<-- Add ScalaTests library Dependencies
+	lazy val hello = (project in file("."))
+	  .settings(
+	    name := "Hello",
+	    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.7" % Test,
+	  )
+
+<-- Write test file
+	vi src/test/scala/HelloSpec.scala
+
+	import org.scalatest.funsuite._
+	class HelloSpec extends AnyFunSuite {
+	  test("Hello should start with H") {
+	    assert("hello".startsWith("H"))
+	  }
+	}
+
+	NOTE:  scala project needs to follow this format:
+		src/
+		  main/
+		    resources/
+		       <files to include in main jar here>
+		    scala/
+		       <main Scala sources>
+		    java/
+		       <main Java sources>
+		  test/
+		    resources
+		       <files to include in test jar here>
+		    scala/
+		       <test Scala sources>
+		    java/
+		       <test Java sources>
+
+<-- Test continuously
+	~testQuick
+
+	manual: test
+
+<-- Leverage Scala REPL (~ spark-shell )
+	* Scala REPL is a tool to evaluate expressions in Scala
+		https://docs.scala-lang.org/overviews/repl/overview.html
+
+	* Bring up Scala REPL from sbt
+		CMD: console
+
+	* Code
+		import scala.concurrent._, duration._
+		import gigahorse._, support.okhttp.Gigahorse
+		import play.api.libs.json._
+
+		Gigahorse.withHttp(Gigahorse.config) { http =>
+		  val baseUrl = "https://www.metaweather.com/api/location"
+		  val rLoc = Gigahorse.url(baseUrl + "/search/").get.
+		    addQueryString("query" -> "New York")
+		  val fLoc = http.run(rLoc, Gigahorse.asString)
+		  val loc = Await.result(fLoc, 10.seconds)
+		  val woeid = (Json.parse(loc) \ 0 \ "woeid").get
+		  val rWeather = Gigahorse.url(baseUrl + s"/$woeid/").get
+		  val fWeather = http.run(rWeather, Gigahorse.asString)
+		  val weather = Await.result(fWeather, 10.seconds)
+		  ({Json.parse(_: String)} andThen Json.prettyPrint)(weather)
+		}
+
+		:q OR Ctrl+Shift+D --> exit 
+
+
+<-- Make a subproject
+	* build.sbt
+		lazy val helloCore = (project in file("core"))
+		  .settings(
+		    name := "Hello Core",
+		  )
+
+	* List all subprojects
+		*hello // * denotes main project
+		helloCore
+
+	* compile subproject helloCore
+		helloCore/compile
+
+	* Add scalatest to helloCore. Refactor build.sbt to use common scalaTest
+		val scalaTest = "org.scalatest" %% "scalatest" % "3.2.7"
+
+		lazy val hello = (project in file("."))
+		  .settings(
+		    name := "Hello",
+		    libraryDependencies += "com.eed3si9n" %% "gigahorse-okhttp" % "0.5.0",
+		    libraryDependencies += scalaTest % Test,
+		  )
+
+		lazy val helloCore = (project in file("core"))
+		  .settings(
+		    name := "Hello Core",
+		    libraryDependencies += scalaTest % Test,
+		  )
+
+	* Broadcast commands: commands (ie compile) sent to hello is also sent to helloCore
+		Add aggreate to val hello
+			lazy val hello = (project in file("."))
+			  .aggregate(helloCore)
+			  .settings(
+			    name := "Hello",
+			    libraryDependencies += "com.eed3si9n" %% "gigahorse-okhttp" % "0.5.0",
+			    libraryDependencies += scalaTest % Test,
+			  )
+
+	* Make hello depend on helloCore
+		lazy val hello = (project in file("."))
+		  .aggregate(helloCore)
+		  .dependsOn(helloCore)
+		  .settings(
+		    name := "Hello",
+		    libraryDependencies += scalaTest % Test,
+		  )
+
+	* Add PLAY dependencies
+
+	* Add Weather.scala to core: core/src/main/scala/example/core/Weather.scala
+
+		package example.core
+
+		import gigahorse._, support.okhttp.Gigahorse
+		import scala.concurrent._, duration._
+		import play.api.libs.json._
+
+		object Weather {
+		  lazy val http = Gigahorse.http(Gigahorse.config)
+
+		  def weather: Future[String] = {
+		    val baseUrl = "https://www.metaweather.com/api/location"
+		    val locUrl = baseUrl + "/search/"
+		    val weatherUrl = baseUrl + "/%s/"
+		    val rLoc = Gigahorse.url(locUrl).get.
+		      addQueryString("query" -> "New York")
+		    import ExecutionContext.Implicits.global
+		    for {
+		      loc <- http.run(rLoc, parse)
+		      woeid = (loc \ 0  \ "woeid").get
+		      rWeather = Gigahorse.url(weatherUrl format woeid).get
+		      weather <- http.run(rWeather, parse)
+		    } yield (weather \\ "weather_state_name")(0).as[String].toLowerCase
+		  }
+
+		  private def parse = Gigahorse.asString andThen Json.parse
+		}
+
+	* Refactor Hello to use core
+		package example
+
+		import scala.concurrent._, duration._
+		import core.Weather
+
+		object Hello {
+		  def main(args: Array[String]): Unit = {
+		    val w = Await.result(Weather.weather, 10.seconds)
+		    println(s"Hello! The weather in New York is $w.")
+		    Weather.http.close()
+		  }
+		}
+
+	* Execute
+		cmd: run	
+			run appears to compile as well
+
+		reload -> run
+
+		Output:  HOORAY
+			Hello! The weather in New York is showers.
+			[success] Total time: 12 s, completed Feb 8, 2022 10:57:45 AM
+
+<-- Add sbt-native-packager plugin
+	* Plugin allows one to use external code in our build.  
+		In comparison to external libraries, which enables code to be used in the src/..scala
+
+	* Create project/plugins.sbt
+		addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.4")
+
+		Documentation: https://www.scala-sbt.org/sbt-native-packager/
+
+	* Enable JavaAppPackaging in build.sbt
+
+		lazy val hello = (project in file("."))
+		  .aggregate(helloCore)
+		  .dependsOn(helloCore)
+		  .enablePlugins(JavaAppPackaging) // <-- NEW
+		  .settings(
+		    name := "Hello",
+		    libraryDependencies += scalaTest % Test,
+		  )
+
+	* Create zip distribution
+		cmd: dist
+
+		Creates
+			./target/universal/hello-0.1.0-SNAPSHOT.zip <-- this is what I use
+			./core/target/scala-2.12/zinc/inc_compile_2.12.zip
+			./target/scala-2.12/zinc/inc_compile_2.12.zip
+
+	* Use zip
+		mkdir tmp 
+		unzip -o -d tmp target/universal/hello-0.1.0-SNAPSHOT.zip
+		./tmp/hello-0.1.0-SNAPSHOT/bin/hello
+
+	* Run Docker
+		cmd: Docker/publishLocal
+
+		Make sure Docker daemon is started, ie start Docker Mac App
+
+	* Set the version
+		ThisBuild / version      := "0.1.0"
+
+	* Cmds to understand the distribution
+		inspect dist
+
+		inspect tree dist // WOW 
