@@ -1,0 +1,33 @@
+// --------------------------
+//
+// --------------------------
+https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html#Navigation
+
+// --------------------------
+// Short Cuts
+// --------------------------
+- Recent Files: Command E
+
+- Navigate By Class: Command O
+
+- Navigate to File:  Command Shift O
+
+- Navigate by method or field: Command Option O
+
+
+
+// --------------------------
+//
+// --------------------------
+
+Code: hyper context
+	sbt --> reload --> sbt
+
+
+import com.typesafe.config.ConfigFactory
+val config_path = "/Users/chang/Documents/dev/git/salesforce/hyperion/examples/src/main/resources/example.conf"
+val config = ConfigFactory.load(config_path)
+config.getString("hyperion.failure_rerun_mode")
+
+import com.krux.hyperion.HyperionContext
+val context = new HyperionContext(config)
