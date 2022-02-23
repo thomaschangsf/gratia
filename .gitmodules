@@ -57,7 +57,3 @@
 [submodule "03_system/devops/docker/docker-compose/-b"]
 	path = 03_system/devops/docker/docker-compose/-b
 	url = https://github.com/venky8283/Docker.git
-[submodule "03_system/devops/docker/docker-compose/Docker"]
-	path = 03_system/devops/docker/docker-compose/Docker
-	url = git@github.com:venky8283/Docker.git
-	branch = master
