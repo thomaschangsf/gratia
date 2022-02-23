@@ -83,12 +83,23 @@ function sbtRemoteDebug() {
 # ------------------------------------------------------------------------
 # Java & Maven
 # ------------------------------------------------------------------------
-#export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-11.0.1.jdk/Contents/Home
-# Find java home: java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home'
-export JAVA_HOME=/Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
-alias javaSetJdk6='export JAVA_HOME=$(/usr/libexec/java_home -v 1.6)'
-alias javaSetJdk7='export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)'
-alias javaSetJdk8='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
+# How to add New Java Versions
+#   Install on Mac: brew install AdoptOpenJDK/openjdk/adoptopenjdk8
+#   Add to jenv: 
+#     List available versions on mac: /usr/libexec/java_home -V
+#     jenv add  /Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
+#   List jenv versions avaialble
+#     jenv versions
+#   Switch java versions
+#     jenv global openjdk64-11.0.11, openjdk64-1.8.0.292, oracle64-17.0.2
+#     restart terminal: srcs
+alias javaVersionsAvailableOnMac='/usr/libexec/java_home -V'
+alias javaVersionsAvailableOnJenv='jenv versions'
+alias javaSetJdk8='jenv global openjdk64-1.8.0.292 && srcs'
+alias javaSetJdk11='jenv global openjdk64-11.0.11 && srcs'
+alias javaSetJdk17='jenv global openjdk64-17.0.2 && srcs'
+alias javaVersionActiveOnMac='java -version'
+
 export MVN_HOME=/usr/local/Cellar/maven/3.6.3_1
 export MAVEN_OPTS="-client -Duser.timezone=Etc/UTC -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss -Xmx512m -XX:MaxPermSize=256m"
 alias mvn='${MVN_HOME}/bin/mvn'
