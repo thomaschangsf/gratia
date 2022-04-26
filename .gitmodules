@@ -57,3 +57,7 @@
 [submodule "03_system/devops/docker/docker-compose/-b"]
 	path = 03_system/devops/docker/docker-compose/-b
 	url = https://github.com/venky8283/Docker.git
+[submodule "02_ml/tools_code/sparknlp/spark-nlp-book"]
+	path = 02_ml/tools_code/sparknlp/spark-nlp-book
+	url = https://github.com/alexander-n-thomas/spark-nlp-book.git
+	branch = master

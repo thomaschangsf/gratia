@@ -71,12 +71,21 @@ class StepByStep(object):
 
             # Step 1 - Computes our model's predicted output - forward pass
             yhat = self.model(x)
+            
             # Step 2 - Computes the loss
             loss = self.loss_fn(yhat, y)
+            
             # Step 3 - Computes gradients for both "a" and "b" parameters
+            #  Compute gradient, ie for each parameter like w, compute the partial dervivate of loss against that parameter
+            #  Intutively, we want the update the paramater w which decrease the loss curve.
             loss.backward()
+            
             # Step 4 - Updates parameters using gradients and the learning rate
+            #  W/O optimzer, for each parameter, we need w -= learning_rate * w.grad
+            #  Optimizer helps scale the number of learn parameters
             self.optimizer.step()
+
+            # Zero out for the next minibatch
             self.optimizer.zero_grad()
 
             # Returns the loss
