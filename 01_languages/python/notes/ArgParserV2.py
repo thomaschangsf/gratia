@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
 Module for ArgParserV2 with Union; which enables how to support multiple commands
+
+Union enables a type that returns one of X types
+    Ex1: myVar: Union[int, str] 
+        myVar = 5
+        myVar = "Hi"
 """
 from typing import List, Union
 from dataclasses import dataclass

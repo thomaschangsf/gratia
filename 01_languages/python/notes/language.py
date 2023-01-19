@@ -20,12 +20,37 @@ add_one(2)  # output 3
 # ---------------------
 # dataclasses
 # - python take on scala's case classes
+# Automatically adding generated special methods such as __init__() and __repr__() to user-defined classes
+#       __repr_ represent the obejct as a string
 # ---------------------
 from dataclasses import dataclass
+
+# Example1:
 @dataclass
 class Shape:
     name: str
+    def sayHi(self):
+        print(f"hi {self.name}")
+Shape("square").sayHi()
 
+
+#Example 2:
+@dataclass
+class InventoryItem:
+    name: str
+    unit_price: float
+    quantity_on_hand: int = 0
+    def total_cost(self) -> float:
+        return self.unit_price * self.quantity_on_hand
+
+dataclass adds this 
+    def __init__(self, name: str, unit_price: float, quantity_on_hand: int = 0):
+        self.name = name
+        self.unit_price = unit_price
+        self.quantity_on_hand = quantity_on_hand
+b = InventoryItem("bread", 2.00, 100)
+print(b)
+    InventoryItem(name='bread', unit_price=2.0, quantity_on_hand=100)
 
 
 # ---------------------
@@ -75,6 +100,50 @@ any(True, False, False) # returns True:
 all(True, False, False) # returns False
 
 
+
+# ---------------------
+# typing
+# ---------------------
+Typing is a python module to help python readability
+
+Can add type to variales, function parameters, function return values
+    def area(r: float) -> float:
+        return 3.1415 * r * r
+
+Type alias: Assigning a existent type to an alias.
+    from typing import List
+
+    # Vector is a list of float values
+    Vector = List[float]
+
+    def scale(scalar: float, vector: Vector) -> Vector:
+        return [scalar * num for num in vector]
+
+    scale(scalar=2.0, vector=[1.0, 2.0, 3.0])
+
+Define a new DataType
+    This seems to be sames as @dataclass
+    from typing import NewType
+
+    StudentID = NewType('StudentID', int)
+    StudentID(100)
+
+Anytype
+    means every type is compatible with this keyword.
+    from typing import Any
+
+    def print_list(a: Any) -> None:
+        print(a)
+
+Union
+    Union enables a type that returns one of X types
+    
+    Ex1: myVar: Union[int, str] 
+        myVar = 5
+        myVar = "Hi"
+
+    Ex2: mylist: List[Union[int, str]] = ["a", 1, "b", 2]
+    
 
 # ---------------------
 # itertools: groupby, accumulate, product, combinations# ---------------------

@@ -1,4 +1,23 @@
 -------------------------------------------------
+AAccounts
+-------------------------------------------------
+- thomaschangsf
+	personal acces token: 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
+	git remote rm origin
+	git remote set-url origin https://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@github.com/thomaschangsf/mlops-course.git
+	git push -u origin main
+
+-------------------------------------------------
+References
+-------------------------------------------------
+https://intermediate.gitgood.training/
+https://adv-tt.gitgood.training/
+https://learngitbranching.js.org/
+
+
+
+
+-------------------------------------------------
 Create project from command line	
 -------------------------------------------------
 echo "# svc-lnp" >> README.md
@@ -24,3 +43,6 @@ Undo a local commit
 
 git reset --soft HEAD~1
 	soft keeps the local changes
+
+
+

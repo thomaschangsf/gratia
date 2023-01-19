@@ -2,8 +2,19 @@
 # Background
 # ------------------------------------
 <-- Notes based on the book: High Performance
-<-- Code is located at /Users/chang/Documents/dev/git/coding/high_performance_python_2e
+<-- Code is located at /Users/chang/Documents/dev/git/gratia/01_languages/python/codes/high_performance_python_2e
 
+<-- Setup
+	cd /Users/chang/Documents/dev/git/gratia/01_languages/python/codes/
+	python -m venv .venv
+	/Users/chang/Documents/dev/git/gratia/01_languages/python/codes/.venv/bin/python3 -m pip install --upgrade pip
+	
+
+	source .venv/bin/activate
+	.venv/bin/jupyter notebook
+
+	
+	
 # ------------------------------------
 # Chapter1 : Understanding
 # ------------------------------------
@@ -36,17 +47,20 @@
 <-- Using time.time()
     Outputs just the time of function, but you don't know which line took a long time.
 
-    cd /Users/chang/Documents/dev/git/coding/high_performance_python_2e/02_profiling
+    cd /Users/chang/Documents/dev/git/gratia/01_languages/python/codes/high_performance_python_2e/02_profiling
 
     --> Method1:
         execute
-            python3 julia.py
+		../../.venv/bin/python3 julia1.py
+
         code
             start_time = time.time()
             output = calculate_z_serial_purepython(max_iterations, zs, cs)
             end_time = time.time()
             secs = end_time - start_time
+
     --> Method2: with decorator: python3 julia_decorator.py
+	@timefn
 
 
 <-- Using cProfiler module
@@ -58,6 +72,11 @@
     To see and have more control how to sort, look at (pg 37)
         python -m cProfile -o profile.stats julia.py
 
+    To Save output of Snakeviz visualization, which uses cProfile output
+	from terminal:
+		python -m cProfile -o profile.stats julia.py
+		snakeviz profile.stats
+		html page opens --> save html
 
 <-- Using line_profiler (pg 41)
     Good to get detail of one function; line b line

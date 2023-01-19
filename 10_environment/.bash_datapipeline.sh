@@ -7,9 +7,6 @@ echo "      | .bash_datapipeline.sh [dp*|airflow*]"
 # DataPipeilne: Spark & Hadoop
 #	  Refer to ml-tools.git/datapipeline/spark/scripts for HDFS commands
 # ------------------------------------------------------------------------
-#export AIBIGDATA_HOME="/usr/local/AIBigData"
-#export HADOOP_HOME=$AIBIGDATA_HOME/hadoop-2.7.0
-#export SPARK_HOME=${AIBIGDATA_HOME}/spark-2.2.0-bin-hadoop2.7/
 export SPARK_HOME=/opt/spark/
 export SPARK_BIN=${SPARK_HOME}/bin
 export PATH=${SPARK_BIN}:${PATH}

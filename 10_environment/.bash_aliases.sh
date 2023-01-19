@@ -93,12 +93,24 @@ function sbtRemoteDebug() {
 #   Switch java versions
 #     jenv global openjdk64-11.0.11, openjdk64-1.8.0.292, oracle64-17.0.2
 #     restart terminal: srcs
+alias sdkInit='source /Users/chang/.sdkman/bin/sdkman-init.sh'
+
+# One time setup
+# sdk install java 8.0.322-zulu
+# sdk install java 11.0.14-zulu
+# sdk install sbt
+# sdk install spark
+
+alias javaSetJDK8='sdk default java 8.0.322-zulu'  # will update JAVA_HOME
+alias javaSetJDK11='sdk default java 11.0.14-zulu' # will update JAVA_HOME
+alias sparkSetVersion='sdk default spark 3.3.1'
+
 alias javaVersionsAvailableOnMac='/usr/libexec/java_home -V'
-alias javaVersionsAvailableOnJenv='jenv versions'
-alias javaSetJdk8='jenv global openjdk64-1.8.0.292 && srcs'
-alias javaSetJdk11='jenv global openjdk64-11.0.11 && srcs'
-alias javaSetJdk17='jenv global openjdk64-17.0.2 && srcs'
-alias javaVersionActiveOnMac='java -version'
+#alias javaVersionsAvailableOnJenv='jenv versions'
+#alias javaSetJdk8='jenv global openjdk64-1.8.0.292 && srcs'
+#alias javaSetJdk11='jenv global openjdk64-11.0.11 && srcs'
+#alias javaSetJdk17='jenv global openjdk64-17.0.2 && srcs'
+#alias javaVersionActiveOnMac='java -version'
 
 export MVN_HOME=/usr/local/Cellar/maven/3.6.3_1
 export MAVEN_OPTS="-client -Duser.timezone=Etc/UTC -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss -Xmx512m -XX:MaxPermSize=256m"
@@ -234,9 +246,10 @@ function tfVersion() {
 ###################################################################################
 # echo environment variables
 ###################################################################################
+sdkInit
 echo " "
-echo "    JAVA_HOME=${JAVA_HOME}"
-echo "    SBT_HOME=${SBT_HOME}"
+echo "    JAVA_HOME=${JAVA_HOME}" # javaSetJDK11
+echo "    SBT_HOME=${SBT_HOME}"   # sparkSetVersion
 echo "    SPARK_HOME=${SPARK_HOME}"
 echo "    PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
 #echo "    PYTHON_VERSION=$(python -V 2>&1)"
