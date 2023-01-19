@@ -1,0 +1,91 @@
+// ------------------------------------
+// Background
+// ------------------------------------
+- Git repo local location
+	cd /Users/chang/Documents/dev/git/gratia/03_system/devops/play-fly-dockercompose-postgres/acdc
+
+	https://github.com/thomaschangsf/acdc.gi
+
+- Scala Centric Repo shows
+	* play webserver using sbt
+		sbt debug mode
+		play filter to instrument http code
+		dependecy injection on metric reporter
+		ProfileAction is interesting
+		Slick DB connector
+
+	* with prometheus metrics
+		counter, summary, guage
+
+	* backed by postgres migrated with flyway
+		use transient flyway containter to populate postgres schema
+
+	* docker compose
+		combines multiple containers: setup and teardown of ws, db, trainsient, tools
+
+		shows how to map a container to local mac volume, see ws
+
+		how to debug containers using 
+			Docker Desktop
+			tranisient container (ie flyway) entrypoint [tail -f /dev/null]
+
+
+// ------------------------------------
+// Operation
+// ------------------------------------
+<-- IntelliJ
+	* Add remove debuggeer
+		Run | Edit Configuration | Add new Remote Debug
+
+	* Terminals
+		- add export POSTGRES_PASSWORD=acdc to ALL terminals
+
+		- docker compose:
+			docker-compose up --always-recreate-deps --force-recreate --detach
+			docker-compose down
+
+		- SBT
+			sbt clean cleanFiles
+			sbt compile
+			sbt --jvm-debug 5005 ws/run
+
+		- PSQL from mac
+			psql -h localhost -p 5432 -U postgres
+			select * from dataset
+
+		- Docker
+			docker exec -it [CONTAINER-ID] bash
+
+
+<-- Operations	
+	* Start docker mac app
+
+	* Intellij : docker compose terminal
+		docker-compose up --always-recreate-deps --force-recreate --detach
+
+	* check docker mac app the containers are up: postgres,adminer
+
+	* check flway migration and postgres succeeded by clicing on the container is docker desktop
+		if postgres did not succedd, add entrypoint: ["bin/sh", "-c", "tail -f /dev/null"]
+		log into postgres container:
+
+		check psql using adminer at localhost:8087 using web browser
+
+	* sbt --jvm-debug 5005 ws/run
+
+	* use postman to hit webservice
+		GET: localhost:9000/__status
+
+		GET: localhost:9000/__metrics
+
+		POST: localhost:9000/api/v1/dataset
+			{ "name": "dataset_lineage_tom1"}
+
+		POST: localhost:9000/api/v1/instance
+			{ 
+				"dataset": "dataset_lineage_tom1",
+				"name": "instance1",
+				"location": "somewhere"
+			}
+
+		GET: location:9000/api/v1/instance/dataset_lineage_tom1/instance1
