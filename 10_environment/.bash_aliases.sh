@@ -119,8 +119,8 @@ alias mci='mvn  -U clean install -DskipTests=true'
 alias mi='mvn -U install -DskipTests=true'
 alias mit='mvn install -Pit'
 
-
-
+alias huggingfacePwd="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"
+export HUGGINGFACE_PWD="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"
 
 
 # ------------------------------------------------------------------------
